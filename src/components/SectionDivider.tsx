@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { gsap, useGSAP } from "@/lib/gsap";
+import { gsap, useGSAP, SplitText } from "@/lib/gsap";
 
 export default function SectionDivider({ label }: { label: string }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -25,6 +25,22 @@ export default function SectionDivider({ label }: { label: string }) {
           ease: "power2.out",
           scrollTrigger: { trigger: ref.current, start: "top 85%" },
         });
+
+        const titleEl = ref.current?.querySelector<HTMLElement>("[data-title]");
+        if (!titleEl) return;
+
+        // Characters resolve out of a soft blur, drifting up.
+        const split = SplitText.create(titleEl, { type: "chars" });
+        gsap.from(split.chars, {
+          opacity: 0,
+          filter: "blur(8px)",
+          yPercent: 35,
+          stagger: 0.04,
+          duration: 0.6,
+          ease: "power2.out",
+          scrollTrigger: { trigger: ref.current, start: "top 85%" },
+        });
+        return () => split.revert();
       });
 
       return () => mm.revert();
@@ -43,7 +59,10 @@ export default function SectionDivider({ label }: { label: string }) {
         aria-hidden
       />
       <span data-pulse className="h-1 w-11 bg-vessel" aria-hidden />
-      <span className="whitespace-nowrap font-signal text-[16px] font-bold tracking-[0.08em] text-[#2A323B] md:text-[18px]">
+      <span
+        data-title
+        className="inline-block whitespace-nowrap font-signal text-[16px] font-bold tracking-[0.08em] text-[#2A323B] md:text-[18px]"
+      >
         {label}
       </span>
       <span data-pulse className="h-1 w-11 bg-vessel" aria-hidden />
