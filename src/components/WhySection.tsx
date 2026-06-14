@@ -66,7 +66,7 @@ export default function WhySection() {
         </div>
 
         <div data-shifts className="pt-1">
-          <div>
+          <div data-shift>
             <p className="font-signal text-[14px] font-bold tracking-[0.08em] text-ink">
               {WHY.eyebrow}
             </p>

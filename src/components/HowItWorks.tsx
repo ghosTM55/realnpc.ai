@@ -12,6 +12,15 @@ export default function HowItWorks() {
       const mm = gsap.matchMedia();
 
       mm.add("(prefers-reduced-motion: no-preference)", () => {
+        gsap.from("[data-how-head] > *", {
+          y: 20,
+          opacity: 0,
+          duration: 0.7,
+          stagger: 0.1,
+          ease: "power3.out",
+          scrollTrigger: { trigger: ref.current, start: "top 80%" },
+        });
+
         gsap.from("[data-step]", {
           y: 16,
           opacity: 0,
@@ -72,12 +81,14 @@ export default function HowItWorks() {
 
   return (
     <section ref={ref} className="mx-auto max-w-[1248px] px-6 py-14 lg:px-0">
-      <h2 className="font-display text-[30px] font-semibold leading-[1.05] text-ink md:text-[38px]">
-        {HOW_IT_WORKS.title}
-      </h2>
-      <p className="mt-3 max-w-[640px] text-[16px] leading-[1.5] text-steel">
-        {HOW_IT_WORKS.subtitle}
-      </p>
+      <div data-how-head>
+        <h2 className="font-display text-[30px] font-semibold leading-[1.05] text-ink md:text-[38px]">
+          {HOW_IT_WORKS.title}
+        </h2>
+        <p className="mt-3 max-w-[640px] text-[16px] leading-[1.5] text-steel">
+          {HOW_IT_WORKS.subtitle}
+        </p>
+      </div>
 
       <div data-timeline className="relative mt-14">
         <div
