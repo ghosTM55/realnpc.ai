@@ -22,14 +22,17 @@ export default function IntroSequence() {
           pointerEvents: "auto",
           zIndex: 20,
         });
-        // Keep filter values numeric so the wash never crosses a black frame.
+        // Hero (closed eye) starts in crisp focus.
         gsap.set("[data-intro-hero] [data-hero-background]", {
           filter: "blur(0px) brightness(1) saturate(1)",
+          transformOrigin: "50% 50%",
         });
+        // Stage (open eye + parts) starts heavily defocused and dimmed —
+        // the lens then racks into focus as the page scrolls.
         gsap.set("[data-intro-assembly] [data-stage-background]", {
-          scale: 1.018,
-          filter: "blur(18px) brightness(1.28) saturate(0.92)",
-          transformOrigin: "50% 54%",
+          scale: 1.06,
+          filter: "blur(26px) brightness(0.72) saturate(0.94)",
+          transformOrigin: "50% 50%",
         });
         gsap.set("[data-intro-assembly] [data-assembly-overlay]", {
           autoAlpha: 0,
@@ -38,6 +41,7 @@ export default function IntroSequence() {
         gsap.set("[data-intro-assembly] [data-hotspot-marker]", {
           autoAlpha: 0,
         });
+        // Variant B cross-fades the two frames instead of flashing white.
         gsap.set("[data-focus-wash]", {
           autoAlpha: 0,
         });
@@ -52,72 +56,60 @@ export default function IntroSequence() {
         });
 
         tl
+          // Hero copy lifts away first.
           .to(
             "[data-intro-hero] [data-hero-copy]",
             {
               autoAlpha: 0,
               y: -42,
-              duration: 0.32,
+              duration: 0.3,
               ease: "power3.out",
             },
             0,
           )
-          .to(
-            "[data-intro-assembly]",
-            {
-              autoAlpha: 1,
-              duration: 0.22,
-              ease: "none",
-            },
-            0.04,
-          )
-          .to(
-            "[data-focus-wash]",
-            {
-              autoAlpha: 0.82,
-              duration: 0.18,
-              ease: "power2.out",
-            },
-            0.08,
-          )
+          // Hero frame softens and eases back — the lens leaving the closed eye.
           .to(
             "[data-intro-hero] [data-hero-background]",
             {
-              scale: 1.012,
-              filter: "blur(8px) brightness(1.28) saturate(0.9)",
-              duration: 0.52,
+              scale: 1.04,
+              filter: "blur(10px) brightness(1.06) saturate(0.96)",
+              duration: 0.55,
               ease: "none",
             },
             0,
           )
+          // Stage cross-fades in over the hero — no flash.
+          .to(
+            "[data-intro-assembly]",
+            {
+              autoAlpha: 1,
+              duration: 0.4,
+              ease: "none",
+            },
+            0.1,
+          )
+          // Core rack-focus: blur tightens, exposure lifts, push-in settles.
           .to(
             "[data-intro-assembly] [data-stage-background]",
             {
               scale: 1,
-              filter: "blur(0px) brightness(1.08) saturate(1)",
-              duration: 0.54,
-              ease: "none",
+              filter: "blur(0px) brightness(1.05) saturate(1)",
+              duration: 0.5,
+              ease: "power2.out",
             },
-            0.06,
+            0.16,
           )
+          // Auto-exposure settles back to neutral once locked.
           .to(
             "[data-intro-assembly] [data-stage-background]",
             {
               filter: "blur(0px) brightness(1) saturate(1)",
-              duration: 0.18,
+              duration: 0.16,
               ease: "none",
             },
             0.66,
           )
-          .to(
-            "[data-focus-wash]",
-            {
-              autoAlpha: 0,
-              duration: 0.22,
-              ease: "power2.out",
-            },
-            0.64,
-          )
+          // Hero fully clears once the stage carries the frame.
           .to(
             "[data-intro-hero]",
             {
@@ -125,8 +117,9 @@ export default function IntroSequence() {
               duration: 0.24,
               ease: "none",
             },
-            0.42,
+            0.4,
           )
+          // Parts panel locks in after focus lands.
           .to(
             "[data-intro-assembly] [data-assembly-overlay]",
             {
@@ -135,13 +128,15 @@ export default function IntroSequence() {
               duration: 0.22,
               ease: "power2.out",
             },
-            0.58,
+            0.6,
           )
+          // Hotspot markers acquire one after another, like HUD locks.
           .to(
             "[data-intro-assembly] [data-hotspot-marker]",
             {
               autoAlpha: 1,
               duration: 0.2,
+              stagger: 0.05,
               ease: "power2.out",
             },
             0.62,
