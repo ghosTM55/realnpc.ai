@@ -2,12 +2,12 @@ export const BRAND = "RealNPC";
 
 export const NAV_LINKS = [
   { label: "Home", href: "/" },
-  { label: "Gamification", href: "/gamification" },
-  { label: "FAQ", href: "#faq" },
+  { label: "NPC World", href: "/npc-world" },
+  { label: "Partnership", href: "/partnership" },
 ] as const;
 
-/** Single source of truth for every configuration CTA on the site. */
-export const CONFIG_CTA_LABEL = "Start Configuration";
+/** Shared wording for every public companion-creation CTA. */
+export const CONFIG_CTA_LABEL = "Create a Soul";
 
 export const HERO = {
   kicker: BRAND,
@@ -18,7 +18,7 @@ export const HERO = {
     punchLead: "Not a toy with fixed functions.",
     punch: "A bespoke character that levels up in your world.",
   },
-  primaryCta: { label: "Start Configuration", href: "/configurator" },
+  primaryCta: { label: CONFIG_CTA_LABEL, href: "/companion-lab" },
 } as const;
 
 export const WHY = {
@@ -133,4 +133,68 @@ export const ACTIVATION = {
       tone: "powers" as const,
     },
   ],
+  cta: {
+    text:
+      "Activation is only the doorway. From here it starts living in your world: places to explore, quests to carry, and context to unlock.",
+    label: "See how it plays",
+    href: "/npc-world",
+  },
+} as const;
+
+/** `/partnership` page copy. Partner-facing, not customer acquisition copy. */
+export const PARTNERSHIP = {
+  hero: {
+    kicker: "PARTNERSHIP",
+    title: "Build the world RealNPCs can enter.",
+    lead: "RealNPC sits between character IP, modular robotics hardware, and real-world places. We are looking for partners who can help make companions recognizable, buildable, and useful beyond the screen.",
+    signal: [
+      "Licensed characters",
+      "Standard hardware modules",
+      "Real-world activation sites",
+    ],
+  },
+  thesis: {
+    kicker: "THE SHARED THESIS",
+    title: "A companion robot is not a single product category.",
+    body: "It becomes valuable when identity, body, and place reinforce each other. Partnership is how RealNPC turns that stack into a business system instead of a one-off device.",
+  },
+  lanes: [
+    {
+      index: "01",
+      tone: "soul" as const,
+      label: "IP Owners",
+      title: "Turn characters into companions people can live with.",
+      description:
+        "We want to work with IP owners who can license characters, worlds, and recognizable identities into RealNPC. Together, we can move character value from media exposure into embodied services, recurring interaction, and new commercial models.",
+      contribution: "Character IP, visual identity, story rules, fan trust.",
+      outcome: "New licensing formats for robot applications and services.",
+    },
+    {
+      index: "02",
+      tone: "vessel" as const,
+      label: "Robotics Hardware Suppliers",
+      title: "Make more builds possible through standardized modules.",
+      description:
+        "We want suppliers who can provide reliable hardware modules, components, sensors, motion systems, shells, and serviceable parts. The goal is to offer customers a wider configuration range without turning every build into custom engineering from zero.",
+      contribution: "Modules, components, integration specs, service support.",
+      outcome: "A broader library of standardized hardware options.",
+    },
+    {
+      index: "03",
+      tone: "powers" as const,
+      label: "Offline Retail & Venue Networks",
+      title: "Create places where robots can prove new behaviors.",
+      description:
+        "We want large offline chains and physical venues to explore real-world use cases with us. Stores, experience centers, malls, hotels, and entertainment networks can become testbeds for research, scenario design, and business model innovation.",
+      contribution: "Physical spaces, operating scenes, users, local context.",
+      outcome: "Commercial pilots for real-world robot interaction.",
+    },
+  ],
+  close: {
+    label: "PARTNER INTAKE",
+    title: "If your work touches character, hardware, or place, we should talk.",
+    text: "Partnerships are reviewed around fit, feasibility, privacy, safety, and long-term serviceability before any public pilot.",
+    cta: "Start a partnership conversation",
+    href: "mailto:partnerships@realnpc.ai",
+  },
 } as const;

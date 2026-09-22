@@ -1,6 +1,8 @@
 "use client";
 
 import { useRef } from "react";
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import { gsap, useGSAP } from "@/lib/gsap";
 import { ACTIVATION } from "@/data/site";
 
@@ -106,6 +108,19 @@ export default function ActivationSection() {
         <p className="mt-5 text-[16px] leading-[1.55] text-steel md:text-[17px]">
           {ACTIVATION.intro}
         </p>
+        <p className="mt-6 text-[15px] leading-[1.5] text-ink md:text-[16px]">
+          {ACTIVATION.cta.text}
+        </p>
+        <Link
+          href={ACTIVATION.cta.href}
+          className="group mt-4 inline-flex items-center gap-2 font-signal text-[13px] font-semibold tracking-[0.04em] text-vessel transition-colors hover:text-ink"
+        >
+          {ACTIVATION.cta.label}
+          <ArrowRight
+            size={16}
+            className="transition-transform group-hover:translate-x-0.5"
+          />
+        </Link>
       </div>
 
       <div

@@ -1,12 +1,19 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
+import FlowBackground from "@/components/FlowBackground";
 import "./globals.css";
 
-/** Site-wide font: IoskeleyMono Nerd Font (matches the founder's ghostty terminal). */
+const cinzel = localFont({
+  src: "../fonts/Cinzel-Variable.woff2",
+  weight: "400 900",
+  variable: "--font-cinzel",
+  display: "swap",
+});
+
+/** IoskeleyMono remains the body and interface font. */
 const ioskeley = localFont({
   src: [
     { path: "../fonts/IoskeleyMonoNerdFont-Regular.ttf", weight: "400" },
-    { path: "../fonts/IoskeleyMonoNerdFont-Medium.ttf", weight: "500" },
     { path: "../fonts/IoskeleyMonoNerdFont-SemiBold.ttf", weight: "600" },
     { path: "../fonts/IoskeleyMonoNerdFont-Bold.ttf", weight: "700" },
   ],
@@ -25,8 +32,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${ioskeley.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col">{children}</body>
+    <html lang="en" className={`${ioskeley.variable} ${cinzel.variable} h-full antialiased`}>
+      <body className="min-h-full flex flex-col">
+        <FlowBackground>{children}</FlowBackground>
+      </body>
     </html>
   );
 }

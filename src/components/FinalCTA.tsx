@@ -36,7 +36,7 @@ export default function FinalCTA() {
       <span className="hidden h-px w-[270px] bg-divider lg:block" aria-hidden />
       <Link
         data-cta
-        href="/configurator"
+        href="/companion-lab"
         className="flex h-[90px] w-full max-w-[520px] items-center justify-center gap-4 rounded-[5px] bg-vessel text-[24px] font-bold text-white transition-transform hover:scale-[1.02] active:scale-[0.99]"
       >
         {CONFIG_CTA_LABEL}

@@ -1,62 +1,13 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef } from "react";
 import Link from "next/link";
 import { SlidersHorizontal } from "lucide-react";
 import { gsap, useGSAP } from "@/lib/gsap";
 import { HERO } from "@/data/site";
 
-type BriefField = "label" | "lead" | "punch";
-type CursorTarget = BriefField | "done" | "idle";
-
-type TypedBrief = {
-  label: string;
-  lead: string;
-  punch: string;
-  cursor: CursorTarget;
-  showButton: boolean;
-};
-
-const EMPTY_BRIEF: TypedBrief = {
-  label: "",
-  lead: "",
-  punch: "",
-  cursor: "idle",
-  showButton: false,
-};
-
-const TYPE_COPY = {
-  label: HERO.brief.label,
-  lead: HERO.brief.punchLead,
-  punch: HERO.brief.punch,
-} as const;
-
-const INITIAL_TYPE_DELAY_MS = 820;
-const TYPE_DELAY_MS = 24;
-const FIELD_PAUSE_MS = 160;
-const BUTTON_DELAY_MS = 260;
-
-function Cursor() {
-  return (
-    <span
-      className="inline-block h-[16px] w-[8px] animate-cursor-blink bg-ink align-middle"
-      aria-hidden
-    />
-  );
-}
-
-function InlineCursor() {
-  return (
-    <span className="whitespace-nowrap">
-      &nbsp;
-      <Cursor />
-    </span>
-  );
-}
-
 export default function Hero() {
   const ref = useRef<HTMLElement>(null);
-  const [typedBrief, setTypedBrief] = useState<TypedBrief>(EMPTY_BRIEF);
 
   useGSAP(
     () => {
@@ -78,66 +29,6 @@ export default function Hero() {
     { scope: ref },
   );
 
-  useEffect(() => {
-    const timers: ReturnType<typeof setTimeout>[] = [];
-    const schedule = (callback: () => void, delay: number) => {
-      const timer = setTimeout(callback, delay);
-      timers.push(timer);
-    };
-
-    const setFullBrief = () => {
-      setTypedBrief({
-        ...TYPE_COPY,
-        cursor: "done",
-        showButton: true,
-      });
-    };
-
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      schedule(setFullBrief, 0);
-
-      return () => {
-        timers.forEach(clearTimeout);
-      };
-    }
-
-    let elapsed = INITIAL_TYPE_DELAY_MS;
-
-    const scheduleField = (field: BriefField, text: string) => {
-      schedule(() => {
-        setTypedBrief((current) => ({ ...current, cursor: field }));
-      }, elapsed);
-
-      for (let index = 1; index <= text.length; index += 1) {
-        schedule(() => {
-          setTypedBrief((current) => ({
-            ...current,
-            [field]: text.slice(0, index),
-            cursor: field,
-          }));
-        }, elapsed + index * TYPE_DELAY_MS);
-      }
-
-      elapsed += text.length * TYPE_DELAY_MS + FIELD_PAUSE_MS;
-    };
-
-    scheduleField("label", TYPE_COPY.label);
-    scheduleField("lead", TYPE_COPY.lead);
-    scheduleField("punch", TYPE_COPY.punch);
-
-    schedule(() => {
-      setTypedBrief((current) => ({ ...current, cursor: "done" }));
-    }, elapsed);
-
-    schedule(() => {
-      setTypedBrief((current) => ({ ...current, showButton: true }));
-    }, elapsed + BUTTON_DELAY_MS);
-
-    return () => {
-      timers.forEach(clearTimeout);
-    };
-  }, []);
-
   return (
     <section ref={ref} className="relative h-screen w-full overflow-hidden">
       <div
@@ -155,7 +46,7 @@ export default function Hero() {
             data-hero-left-item
             className="font-signal text-[12px] font-semibold tracking-[0.08em] text-vessel"
           >
-            PRIVATE COMPANION ROBOTICS
+            BESPOKE COMPANION ROBOTICS
           </p>
           <h1
             data-hero-left-item
@@ -187,32 +78,21 @@ export default function Hero() {
           </span>
           <div>
             <p className="flex min-h-[15px] items-center gap-2 font-signal text-[12px] font-semibold tracking-[0.18em] text-ink">
-              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-soul" />
-              <span>
-                {typedBrief.label}
-                {typedBrief.cursor === "label" ? <InlineCursor /> : null}
-              </span>
+              <span className="h-1.5 w-1.5 rounded-full bg-soul" />
+              <span>{HERO.brief.label}</span>
             </p>
             <div className="mt-3.5 text-[18px] leading-[1.42] text-ink">
               <p className="min-h-[26px]">
-                {typedBrief.lead}
-                {typedBrief.cursor === "lead" ? <InlineCursor /> : null}
+                <span>{HERO.brief.punchLead}</span>
               </p>
               <p className="mt-2 min-h-[52px] font-semibold">
-                {typedBrief.punch}
-                {typedBrief.cursor === "punch" || typedBrief.cursor === "done" ? (
-                  <InlineCursor />
-                ) : null}
+                <span>{HERO.brief.punch}</span>
               </p>
             </div>
           </div>
           <div
             data-hero-brief-button
-            className={`mt-7 flex flex-col items-start gap-3 transition-[opacity,transform] duration-300 ease-out ${
-              typedBrief.showButton
-                ? "translate-y-0 opacity-100"
-                : "pointer-events-none translate-y-2 opacity-0"
-            }`}
+            className="mt-7 flex flex-col items-start gap-3"
           >
             <Link
               href={HERO.primaryCta.href}

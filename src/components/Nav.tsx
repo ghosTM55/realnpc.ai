@@ -2,23 +2,23 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChevronDown, Globe, SlidersHorizontal, User } from "lucide-react";
-import { BRAND, CONFIG_CTA_LABEL, NAV_LINKS } from "@/data/site";
+import { SlidersHorizontal } from "lucide-react";
+import { CONFIG_CTA_LABEL, NAV_LINKS } from "@/data/site";
+import BrandLogo from "@/components/BrandLogo";
 
 export default function Nav() {
-  const pathname = usePathname();
+  const pathname = usePathname().replace(/\/$/, "") || "/";
+  const inLab = pathname === "/companion-lab";
+  const inCompanionFlow = inLab || pathname === "/configurator";
 
   return (
     <header className="fixed top-0 inset-x-0 z-50 h-[72px] border-b border-hairline bg-paper shadow-[0_1px_20px_rgba(21,24,29,0.045)]">
-      <nav className="mx-auto flex h-full max-w-[1440px] items-center justify-between px-6 lg:px-24">
-        <Link href="/" className="flex items-center gap-2.5">
-          <span className="h-[7px] w-[7px] bg-vessel" aria-hidden />
-          <span className="font-display text-[13px] font-semibold text-ink">
-            {BRAND}
-          </span>
+      <nav className="mx-auto flex h-full max-w-[1440px] items-center justify-between gap-4 px-5 lg:px-24">
+        <Link href="/" className="flex min-h-11 shrink-0 items-center" aria-label="RealNPC home">
+          <BrandLogo />
         </Link>
-        <div className="flex items-center gap-6">
-          <ul className="hidden items-center gap-8 md:flex">
+        <div className="flex items-center gap-3 lg:gap-6">
+          <ul className="hidden items-center gap-2 md:flex lg:gap-5">
             {NAV_LINKS.map((link) => {
               const isActive =
                 link.href === "/"
@@ -30,7 +30,7 @@ export default function Nav() {
                   <Link
                     href={link.href}
                     aria-current={isActive ? "page" : undefined}
-                    className={`inline-flex h-8 items-center rounded-[4px] border px-3 font-signal text-[11px] transition-colors ${
+                    className={`inline-flex min-h-11 items-center rounded-[4px] border px-3 font-nav text-[13px] font-semibold tracking-[0.025em] transition-colors ${
                       isActive
                         ? "border-vessel/35 bg-vessel-tint text-ink"
                         : "border-transparent text-steel hover:border-hairline hover:bg-white hover:text-ink"
@@ -42,34 +42,14 @@ export default function Nav() {
               );
             })}
           </ul>
-          <Link
+          {!inCompanionFlow && <Link
             href="/configurator"
-            className="flex items-center gap-2 rounded-[4px] bg-vessel px-4 py-2.5 text-[11px] font-semibold text-white transition-opacity hover:opacity-90"
+            aria-label={CONFIG_CTA_LABEL}
+            className="flex min-h-11 shrink-0 items-center gap-2 whitespace-nowrap rounded-[4px] bg-vessel px-3 py-2.5 font-nav text-xs font-semibold tracking-[0.025em] text-white transition-opacity hover:opacity-90 min-[360px]:px-4"
           >
-            {CONFIG_CTA_LABEL}
+            <span>{CONFIG_CTA_LABEL}</span>
             <SlidersHorizontal size={13} />
-          </Link>
-          {/* Reserved: account + language dropdowns (menus wired up later) */}
-          <div className="flex items-center gap-1 border-l border-hairline pl-4">
-            <button
-              type="button"
-              aria-label="Account"
-              aria-haspopup="menu"
-              className="flex items-center gap-0.5 rounded-[4px] p-1.5 text-steel transition-colors hover:text-ink"
-            >
-              <User size={16} />
-              <ChevronDown size={12} />
-            </button>
-            <button
-              type="button"
-              aria-label="Language"
-              aria-haspopup="menu"
-              className="flex items-center gap-0.5 rounded-[4px] p-1.5 text-steel transition-colors hover:text-ink"
-            >
-              <Globe size={16} />
-              <ChevronDown size={12} />
-            </button>
-          </div>
+          </Link>}
         </div>
       </nav>
     </header>
