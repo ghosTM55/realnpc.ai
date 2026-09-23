@@ -51,7 +51,7 @@ const SERVICE_LABELS = {
 
 export default function ConfiguratorExperience() {
   const { draft } = useDemoDraft();
-  const { config, review: preferences, step } = draft;
+  const { config, review: preferences, step, unlockedStep } = draft;
   const profile = getCompanionProfile(config);
   const reviewCase = createReviewCase(config, preferences);
   useEffect(() => {
@@ -77,7 +77,10 @@ export default function ConfiguratorExperience() {
     if (!applyForm && !applyView) return;
     updateDemoDraft((current) => ({
       ...current,
-      step: applyView ? initialStep : current.step,
+      step: applyView
+        ? Math.min(initialStep, current.unlockedStep)
+        : current.step,
+      unlockedStep: view === "choose" ? 0 : current.unlockedStep,
       config: applyForm
         ? { ...current.config, form: initialForm }
         : current.config,
@@ -99,12 +102,34 @@ export default function ConfiguratorExperience() {
     }));
   }
   function goToStep(next: number) {
-    updateDemoDraft((current) => ({ ...current, step: next }));
+    updateDemoDraft((current) =>
+      next < 0 || next > current.unlockedStep
+        ? current
+        : { ...current, step: next },
+    );
+    focusFlowHeading();
+  }
+  function completeStep() {
+    updateDemoDraft((current) => {
+      if (current.step !== step || current.step >= STEPS.length - 1)
+        return current;
+      const next = current.step + 1;
+      return {
+        ...current,
+        step: next,
+        unlockedStep: Math.max(current.unlockedStep, next),
+      };
+    });
     focusFlowHeading();
   }
   return (
     <FlowShell label="REALNPC / CONFIGURATOR">
-      <FlowSteps labels={STEPS} current={step} onChange={goToStep} />
+      <FlowSteps
+        labels={STEPS}
+        current={step}
+        unlockedStep={unlockedStep}
+        onChange={goToStep}
+      />
       {step > 2 && step < 5 && (
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3 border-b border-hairline pb-4">
           <div className="flex items-center gap-3">
@@ -350,7 +375,7 @@ export default function ConfiguratorExperience() {
         note={`${profile.soul.name} · ${step + 1} of 6`}
       >
         {step < 5 ? (
-          <NextButton onClick={() => goToStep(step + 1)}>
+          <NextButton onClick={completeStep}>
             {
               [
                 `Continue with ${profile.soul.name}`,

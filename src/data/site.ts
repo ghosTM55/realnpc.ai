@@ -8,6 +8,7 @@ export const NAV_LINKS = [
 
 /** Shared wording for every public companion-creation CTA. */
 export const CONFIG_CTA_LABEL = "Create a Soul";
+export const CONFIG_CTA_HREF = "/configurator/?view=choose";
 
 export const HERO = {
   kicker: BRAND,
@@ -18,7 +19,7 @@ export const HERO = {
     punchLead: "Not a toy with fixed functions.",
     punch: "A bespoke character that levels up in your world.",
   },
-  primaryCta: { label: CONFIG_CTA_LABEL, href: "/companion-lab" },
+  primaryCta: { label: CONFIG_CTA_LABEL, href: CONFIG_CTA_HREF },
 } as const;
 
 export const WHY = {

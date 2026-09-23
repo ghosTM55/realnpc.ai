@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { SlidersHorizontal } from "lucide-react";
-import { CONFIG_CTA_LABEL, NAV_LINKS } from "@/data/site";
+import { CONFIG_CTA_HREF, CONFIG_CTA_LABEL, NAV_LINKS } from "@/data/site";
 import BrandLogo from "@/components/BrandLogo";
 
 export default function Nav() {
@@ -43,7 +43,7 @@ export default function Nav() {
             })}
           </ul>
           {!inCompanionFlow && <Link
-            href="/configurator"
+            href={CONFIG_CTA_HREF}
             aria-label={CONFIG_CTA_LABEL}
             className="flex min-h-11 shrink-0 items-center gap-2 whitespace-nowrap rounded-[4px] bg-vessel px-3 py-2.5 font-nav text-xs font-semibold tracking-[0.025em] text-white transition-opacity hover:opacity-90 min-[360px]:px-4"
           >

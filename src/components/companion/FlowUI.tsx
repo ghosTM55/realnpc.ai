@@ -69,10 +69,12 @@ export function FlowShell({
 export function FlowSteps({
   labels,
   current,
+  unlockedStep,
   onChange,
 }: {
   labels: readonly string[];
   current: number;
+  unlockedStep: number;
   onChange: (step: number) => void;
 }) {
   return (
@@ -82,9 +84,15 @@ export function FlowSteps({
           <li key={label} className="min-w-0 flex-1">
             <button
               type="button"
+              disabled={index > unlockedStep}
+              title={
+                index > unlockedStep
+                  ? "Complete the previous steps to unlock"
+                  : undefined
+              }
               onClick={() => onChange(index)}
               aria-current={index === current ? "step" : undefined}
-              className={`flex min-h-12 w-full flex-col items-start justify-center gap-2 border-b-2 pb-2 text-left text-xs sm:flex-row sm:items-center sm:justify-start sm:gap-2 sm:text-sm ${index === current ? "border-vessel font-semibold text-ink" : "border-hairline text-steel hover:border-steel hover:text-ink"}`}
+              className={`flex min-h-12 w-full flex-col items-start justify-center gap-2 border-b-2 pb-2 text-left text-xs disabled:cursor-not-allowed disabled:opacity-40 sm:flex-row sm:items-center sm:justify-start sm:gap-2 sm:text-sm ${index === current ? "border-vessel font-semibold text-ink" : "border-hairline text-steel enabled:hover:border-steel enabled:hover:text-ink"}`}
             >
               <span className="hidden sm:inline" aria-hidden>
                 {String(index + 1).padStart(2, "0")}

@@ -1,6 +1,6 @@
 // Adapted from NONG.github.io's flowBackground: the same descending currents,
 // with RealNPC's paper and neutral signal colors. No additional animation library.
-export function initFlowBackground(canvas: HTMLCanvasElement) {
+export function initFlowBackground(canvas: HTMLCanvasElement, coverEnd: HTMLElement | null = null) {
   const context = canvas.getContext("2d");
   if (!context) return null;
   const reduced = matchMedia("(prefers-reduced-motion: reduce)");
@@ -22,12 +22,16 @@ export function initFlowBackground(canvas: HTMLCanvasElement) {
   let width = 0;
   let height = 0;
   let frame = 0;
+  let coverFrame = 0;
   let previous = 0;
   let tick = 0;
   let seed = 83;
   let disposed = false;
   let paused = false;
   let visible = false;
+  let covered = Boolean(coverEnd && coverEnd.getBoundingClientRect().top >= window.innerHeight - 1);
+  let needsResize = true;
+  let warmup = 0;
   const random = () => {
     seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
     return seed / 4294967296;
@@ -127,6 +131,7 @@ export function initFlowBackground(canvas: HTMLCanvasElement) {
   };
 
   const resize = () => {
+    needsResize = false;
     const rect = canvas.getBoundingClientRect();
     const dpr = Math.min(devicePixelRatio || 1, 1.25);
     if (width === rect.width && height === rect.height && canvas.width === Math.round(rect.width * dpr)) return;
@@ -142,41 +147,63 @@ export function initFlowBackground(canvas: HTMLCanvasElement) {
     momentumY.fill(0);
     weights.fill(0);
     for (let i = 0; i < particles.length; i += 6) spawn(i, true);
-    // A modest warm start also gives reduced-motion visitors a complete still.
-    for (let i = 0; i < 112; i++) step();
-    paint();
+    // Prepare the same still in small batches instead of blocking hydration.
+    warmup = 112;
   };
 
   const render = (now: number) => {
     frame = 0;
-    if (disposed || document.hidden || reduced.matches || paused || !visible) return;
-    if (now - previous >= 1000 / 30) {
+    if (disposed || document.hidden || !visible || covered) return;
+    if (needsResize) resize();
+    if (warmup > 0) {
+      const batch = Math.min(warmup, 8);
+      for (let i = 0; i < batch; i++) step();
+      warmup -= batch;
+      if (warmup === 0) paint();
+    } else if (!reduced.matches && !paused && now - previous >= 1000 / 30) {
       step();
       paint();
       previous = now - ((now - previous) % (1000 / 30));
     }
-    frame = requestAnimationFrame(render);
+    if (warmup > 0 || (!reduced.matches && !paused)) frame = requestAnimationFrame(render);
   };
   const sync = () => {
     cancelAnimationFrame(frame);
     frame = 0;
     previous = performance.now();
-    if (!disposed && !document.hidden && !reduced.matches && !paused && visible) {
+    if (!disposed && !document.hidden && visible && !covered &&
+        (needsResize || warmup > 0 || (!reduced.matches && !paused))) {
       frame = requestAnimationFrame(render);
     }
   };
-  window.addEventListener("resize", resize, { passive: true });
-  const sizeObserver = new ResizeObserver(resize);
+  const onResize = () => {
+    needsResize = true;
+    if (coverEnd) covered = coverEnd.getBoundingClientRect().top >= window.innerHeight - 1;
+    sync();
+  };
+  window.addEventListener("resize", onResize, { passive: true });
+  const sizeObserver = new ResizeObserver(onResize);
   sizeObserver.observe(canvas);
   const visibilityObserver = new IntersectionObserver(([entry]) => {
-    visible = entry.isIntersecting;
+    visible = entry.isIntersecting && entry.intersectionRatio > 0;
     sync();
-  });
+  }, { threshold: [0, 0.001] });
   visibilityObserver.observe(canvas);
+  // A scroll jump can cross the entire marker without an intersection event.
+  const onScroll = () => {
+    if (coverFrame) return;
+    coverFrame = requestAnimationFrame(() => {
+      coverFrame = 0;
+      const nextCovered = Boolean(coverEnd && coverEnd.getBoundingClientRect().top >= window.innerHeight - 1);
+      if (covered !== nextCovered) {
+        covered = nextCovered;
+        sync();
+      }
+    });
+  };
+  if (coverEnd) window.addEventListener("scroll", onScroll, { passive: true });
   document.addEventListener("visibilitychange", sync);
   reduced.addEventListener("change", sync);
-  resize();
-  sync();
   return {
     setPaused(value: boolean) {
       paused = value;
@@ -185,7 +212,9 @@ export function initFlowBackground(canvas: HTMLCanvasElement) {
     dispose() {
       disposed = true;
       cancelAnimationFrame(frame);
-      window.removeEventListener("resize", resize);
+      cancelAnimationFrame(coverFrame);
+      window.removeEventListener("resize", onResize);
+      window.removeEventListener("scroll", onScroll);
       sizeObserver.disconnect();
       visibilityObserver.disconnect();
       document.removeEventListener("visibilitychange", sync);

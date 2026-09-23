@@ -19,7 +19,7 @@ export default function FocusedPopover({
   return (
     <div
       data-popover
-      className={`pointer-events-auto absolute z-30 w-[362px] rounded-[8px] border bg-white p-6 shadow-[0_14px_36px_rgba(26,42,53,0.16)] ${concept.border}`}
+      className={`pointer-events-auto absolute z-30 w-[calc(100%-48px)] max-w-[362px] rounded-[8px] border bg-white p-6 shadow-[0_14px_36px_rgba(26,42,53,0.16)] ${concept.border}`}
       style={{
         left: `clamp(24px, calc(${dot.x * 100}% + 112px), calc(100% - 386px))`,
         top: `clamp(24px, calc(${dot.y * 100}% - 118px), calc(100% - 300px))`,

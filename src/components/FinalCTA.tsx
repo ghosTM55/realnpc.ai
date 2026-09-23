@@ -4,7 +4,7 @@ import { useRef } from "react";
 import Link from "next/link";
 import { SlidersHorizontal } from "lucide-react";
 import { gsap, useGSAP } from "@/lib/gsap";
-import { CONFIG_CTA_LABEL } from "@/data/site";
+import { CONFIG_CTA_HREF, CONFIG_CTA_LABEL } from "@/data/site";
 
 export default function FinalCTA() {
   const ref = useRef<HTMLElement>(null);
@@ -36,7 +36,7 @@ export default function FinalCTA() {
       <span className="hidden h-px w-[270px] bg-divider lg:block" aria-hidden />
       <Link
         data-cta
-        href="/companion-lab"
+        href={CONFIG_CTA_HREF}
         className="flex h-[90px] w-full max-w-[520px] items-center justify-center gap-4 rounded-[5px] bg-vessel text-[24px] font-bold text-white transition-transform hover:scale-[1.02] active:scale-[0.99]"
       >
         {CONFIG_CTA_LABEL}

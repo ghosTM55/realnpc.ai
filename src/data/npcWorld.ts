@@ -442,5 +442,3 @@ export const NPC_WORLD: WorldCity[] = [
     ],
   },
 ];
-
-export const NPC_WORLD_TOTAL = NPC_WORLD.reduce((sum, c) => sum + c.npcs.length, 0);

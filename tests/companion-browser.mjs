@@ -188,7 +188,10 @@ try {
       .getByRole("button", { name: "Choose presence", exact: true })
       .click();
     await heading(page, "Bring Vex into your world.");
-    assert.equal(new URL(page.url()).pathname.replace(/\/$/, ""), "/configurator");
+    assert.equal(
+      new URL(page.url()).pathname.replace(/\/$/, ""),
+      "/configurator",
+    );
     assert.equal(
       await steps
         .getByRole("button", { name: "Presence", exact: true })
@@ -368,7 +371,17 @@ try {
   await direct.goto(`${base}/configurator?form=robot`);
   await direct.waitForLoadState("networkidle");
   await heading(direct, "Choose your Soul.");
-  await direct.getByRole("button", { name: "Presence", exact: true }).click();
+  assert.ok(
+    await direct
+      .getByRole("button", { name: "Presence", exact: true })
+      .isDisabled(),
+  );
+  for (const name of [
+    "Continue with Morrow",
+    "Set preferences",
+    "Choose presence",
+  ])
+    await direct.getByRole("button", { name, exact: true }).click();
   assert.ok(
     await direct
       .getByRole("radio", { name: /A physical companion/ })
@@ -384,15 +397,32 @@ try {
   );
   assert.equal(new URL(direct.url()).searchParams.has("form"), false);
   await direct.goto(`${base}/companion-lab?view=profile`);
+  await heading(direct, "Bring Morrow into your world.");
+  await direct
+    .getByRole("button", { name: "Set priorities", exact: true })
+    .click();
+  await direct
+    .getByRole("button", { name: "View your plan", exact: true })
+    .click();
   await heading(direct, "Your companion plan.");
   await direct.goto(`${base}/companion-lab?view=choose`);
   await heading(direct, "Choose your Soul.");
-  await direct.getByRole("button", { name: "Your terms", exact: true }).click();
+  assert.ok(
+    await direct
+      .getByRole("button", { name: "Your terms", exact: true })
+      .isDisabled(),
+  );
+  await direct
+    .getByRole("button", { name: "Continue with Morrow", exact: true })
+    .click();
+  await direct
+    .getByRole("button", { name: "Set preferences", exact: true })
+    .click();
   await direct.reload();
   await heading(direct, "On your terms.");
   await directContext.close();
   console.log(
-    "PASS legacy URLs and campaign form: canonical route, one-time destinations, refresh preserves current step",
+    "PASS legacy URLs and campaign form: no skipping locked steps, fresh entry resets progress, refresh preserves current step",
   );
 
   const legacyContext = await browser.newContext();
@@ -426,7 +456,22 @@ try {
   inspect(legacy);
   await legacy.goto(`${base}/configurator`);
   await legacy.waitForLoadState("networkidle");
-  await heading(legacy, "What matters most?");
+  await heading(legacy, "Choose your Soul.");
+  assert.ok(
+    await legacy.getByRole("radio", { name: "Vex", exact: true }).isChecked(),
+  );
+  assert.ok(
+    await legacy
+      .getByRole("button", { name: "Your plan", exact: true })
+      .isDisabled(),
+  );
+  for (const name of [
+    "Continue with Vex",
+    "Set preferences",
+    "Choose presence",
+    "Set priorities",
+  ])
+    await legacy.getByRole("button", { name, exact: true }).click();
   await legacy
     .getByRole("button", { name: "View your plan", exact: true })
     .click();

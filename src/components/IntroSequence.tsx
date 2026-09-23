@@ -41,11 +41,6 @@ export default function IntroSequence() {
         gsap.set("[data-intro-assembly] [data-hotspot-marker]", {
           autoAlpha: 0,
         });
-        // Variant B cross-fades the two frames instead of flashing white.
-        gsap.set("[data-focus-wash]", {
-          autoAlpha: 0,
-        });
-
         const tl = gsap.timeline({
           scrollTrigger: {
             trigger: ref.current,
@@ -177,21 +172,13 @@ export default function IntroSequence() {
           <Hero />
         </div>
         <div
-          data-focus-wash
-          className="pointer-events-none absolute inset-0 z-40 bg-white opacity-0"
-          style={{
-            background:
-              "radial-gradient(ellipse at 50% 54%, rgba(255,255,255,0.96) 0%, rgba(255,255,255,0.9) 34%, rgba(239,250,253,0.76) 62%, rgba(255,255,255,0.42) 100%)",
-          }}
-          aria-hidden
-        />
-        <div
           data-intro-assembly
           className="absolute inset-0 z-10 motion-reduce:relative motion-reduce:z-auto"
         >
           <AssemblyStage />
         </div>
       </div>
+      <span data-flow-cover-end aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-px" />
     </section>
   );
 }

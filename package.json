@@ -8,15 +8,16 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
     "lint": "eslint",
     "test": "node --test tests/*.test.mjs",
-    "test:browser": "node tests/companion-browser.mjs",
+    "test:browser": "node tests/companion-browser.mjs && node tests/companion-navigation.mjs",
+    "test:site": "node tests/site-browser.mjs",
+    "test:budget": "node tests/export-budget.mjs",
+    "assets:images": "node scripts/optimize-images.mjs",
     "typecheck": "next typegen && tsc --noEmit"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",
-    "animejs": "^4.5.0",
     "gsap": "^3.15.0",
     "lucide-react": "^1.24.0",
     "next": "16.2.10",

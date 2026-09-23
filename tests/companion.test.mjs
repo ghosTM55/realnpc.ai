@@ -28,6 +28,7 @@ test("a chosen companion survives all six steps without storing dialogue", () =>
   const draft = {
     ...DEFAULT_DRAFT,
     step: 5,
+    unlockedStep: 5,
     config: {
       ...DEFAULT_CONFIG,
       soulId: "scout",
@@ -132,7 +133,7 @@ test("optional review selections survive a reload and license / budget constrain
     priority: "presence",
   };
   const restored = parseDemoDraft(
-    serializeDemoDraft({ ...DEFAULT_DRAFT, review, step: 5 }),
+    serializeDemoDraft({ ...DEFAULT_DRAFT, review, step: 5, unlockedStep: 5 }),
   );
   assert.deepEqual(restored.review, review);
   assert.equal(restored.step, 5);
@@ -229,20 +230,54 @@ test("existing two-flow drafts migrate without losing the chosen companion or pe
     review: { ...DEFAULT_REVIEW, characterSource: "licensed" },
   };
   const migrated = parseDemoDraft(JSON.stringify(legacy));
-  assert.equal(migrated.version, 2);
-  assert.equal(migrated.step, 4);
+  assert.equal(migrated.version, 3);
+  assert.equal(migrated.step, 0);
+  assert.equal(migrated.unlockedStep, 0);
   assert.deepEqual(migrated.config, legacy.config);
   assert.deepEqual(migrated.review, legacy.review);
   assert.equal("labStep" in migrated, false);
   assert.equal("reviewStep" in migrated, false);
   assert.equal(
     parseDemoDraft(JSON.stringify({ ...legacy, labStep: 1 })).step,
-    1,
+    0,
   );
   for (const step of [-1, 6, 1.5]) {
     assert.deepEqual(
       parseDemoDraft(JSON.stringify({ ...DEFAULT_DRAFT, step })),
       DEFAULT_DRAFT,
     );
+  }
+});
+
+test("older unrestricted drafts retain choices but do not count skipped steps as completed", () => {
+  const old = {
+    ...DEFAULT_DRAFT,
+    version: 2,
+    step: 5,
+    config: { ...DEFAULT_CONFIG, soulId: "scout", form: "robot" },
+  };
+  const restored = parseDemoDraft(JSON.stringify(old));
+  assert.equal(restored.step, 0);
+  assert.equal(restored.unlockedStep, 0);
+  assert.deepEqual(restored.config, old.config);
+});
+
+test("saved navigation preserves unlocked progress when revisiting an earlier step", () => {
+  const draft = { ...DEFAULT_DRAFT, step: 1, unlockedStep: 3 };
+  assert.deepEqual(parseDemoDraft(serializeDemoDraft(draft)), draft);
+});
+
+test("restored navigation cannot exceed completed progress or trust invalid progress", () => {
+  const clamped = parseDemoDraft(
+    JSON.stringify({ ...DEFAULT_DRAFT, step: 5, unlockedStep: 2 }),
+  );
+  assert.equal(clamped.step, 2);
+  assert.equal(clamped.unlockedStep, 2);
+  for (const unlockedStep of [-1, 6, 1.5, "5", null]) {
+    const restored = parseDemoDraft(
+      JSON.stringify({ ...DEFAULT_DRAFT, step: 5, unlockedStep }),
+    );
+    assert.equal(restored.step, 0);
+    assert.equal(restored.unlockedStep, 0);
   }
 });

@@ -2,28 +2,31 @@
 
 import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import { Pause, Play } from "lucide-react";
+import { usePathname } from "next/navigation";
 import { initFlowBackground } from "@/lib/flowBackground";
 
 const FlowPaused = createContext(false);
 
-function FlowCanvas() {
+function FlowCanvas({ background = false }: { background?: boolean }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const flowRef = useRef<ReturnType<typeof initFlowBackground>>(null);
   const paused = useContext(FlowPaused);
+  const pathname = usePathname();
 
   useEffect(() => {
     if (!canvasRef.current) return;
-    const flow = initFlowBackground(canvasRef.current);
+    const coverEnd = background ? document.querySelector<HTMLElement>("[data-flow-cover-end]") : null;
+    const flow = initFlowBackground(canvasRef.current, coverEnd);
     flowRef.current = flow;
     return () => {
       flow?.dispose();
       flowRef.current = null;
     };
-  }, []);
+  }, [background, pathname]);
 
   useEffect(() => {
     flowRef.current?.setPaused(paused);
-  }, [paused]);
+  }, [paused, pathname]);
 
   return <canvas ref={canvasRef} />;
 }
@@ -38,7 +41,7 @@ export default function FlowBackground({ children }: { children: ReactNode }) {
   return (
     <FlowPaused.Provider value={paused}>
       <div className="site-flow-background" aria-hidden="true">
-        <FlowCanvas />
+        <FlowCanvas background />
       </div>
       {children}
       <button

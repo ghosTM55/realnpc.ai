@@ -1,62 +1,31 @@
 "use client";
 
-import { Component, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { Component, useCallback, useEffect, useRef, useState, type ComponentType, type ReactNode } from "react";
 import { ArrowRight, Globe2, RotateCcw, X } from "lucide-react";
-import * as THREE from "three";
-import type { GlobeMethods, GlobeProps } from "react-globe.gl";
+import type { GlobeCanvasProps } from "./GlobeCanvas";
 import { NPC_WORLD_PAGE, WORLD_SCENARIOS, type ScenarioId, type WorldScenario } from "@/data/npcWorldPage";
 import { NPC_WORLD, type WorldCity } from "@/data/npcWorld";
 import { useSceneActivity } from "./useWorldPlayback";
-
-type GlobeComponent = React.ForwardRefExoticComponent<GlobeProps & React.RefAttributes<GlobeMethods>>;
-const TONE_HEX = { vessel: "#d40d3d", soul: "#43a9c9", powers: "#e6a42b" } as const;
-const isWorldCity = (point: unknown): point is WorldCity => {
-  if (!point || typeof point !== "object") return false;
-  const city = point as Partial<WorldCity>;
-  return typeof city.id === "string" && typeof city.city === "string" &&
-    typeof city.lat === "number" && Number.isFinite(city.lat) &&
-    typeof city.lng === "number" && Number.isFinite(city.lng) && Array.isArray(city.npcs);
-};
-const cityLat = (point: object) => isWorldCity(point) ? point.lat : 0;
-const cityLng = (point: object) => isWorldCity(point) ? point.lng : 0;
 
 export default function GlobeNpcExplorer({ scenario, onScenarioChange }: {
   scenario: WorldScenario;
   onScenarioChange: (id: ScenarioId) => void;
 }) {
-  const globeRef = useRef<GlobeMethods | null>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
   const { active, reducedMotion } = useSceneActivity(wrapRef);
-  const [GlobeComp, setGlobeComp] = useState<GlobeComponent | null>(null);
+  const [GlobeComp, setGlobeComp] = useState<ComponentType<GlobeCanvasProps> | null>(null);
   const [countries, setCountries] = useState<object[]>([]);
   const [dims, setDims] = useState({ w: 0, h: 0 });
   const [exploredCity, setExploredCity] = useState<WorldCity | null>(null);
   const [focused, setFocused] = useState(false);
-  const [ready, setReady] = useState(false);
   const [loadError, setLoadError] = useState(false);
   const [attempt, setAttempt] = useState(0);
   const selectedCity = exploredCity ?? NPC_WORLD.find((city) => city.id === scenario.cityId)!;
-  const globeMaterial = useMemo(() => new THREE.MeshBasicMaterial({
-    color: new THREE.Color("#d2e8f5"), transparent: true, opacity: 0.9,
-  }), []);
-
-  const borderPaths = useMemo(() => {
-    const paths: number[][][] = [];
-    for (const feature of countries) {
-      const geometry = (feature as { geometry?: { type: string; coordinates: unknown } }).geometry;
-      if (geometry?.type === "Polygon") paths.push(...geometry.coordinates as number[][][]);
-      else if (geometry?.type === "MultiPolygon") {
-        for (const polygon of geometry.coordinates as number[][][][]) paths.push(...polygon);
-      }
-    }
-    return paths;
-  }, [countries]);
-
   useEffect(() => {
     const controller = new AbortController();
     let mounted = true;
     Promise.all([
-      import("react-globe.gl"),
+      import("./GlobeCanvas"),
       fetch("/data/countries-110m.geojson", { signal: controller.signal })
         .then((response) => {
           if (!response.ok) throw new Error("Map unavailable");
@@ -69,7 +38,7 @@ export default function GlobeNpcExplorer({ scenario, onScenarioChange }: {
     ]).then(([module, features]) => {
       if (!mounted) return;
       setCountries(features);
-      setGlobeComp(() => module.default as unknown as GlobeComponent);
+      setGlobeComp(() => module.default);
     }).catch(() => { if (mounted) setLoadError(true); });
     return () => { mounted = false; controller.abort(); };
   }, [attempt]);
@@ -84,43 +53,14 @@ export default function GlobeNpcExplorer({ scenario, onScenarioChange }: {
     return () => observer.disconnect();
   }, []);
 
-  useEffect(() => () => { globeMaterial.dispose(); }, [globeMaterial]);
-
-  const configure = useCallback(() => {
-    const globe = globeRef.current;
-    if (!globe) return;
-    globe.renderer().setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
-    globe.controls().enableZoom = false;
-    globe.controls().autoRotateSpeed = 0.35;
-    globe.pointOfView({ lat: 32, lng: 125, altitude: 1.65 });
-    setReady(true);
-  }, []);
-
-  useEffect(() => {
-    const globe = globeRef.current;
-    if (!globe || !ready) return;
-    globe.controls().autoRotate = active && !reducedMotion && !focused;
-    if (active) globe.resumeAnimation();
-    else globe.pauseAnimation();
-  }, [active, focused, ready, reducedMotion]);
-
-  useEffect(() => {
-    if (!focused || !ready) return;
-    globeRef.current?.pointOfView(
-      { lat: selectedCity.lat, lng: selectedCity.lng, altitude: 1.55 },
-      reducedMotion ? 0 : 700,
-    );
-  }, [focused, ready, reducedMotion, selectedCity]);
-
-  const selectCity = (city: WorldCity) => {
+  const selectCity = useCallback((city: WorldCity) => {
     const story = WORLD_SCENARIOS.find((item) => item.cityId === city.id);
     setFocused(true);
     if (story) { setExploredCity(null); onScenarioChange(story.id); }
     else setExploredCity(city);
-  };
+  }, [onScenarioChange]);
   const retry = () => {
     setLoadError(false);
-    setReady(false);
     setGlobeComp(null);
     setAttempt((value) => value + 1);
   };
@@ -139,24 +79,9 @@ export default function GlobeNpcExplorer({ scenario, onScenarioChange }: {
       <div ref={wrapRef} className="npc-globe-canvas" aria-label="Explore the NPC World demo globe">
         {loadError ? <GlobeFallback onRetry={retry} /> : GlobeComp && dims.w > 0 ? (
           <GlobeBoundary key={attempt} fallback={<GlobeFallback onRetry={retry} />}>
-            <GlobeComp ref={globeRef} width={dims.w} height={dims.h} onGlobeReady={configure}
-              backgroundColor="rgba(0,0,0,0)" globeMaterial={globeMaterial}
-              showAtmosphere atmosphereColor="#43a9c9" atmosphereAltitude={0.12}
-              polygonsData={countries} polygonCapColor={() => "#fbfbfc"} polygonSideColor={() => "rgba(0,0,0,0)"}
-              polygonStrokeColor={() => "rgba(0,0,0,0)"} polygonAltitude={0.005} polygonsTransitionDuration={0} polygonLabel={() => ""}
-              pathsData={borderPaths} pathPointLat={(p: number[]) => p[1]} pathPointLng={(p: number[]) => p[0]}
-              pathPointAlt={0.006} pathColor={() => "rgba(67,169,201,0.9)"} pathStroke={1.6} pathTransitionDuration={0} pathLabel={() => ""}
-              pointsData={NPC_WORLD} pointLat={cityLat} pointLng={cityLng} pointAltitude={0.007}
-              pointRadius={(point: object) => isWorldCity(point) && selectedCity.id === point.id ? 0.85 : 0.45}
-              pointColor={(point: object) => isWorldCity(point) && selectedCity.id === point.id ? TONE_HEX.powers : TONE_HEX.vessel}
-              pointLabel={(point: object) => isWorldCity(point) ? point.city + " · demo" : ""}
-              onPointClick={(point: object) => { if (isWorldCity(point)) selectCity(point); }}
-              onPointHover={(point: object | null) => {
-                if (globeRef.current) globeRef.current.controls().autoRotate = !point && active && !reducedMotion && !focused;
-              }}
-              ringsData={!reducedMotion && active && focused ? [selectedCity] : []}
-              ringLat={cityLat} ringLng={cityLng} ringMaxRadius={2.2} ringPropagationSpeed={1.2} ringRepeatPeriod={2200}
-              ringColor={() => ["rgba(230,164,43,0.6)", "rgba(230,164,43,0)"]}
+            <GlobeComp countries={countries} width={dims.w} height={dims.h}
+              active={active} reducedMotion={reducedMotion} focused={focused}
+              selectedCity={selectedCity} onSelectCity={selectCity}
             />
           </GlobeBoundary>
         ) : <GlobeFallback loading />}

@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { gsap, useGSAP } from "@/lib/gsap";
+import SceneImage from "@/components/SceneImage";
 import FocusedPopover from "@/components/assembly/FocusedPopover";
 import StageCallouts from "@/components/assembly/StageCallouts";
 import StageHotspots from "@/components/assembly/StageHotspots";
@@ -119,12 +120,9 @@ export default function AssemblyStage() {
       >
         <div
           data-stage-background
-          className="absolute inset-0 bg-cover bg-[position:center]"
-          style={{
-            backgroundImage: "url(/media/three-layers-parts-wall.jpg)",
-          }}
+          className="absolute inset-0"
           aria-hidden
-        />
+        ><SceneImage scene="assembly" /></div>
         <StageHotspots
           active={active}
           hovered={hovered}

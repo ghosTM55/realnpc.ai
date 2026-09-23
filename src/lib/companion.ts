@@ -74,15 +74,17 @@ export const DEFAULT_REVIEW: ReviewOptions = {
 };
 
 export type DemoDraft = {
-  version: 2;
+  version: 3;
   step: number;
+  unlockedStep: number;
   review: ReviewOptions;
   config: CompanionConfig;
 };
 
 export const DEFAULT_DRAFT: DemoDraft = {
-  version: 2,
+  version: 3,
   step: 0,
+  unlockedStep: 0,
   review: DEFAULT_REVIEW,
   config: DEFAULT_CONFIG,
 };
@@ -93,7 +95,7 @@ export function parseDemoDraft(serialized: string | null): DemoDraft {
     const value = JSON.parse(serialized ?? "null");
     const config = value?.config;
     const review = value?.review;
-    // Preserve existing choices when the two old step counters become one.
+    // Older drafts allowed arbitrary jumps, so their step is not completion evidence.
     const legacyStepsValid =
       value?.version === 1 &&
       Number.isInteger(value.labStep) &&
@@ -106,7 +108,7 @@ export function parseDemoDraft(serialized: string | null): DemoDraft {
       ? value.labStep < 3
         ? value.labStep
         : 3 + value.reviewStep
-      : value?.version === 2
+      : value?.version === 2 || value?.version === 3
         ? value.step
         : undefined;
     if (
@@ -134,9 +136,17 @@ export function parseDemoDraft(serialized: string | null): DemoDraft {
       ].every((key) => typeof config[key] === "boolean")
     )
       return DEFAULT_DRAFT;
+    const unlockedStep =
+      value.version === 3 &&
+      Number.isInteger(value.unlockedStep) &&
+      value.unlockedStep >= 0 &&
+      value.unlockedStep <= 5
+        ? value.unlockedStep
+        : 0;
     return {
-      version: 2,
-      step,
+      version: 3,
+      step: Math.min(step, unlockedStep),
+      unlockedStep,
       review: {
         priority: review.priority,
         characterSource: review.characterSource,

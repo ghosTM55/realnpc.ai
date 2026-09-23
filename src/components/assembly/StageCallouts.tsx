@@ -20,7 +20,7 @@ export default function StageCallouts({
   return (
     <>
       <div
-        className="pointer-events-none absolute bottom-8 left-6 z-20 w-max transition-opacity duration-200 lg:bottom-10 lg:left-[72px]"
+        className="pointer-events-none absolute bottom-8 left-6 z-20 w-max max-w-[calc(100%-3rem)] transition-opacity duration-200 lg:bottom-10 lg:left-[72px] lg:max-w-none"
         style={{ opacity: isOverlaySuppressed ? 0 : 1 }}
       >
         <div className="relative border border-white/60 bg-white/[0.72] px-4 py-3.5 shadow-[0_14px_34px_rgba(21,24,29,0.08)] backdrop-blur-[1px]">
@@ -39,7 +39,7 @@ export default function StageCallouts({
           <h2 className="mt-3 font-display text-[18px] font-semibold leading-none text-ink">
             Vessel · Soul · Powers
           </h2>
-          <p className="mt-2 whitespace-nowrap text-[12px] leading-[1.35] text-steel">
+          <p className="mt-2 text-[12px] leading-[1.35] text-steel lg:whitespace-nowrap">
             Body, character, and capability in one build.
           </p>
         </div>
@@ -59,9 +59,9 @@ export default function StageCallouts({
             onClick={() => onFocus(spot)}
             onMouseEnter={() => onHover(spot.concept)}
             onMouseLeave={() => onHover(null)}
-            className="group/callout pointer-events-auto absolute z-20 w-[240px] -translate-y-1/2 text-left transition-opacity duration-200"
+            className="group/callout pointer-events-auto absolute z-20 mt-9 w-[88px] -translate-x-1/2 -translate-y-1/2 text-left transition-opacity duration-200 lg:mt-0 lg:ml-8 lg:w-[240px] lg:translate-x-0"
             style={{
-              left: `calc(${spot.x * 100}% + 32px)`,
+              left: `${spot.x * 100}%`,
               top: `${spot.y * 100}%`,
               opacity: isOverlaySuppressed ? 0 : 1,
               pointerEvents: isOverlaySuppressed ? "none" : "auto",
@@ -79,15 +79,15 @@ export default function StageCallouts({
             </span>
             <span className="block overflow-hidden rounded-[2px] border border-hairline bg-white/95 shadow-[0_12px_28px_rgba(26,42,53,0.12)]">
               <span
-                className="flex items-center justify-between px-3.5 py-2"
+                className="flex min-h-11 items-center justify-between px-2 py-2 lg:min-h-0 lg:px-3.5"
                 style={{ backgroundColor: c.color }}
               >
-                <span className="font-signal text-[15px] font-bold tracking-[0.14em] text-white">
+                <span className="font-signal text-[12px] font-bold tracking-[0.08em] text-white lg:text-[15px] lg:tracking-[0.14em]">
                   {spot.label.toUpperCase()}
                 </span>
-                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-white/80" />
+                <span className="hidden h-1.5 w-1.5 animate-pulse rounded-full bg-white/80 lg:block" />
               </span>
-              <span className="block whitespace-nowrap px-3.5 pb-3 pt-2 text-[12px] leading-[1.25] text-steel">
+              <span className="hidden whitespace-nowrap px-3.5 pb-3 pt-2 text-[12px] leading-[1.25] text-steel lg:block">
                 {callout.copy}
               </span>
             </span>

@@ -13,11 +13,12 @@ const cinzel = localFont({
 /** IoskeleyMono remains the body and interface font. */
 const ioskeley = localFont({
   src: [
-    { path: "../fonts/IoskeleyMonoNerdFont-Regular.ttf", weight: "400" },
-    { path: "../fonts/IoskeleyMonoNerdFont-SemiBold.ttf", weight: "600" },
-    { path: "../fonts/IoskeleyMonoNerdFont-Bold.ttf", weight: "700" },
+    { path: "../fonts/IoskeleyMono-Regular.woff2", weight: "400" },
+    { path: "../fonts/IoskeleyMono-SemiBold.woff2", weight: "600" },
+    { path: "../fonts/IoskeleyMono-Bold.woff2", weight: "700" },
   ],
   variable: "--font-ioskeley",
+  display: "swap",
 });
 
 export const metadata: Metadata = {

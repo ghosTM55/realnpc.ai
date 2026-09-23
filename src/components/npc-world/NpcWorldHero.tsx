@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { animate, shouldReduceMotion, stagger } from "@/lib/anime";
 import GlobeNpcExplorer from "@/components/npc-world/GlobeNpcExplorer";
 import type { ScenarioId, WorldScenario } from "@/data/npcWorldPage";
 
@@ -12,16 +11,18 @@ export default function NpcWorldHero({ scenario, onScenarioChange }: {
   const ref = useRef<HTMLElement>(null);
 
   useEffect(() => {
-    if (!ref.current || shouldReduceMotion()) return;
-    const intro = animate(ref.current.querySelectorAll("[data-hero-item]"), {
-      opacity: [0, 1],
-      y: [22, 0],
-      duration: 720,
-      delay: stagger(80, { start: 140 }),
-      ease: "outExpo",
-    });
+    if (!ref.current) return;
+    const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    if (motion.matches) return;
+    const animations = [...ref.current.querySelectorAll("[data-hero-item]")].map((node, index) => node.animate(
+      [{ opacity: 0, transform: "translateY(22px)" }, { opacity: 1, transform: "translateY(0)" }],
+      { duration: 720, delay: 140 + index * 80, easing: "cubic-bezier(0.16, 1, 0.3, 1)", fill: "backwards" },
+    ));
+    const stop = () => animations.forEach(animation => animation.cancel());
+    motion.addEventListener("change", stop);
     return () => {
-      intro.revert();
+      motion.removeEventListener("change", stop);
+      stop();
     };
   }, []);
 
