@@ -70,6 +70,45 @@ test("globe map starts before JavaScript and its preload is reused", async () =>
   } finally { await page.close(); }
 });
 
+test("assembly decorative markers stay still with reduced motion", async () => {
+  const page = await browser.newPage({ viewport: { width: 1440, height: 900 }, reducedMotion: "reduce" });
+  try {
+    await page.goto(base, { waitUntil: "networkidle" });
+    await page.locator("#layers").scrollIntoViewIfNeeded();
+    const animations = await page.locator("#layers").evaluate(node => node.getAnimations({ subtree: true })
+      .filter(animation => animation.playState === "running" && animation.effect.getTiming().iterations === Infinity).length);
+    assert.equal(animations, 0, "Reduced motion must also stop decorative pulses");
+  } finally { await page.close(); }
+});
+
+test("world scene colors survive client navigation and preserve contrast on both surfaces", async () => {
+  const page = await browser.newPage({ viewport: { width: 1440, height: 900 }, reducedMotion: "reduce" });
+  try {
+    await page.goto(`${base}/partnership/`, { waitUntil: "networkidle" });
+    for (let visit = 0; visit < 2; visit++) {
+      await page.getByRole("link", { name: "NPC World", exact: true }).click();
+      await page.waitForURL(/\/npc-world\//);
+      for (const [index, light, dark] of [
+        [0, "rgb(212, 13, 61)", "rgb(244, 107, 136)"],
+        [1, "rgb(36, 103, 125)", "rgb(119, 199, 222)"],
+        [2, "rgb(128, 87, 16)", "rgb(239, 189, 97)"],
+      ]) {
+        const choice = page.locator(".npc-scenario-choice").nth(index);
+        const tab = page.locator(".npc-scenario-tab").nth(index);
+        await choice.click();
+        assert.equal(await tab.getAttribute("aria-pressed"), "true");
+        assert.equal(await choice.locator(".npc-scenario-name").evaluate(node => getComputedStyle(node).color), light);
+        assert.equal(await choice.evaluate(node => getComputedStyle(node).borderBottomColor), light);
+        assert.equal(await tab.evaluate(node => getComputedStyle(node).color), dark);
+        assert.equal(await tab.evaluate(node => getComputedStyle(node).borderBottomColor), dark);
+      }
+      await page.getByRole("link", { name: "RealNPC home", exact: true }).click();
+      await page.waitForURL(base + "/");
+      assert.equal(await page.locator("[data-hotspot-marker]").count(), 3);
+    }
+  } finally { await page.close(); }
+});
+
 test("assembly honors a changed motion preference, including during focus", async () => {
   const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
   try {

@@ -1,6 +1,5 @@
 import { assemblyHotspots } from "@/data/assemblyHotspots";
 import type { AssemblyConcept, AssemblyHotspot } from "@/types/domain";
-import { CALLOUT, CONCEPT } from "./assemblyStageConfig";
 
 type StageCalloutsProps = {
   active: AssemblyHotspot | null;
@@ -20,7 +19,7 @@ export default function StageCallouts({
   return (
     <>
       <div
-        className="pointer-events-none absolute bottom-8 left-6 z-20 w-max max-w-[calc(100%-3rem)] transition-opacity duration-200 lg:bottom-10 lg:left-[72px] lg:max-w-none"
+        className="pointer-events-none absolute bottom-8 left-6 z-20 w-max max-w-[calc(100%-3rem)] transition-opacity duration-200 motion-reduce:transition-none lg:bottom-10 lg:left-[72px] lg:max-w-none"
         style={{ opacity: isOverlaySuppressed ? 0 : 1 }}
       >
         <div className="relative border border-white/60 bg-white/[0.72] px-4 py-3.5 shadow-[0_14px_34px_rgba(21,24,29,0.08)] backdrop-blur-[1px]">
@@ -46,20 +45,19 @@ export default function StageCallouts({
       </div>
 
       {assemblyHotspots.map((spot) => {
-        const c = CONCEPT[spot.concept];
-        const callout = CALLOUT[spot.concept];
         const isActive = active?.id === spot.id;
 
         return (
           <button
             key={`${spot.id}-callout`}
+            data-tone={spot.concept}
             type="button"
             aria-label={`Focus the ${spot.label} layer`}
             aria-expanded={isActive}
             onClick={() => onFocus(spot)}
             onMouseEnter={() => onHover(spot.concept)}
             onMouseLeave={() => onHover(null)}
-            className="group/callout pointer-events-auto absolute z-20 mt-9 w-[88px] -translate-x-1/2 -translate-y-1/2 text-left transition-opacity duration-200 lg:mt-0 lg:ml-8 lg:w-[240px] lg:translate-x-0"
+            className="group/callout pointer-events-auto absolute z-20 mt-9 w-[88px] -translate-x-1/2 -translate-y-1/2 text-left transition-opacity duration-200 motion-reduce:transition-none lg:mt-0 lg:ml-8 lg:w-[240px] lg:translate-x-0"
             style={{
               left: `${spot.x * 100}%`,
               top: `${spot.y * 100}%`,
@@ -68,8 +66,7 @@ export default function StageCallouts({
             }}
           >
             <span
-              className="pointer-events-none absolute -inset-1"
-              style={{ color: c.color }}
+              className="pointer-events-none absolute -inset-1 text-tone"
               aria-hidden
             >
               <span className="absolute left-0 top-0 h-2.5 w-2.5 border-l-[1.5px] border-t-[1.5px] border-current" />
@@ -79,16 +76,15 @@ export default function StageCallouts({
             </span>
             <span className="block overflow-hidden rounded-[2px] border border-hairline bg-white/95 shadow-[0_12px_28px_rgba(26,42,53,0.12)]">
               <span
-                className="flex min-h-11 items-center justify-between px-2 py-2 lg:min-h-0 lg:px-3.5"
-                style={{ backgroundColor: c.color }}
+                className="flex min-h-11 items-center justify-between bg-tone px-2 py-2 lg:min-h-0 lg:px-3.5"
               >
                 <span className="font-signal text-[12px] font-bold tracking-[0.08em] text-white lg:text-[15px] lg:tracking-[0.14em]">
                   {spot.label.toUpperCase()}
                 </span>
-                <span className="hidden h-1.5 w-1.5 animate-pulse rounded-full bg-white/80 lg:block" />
+                <span className="hidden h-1.5 w-1.5 motion-safe:animate-pulse rounded-full bg-white/80 lg:block" />
               </span>
               <span className="hidden whitespace-nowrap px-3.5 pb-3 pt-2 text-[12px] leading-[1.25] text-steel lg:block">
-                {callout.copy}
+                {spot.summary}
               </span>
             </span>
           </button>

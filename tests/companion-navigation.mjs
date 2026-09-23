@@ -20,12 +20,25 @@ const actions = [
   "View your plan",
 ];
 
+async function checkCopy(page, step, soul = "Morrow") {
+  const headings = ["Choose your Soul.", `Life with ${soul}.`, "On your terms.", `Bring ${soul} into your world.`, "What matters most?", "Your companion plan."];
+  const eyebrows = ["01 / Chemistry", "02 / Everyday life", `03 / ${soul}`, "04 / Presence", "05 / Priorities", "06 / Your plan"];
+  const heading = page.getByRole("heading", { level: 1, name: headings[step], exact: true });
+  await heading.waitFor();
+  assert.equal(await heading.locator("..").locator("p").first().textContent(), eyebrows[step]);
+  assert.equal(await page.locator("[data-flow-footer] p").first().textContent(), `${soul} · ${step + 1} of 6`);
+  const action = step === 5 ? "Save your plan" : step === 0 ? `Continue with ${soul}` : actions[step];
+  assert.equal(await page.locator("[data-flow-footer]").getByRole("button", { name: action, exact: true }).count(), 1);
+}
+
 async function checkSteps(page, unlocked, current = unlocked) {
   const steps = page
     .getByRole("navigation", { name: "Experience steps" })
     .getByRole("button");
+  const labels = ["Choose Soul", "Meet them", "Your terms", "Presence", "Priorities", "Your plan"];
   assert.equal(await steps.count(), 6);
   for (let index = 0; index < 6; index++) {
+    assert.equal(await page.getByRole("navigation", { name: "Experience steps" }).getByRole("button", { name: labels[index], exact: true }).count(), 1);
     assert.equal(
       await steps.nth(index).isEnabled(),
       index <= unlocked,
@@ -53,9 +66,11 @@ try {
         if (scenario === "fresh entry") {
           await page.getByRole("heading", { name: "Vex", exact: true }).click();
           for (const entrance of [1, 0, 2]) {
-            for (const name of ["Continue with Vex", ...actions.slice(1)]) {
+            for (const [index, name] of ["Continue with Vex", ...actions.slice(1)].entries()) {
+              await checkCopy(page, index, "Vex");
               await page.getByRole("button", { name, exact: true }).click();
             }
+            await checkCopy(page, 5, "Vex");
             await page
               .getByRole("heading", {
                 name: "Your companion plan.",
@@ -104,6 +119,7 @@ try {
           }
           for (let index = 0; index < 6; index++) {
             await checkSteps(page, index);
+            await checkCopy(page, index);
             if (index === 2) {
               const steps = page.getByRole("navigation", {
                 name: "Experience steps",

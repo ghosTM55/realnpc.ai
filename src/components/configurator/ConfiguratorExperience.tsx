@@ -2,9 +2,10 @@
 
 import { useEffect } from "react";
 import { Check, ShieldCheck } from "lucide-react";
-import CompanionLab, {
+import SoulSetupSteps, {
   CompanionProfile,
-} from "@/components/companion-lab/CompanionLab";
+} from "./SoulSetupSteps";
+import { getConfiguratorSteps } from "@/data/configuratorSteps";
 import {
   createReviewCase,
   getCompanionProfile,
@@ -28,14 +29,6 @@ import {
   focusFlowHeading,
 } from "@/components/companion/FlowUI";
 
-const STEPS = [
-  "Choose Soul",
-  "Meet them",
-  "Your terms",
-  "Presence",
-  "Priorities",
-  "Your plan",
-] as const;
 const BUDGET_LABELS = {
   discuss: "Discuss later",
   "under-10k": "Under $10K",
@@ -53,6 +46,8 @@ export default function ConfiguratorExperience() {
   const { draft } = useDemoDraft();
   const { config, review: preferences, step, unlockedStep } = draft;
   const profile = getCompanionProfile(config);
+  const steps = getConfiguratorSteps(profile.soul.name);
+  const currentStep = steps[step];
   const reviewCase = createReviewCase(config, preferences);
   useEffect(() => {
     const url = new URL(window.location.href);
@@ -111,7 +106,7 @@ export default function ConfiguratorExperience() {
   }
   function completeStep() {
     updateDemoDraft((current) => {
-      if (current.step !== step || current.step >= STEPS.length - 1)
+      if (current.step !== step || current.step >= steps.length - 1)
         return current;
       const next = current.step + 1;
       return {
@@ -125,7 +120,7 @@ export default function ConfiguratorExperience() {
   return (
     <FlowShell label="REALNPC / CONFIGURATOR">
       <FlowSteps
-        labels={STEPS}
+        labels={steps.map(({ label }) => label)}
         current={step}
         unlockedStep={unlockedStep}
         onChange={goToStep}
@@ -156,14 +151,14 @@ export default function ConfiguratorExperience() {
         </div>
       )}
 
-      {step < 3 && <CompanionLab step={step} onStepChange={goToStep} />}
+      <FlowHeading
+        eyebrow={`${String(step + 1).padStart(2, "0")} / ${currentStep.eyebrow}`}
+        title={currentStep.title}
+        description={currentStep.description}
+      />
+      {step < 3 && <SoulSetupSteps step={step} onStepChange={goToStep} />}
       {step === 3 && (
         <>
-          <FlowHeading
-            eyebrow="04 / Presence"
-            title={`Bring ${profile.soul.name} into your world.`}
-            description="Choose a form. See what it would take to build."
-          />
           <div className="grid items-start gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:gap-12">
             <div>
               <OptionGroup
@@ -212,11 +207,6 @@ export default function ConfiguratorExperience() {
 
       {step === 4 && (
         <>
-          <FlowHeading
-            eyebrow="05 / Priorities"
-            title="What matters most?"
-            description="Adjust the direction, or continue with these defaults."
-          />
           <div className="grid items-start gap-8 lg:grid-cols-[1fr_0.9fr] lg:gap-12">
             <div className="space-y-7">
               <OptionGroup
@@ -316,11 +306,6 @@ export default function ConfiguratorExperience() {
 
       {step === 5 && (
         <>
-          <FlowHeading
-            eyebrow="06 / Your plan"
-            title="Your companion plan."
-            description="Your personality, preferences and presence. Save this plan to keep it. Nothing is submitted."
-          />
           <CompanionProfile config={config} onChangeSoul={() => goToStep(0)} />
           <div className="mt-10 grid items-start gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:gap-12">
             <div>
@@ -372,19 +357,11 @@ export default function ConfiguratorExperience() {
       <DemoPrivacy />
       <FlowFooter
         onBack={step > 0 ? () => goToStep(step - 1) : undefined}
-        note={`${profile.soul.name} · ${step + 1} of 6`}
+        note={`${profile.soul.name} · ${step + 1} of ${steps.length}`}
       >
-        {step < 5 ? (
+        {currentStep.nextLabel !== null ? (
           <NextButton onClick={completeStep}>
-            {
-              [
-                `Continue with ${profile.soul.name}`,
-                "Set preferences",
-                "Choose presence",
-                "Set priorities",
-                "View your plan",
-              ][step]
-            }
+            {currentStep.nextLabel}
           </NextButton>
         ) : (
           <DownloadButton

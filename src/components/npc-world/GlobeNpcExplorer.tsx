@@ -121,7 +121,7 @@ export default function GlobeNpcExplorer({ scenario, onScenarioChange }: {
           <p className="npc-eyebrow npc-control-label">CHOOSE A SOCIAL SCENE</p>
           <div className="mt-3 grid grid-cols-3 gap-1" aria-label="Choose a social scene">
             {WORLD_SCENARIOS.map((story) => (
-              <button key={story.id} type="button" className="npc-scenario-choice" data-scenario={story.id}
+              <button key={story.id} type="button" className="npc-scenario-choice" data-scenario={story.id} data-tone={story.tone}
                 aria-pressed={!exploredCity && scenario.id === story.id}
                 onClick={() => selectCity(NPC_WORLD.find((city) => city.id === story.cityId)!)}>
                 <span className="npc-scenario-name">{story.label}</span>

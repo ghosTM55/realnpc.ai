@@ -15,7 +15,7 @@ const compressedBytes = async urls => (await Promise.all([...new Set(urls)].map(
   gzipSync(await readFile(resolve(root, `.${url}`)), { level: 9 }).length,
 ))).reduce((sum, value) => sum + value, 0);
 
-for (const [route, jsBudget] of [["", 255_000], ["npc-world", 225_000], ["configurator", 225_000], ["partnership", 215_000]]) {
+for (const [route, jsBudget, cssBudget] of [["", 255_000, 12_000], ["npc-world", 225_000, 16_000], ["configurator", 225_000, 11_000], ["partnership", 215_000, 12_000]]) {
   const html = await readFile(resolve(root, route, "index.html"), "utf8");
   const fonts = [...new Set([...html.matchAll(/<link\b[^>]*>/g)]
     .filter(([tag]) => /as="font"/.test(tag))
@@ -29,7 +29,7 @@ for (const [route, jsBudget] of [["", 255_000], ["npc-world", 225_000], ["config
   assert.ok(jsBytes > 0 && jsBytes <= jsBudget, `${route || "/"}: initial JS costs ${jsBytes} bytes gzip (budget ${jsBudget})`);
   const styles = [...html.matchAll(/<link\b[^>]*>/g)].filter(([tag]) => /rel="stylesheet"/.test(tag)).map(([tag]) => tag.match(/href="([^"]+)"/)[1]);
   const cssBytes = await compressedBytes(styles);
-  assert.ok(cssBytes > 0 && cssBytes <= 20_000, `${route || "/"}: CSS costs ${cssBytes} bytes gzip (budget 20,000)`);
+  assert.ok(cssBytes > 0 && cssBytes <= cssBudget, `${route || "/"}: CSS costs ${cssBytes} bytes gzip (budget ${cssBudget})`);
   if (route === "npc-world") {
     assert.ok([...html.matchAll(/<link\b[^>]*>/g)].some(([tag]) => tag.includes(`/data/${maps[0]}`) && /rel="preload"/.test(tag) && /as="fetch"/.test(tag) && /crossorigin="(?:anonymous)?"/i.test(tag)), "World page must preload the same map fetched by the globe");
   }

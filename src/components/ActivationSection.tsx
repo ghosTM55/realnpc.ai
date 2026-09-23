@@ -5,24 +5,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { gsap, useGSAP } from "@/lib/gsap";
 import { ACTIVATION } from "@/data/site";
-
-const TONE = {
-  vessel: {
-    line: "bg-vessel",
-    chip: "border-vessel/25 bg-vessel-tint text-vessel",
-    glow: "shadow-[0_0_0_5px_color-mix(in_srgb,var(--vessel-red)_9%,transparent),0_10px_28px_-10px_color-mix(in_srgb,var(--vessel-red)_62%,transparent)]",
-  },
-  soul: {
-    line: "bg-soul",
-    chip: "border-soul/25 bg-soul-tint text-soul",
-    glow: "shadow-[0_0_0_5px_color-mix(in_srgb,var(--soul-blue)_10%,transparent),0_10px_28px_-10px_color-mix(in_srgb,var(--soul-blue)_62%,transparent)]",
-  },
-  powers: {
-    line: "bg-powers",
-    chip: "border-powers/30 bg-powers-tint text-powers",
-    glow: "shadow-[0_0_0_5px_color-mix(in_srgb,var(--powers-amber)_12%,transparent),0_10px_28px_-10px_color-mix(in_srgb,var(--powers-amber)_64%,transparent)]",
-  },
-} as const;
+import styles from "./ActivationSection.module.css";
 
 export default function ActivationSection() {
   const ref = useRef<HTMLElement>(null);
@@ -155,18 +138,18 @@ export default function ActivationSection() {
 
           <ol className="space-y-5">
             {ACTIVATION.states.map((phase) => {
-              const tone = TONE[phase.tone];
               return (
                 <li
                   key={phase.name}
                   data-activation-row
-                  className="grid grid-cols-[18px_minmax(0,1fr)] items-start gap-5"
+                  data-tone={phase.tone}
+                  className={`${styles.phase} grid grid-cols-[18px_minmax(0,1fr)] items-start gap-5`}
                 >
                   <span className="relative flex h-6 items-center justify-start pt-1">
                     <span
                       data-activation-node
                       aria-hidden
-                      className={`relative z-10 h-3 w-3 rounded-full border border-white ${tone.line} ${tone.glow}`}
+                      className={`relative z-10 h-3 w-3 rounded-full border border-white bg-tone ${styles.node}`}
                     />
                   </span>
 
@@ -176,7 +159,7 @@ export default function ActivationSection() {
                         {phase.name}
                       </h3>
                       <span
-                        className={`shrink-0 border px-2 py-1 font-signal text-[10px] leading-none tracking-[0.08em] ${tone.chip}`}
+                        className={`shrink-0 border px-2 py-1 font-signal text-[10px] leading-none tracking-[0.08em] bg-tone-tint text-tone ${styles.chip}`}
                       >
                         {phase.tone.toUpperCase()}
                       </span>

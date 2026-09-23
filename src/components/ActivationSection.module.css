@@ -1,0 +1,16 @@
+.phase {
+  --activation-ring-opacity: 9%;
+  --activation-glow-opacity: 62%;
+  --activation-chip-opacity: 25%;
+}
+.phase[data-tone="soul"] { --activation-ring-opacity: 10%; }
+.phase[data-tone="powers"] {
+  --activation-ring-opacity: 12%;
+  --activation-glow-opacity: 64%;
+  --activation-chip-opacity: 30%;
+}
+.node {
+  box-shadow: 0 0 0 5px color-mix(in srgb, var(--tone) var(--activation-ring-opacity), transparent),
+    0 10px 28px -10px color-mix(in srgb, var(--tone) var(--activation-glow-opacity), transparent);
+}
+.chip { border-color: color-mix(in oklab, var(--tone) var(--activation-chip-opacity), transparent); }

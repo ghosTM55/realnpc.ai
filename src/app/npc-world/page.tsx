@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import "@/components/npc-world/npc-world.css";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
 import NpcWorldExperience from "@/components/npc-world/NpcWorldExperience";

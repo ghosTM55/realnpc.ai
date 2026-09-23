@@ -22,7 +22,7 @@ export default function NpcWorldExperience() {
           <div className="mt-8 flex flex-wrap items-center justify-between gap-5">
             <div className="npc-scenario-tabs" aria-label="Choose a story">
               {WORLD_SCENARIOS.map((item) => (
-                <button key={item.id} type="button" aria-pressed={item.id === scenario.id} data-scenario={item.id}
+                <button key={item.id} type="button" aria-pressed={item.id === scenario.id} data-scenario={item.id} data-tone={item.tone}
                   onClick={() => setScenarioId(item.id)} className="npc-scenario-tab">
                   {item.label}
                 </button>

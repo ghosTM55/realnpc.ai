@@ -29,6 +29,14 @@ VI three-color semantic layer (signals only — never large fills):
 | Soul Blue | `#43A9C9` | persona / memory / privacy boundary |
 | Powers Amber | `#E6A42B` | capability packs / service add-ons |
 
+Set `data-tone="vessel|soul|powers"` on a semantic group. The shared selectors in
+`globals.css` provide `--tone`, `--tone-tint`, `--tone-ink` (text on light surfaces)
+and `--tone-on-dark`. Tailwind components use `text-tone`, `bg-tone-tint` and
+`border-tone/40`; avoid rebuilding tone-to-color maps in JavaScript. Border and
+glow opacity remain component decisions, including Activation's tone-specific
+strengths. NPC World imports its scoped `.npc-*` stylesheet at the route so
+unrelated pages do not load its layout and story styles.
+
 ## Architecture map
 
 ```
@@ -53,6 +61,12 @@ scripts/              # repeatable font, responsive-image and globe-map generati
 Configurations produce local plan previews. A future private review intake must
 require human review before an order; no backend ReviewCase pipeline, checkout,
 cart or deposit exists in this demo.
+
+`src/data/configuratorSteps.ts` owns navigation labels, headings and next-button
+copy for all six steps. `ConfiguratorExperience` renders the common heading;
+`SoulSetupSteps` renders the first three steps' controls. Navigation labels and
+eyebrows deliberately use different copy. Step order still matches draft schema
+v3; reordering it requires a migration rather than only editing the metadata.
 
 ## Dev
 
@@ -135,6 +149,9 @@ deferred JS chunks and responsive scene images. `test:site` also delays JavaScri
 to catch title flashes and map waterfalls, checks preload reuse, and switches
 motion preferences during assembly interactions. These checks target payload and
 loading behavior; local timings are not measurements of mainland China latency.
+They also cover reduced-motion decorative markers and NPC scene colors after
+client navigation. Configurator browser tests preserve the six steps' copy,
+locked-step navigation, draft migration and local plan export.
 
 GitHub Pages controls response caching (currently ten minutes). Region-specific
 CDN hosting and longer immutable caching remain infrastructure follow-ups;

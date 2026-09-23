@@ -4,7 +4,7 @@ import type { AssemblyHotspot } from "@/types/domain";
  * Data-driven hotspots for the AssemblyStage (Ferrari-style click-to-focus).
  * Coordinates are normalized 0-1 over the stage image and were calibrated
  * against the current three-layer vessel render
- * (public/media/three-layers-parts-wall.jpg).
+ * (assets/media/three-layers-parts-wall.jpg).
  * Recalibrate when the final base-vessel image lands.
  */
 export const assemblyHotspots: AssemblyHotspot[] = [
@@ -12,6 +12,7 @@ export const assemblyHotspots: AssemblyHotspot[] = [
     id: "body-platform",
     concept: "vessel",
     label: "Vessel",
+    summary: "Body, motion, and sensors",
     x: 0.24,
     y: 0.43,
     focusScale: 2.4,
@@ -24,6 +25,7 @@ export const assemblyHotspots: AssemblyHotspot[] = [
     id: "persona-core",
     concept: "soul",
     label: "Soul",
+    summary: "Persona, voice, and memory",
     x: 0.57,
     y: 0.17,
     focusScale: 2.6,
@@ -36,6 +38,7 @@ export const assemblyHotspots: AssemblyHotspot[] = [
     id: "capability-layer",
     concept: "powers",
     label: "Powers",
+    summary: "Skills that keep growing",
     x: 0.79,
     y: 0.43,
     focusScale: 2.2,

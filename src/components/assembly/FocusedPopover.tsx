@@ -1,6 +1,5 @@
 import type { AssemblyHotspot } from "@/types/domain";
 import styles from "./FocusedPopover.module.css";
-import { CONCEPT } from "./assemblyStageConfig";
 
 type FocusedPopoverProps = {
   active: AssemblyHotspot | null;
@@ -15,12 +14,11 @@ export default function FocusedPopover({
 }: FocusedPopoverProps) {
   if (!active || !dot || focusing) return null;
 
-  const concept = CONCEPT[active.concept];
-
   return (
     <div
       data-popover
-      className={`${styles.popover} pointer-events-auto absolute z-30 w-[calc(100%-48px)] max-w-[362px] rounded-[8px] border bg-paper/45 p-6 shadow-[0_14px_36px_rgba(26,42,53,0.16)] ${concept.border}`}
+      data-tone={active.concept}
+      className={`${styles.popover} pointer-events-auto absolute z-30 w-[calc(100%-48px)] max-w-[362px] rounded-[8px] border border-tone/40 bg-paper/45 p-6 shadow-[0_14px_36px_rgba(26,42,53,0.16)]`}
       style={{
         left: `clamp(24px, calc(${dot.x * 100}% + 112px), calc(100% - 386px))`,
         top: `clamp(24px, calc(${dot.y * 100}% - 118px), calc(100% - 300px))`,
@@ -28,11 +26,10 @@ export default function FocusedPopover({
     >
       <div className="flex items-center gap-2">
         <span
-          className="h-[7px] w-[7px] rounded-full"
-          style={{ backgroundColor: concept.color }}
+          className="h-[7px] w-[7px] rounded-full bg-tone"
         />
         <span
-          className={`font-signal text-[12px] tracking-wide ${concept.text}`}
+          className="font-signal text-[12px] tracking-wide text-tone"
         >
           {active.label.toUpperCase()}
         </span>
@@ -48,8 +45,7 @@ export default function FocusedPopover({
           {active.includes.map((chip) => (
             <span
               key={chip}
-              className="rounded-[3px] border border-hairline px-2.5 py-1 font-signal text-[11px] text-steel"
-              style={{ backgroundColor: concept.tint }}
+              className="rounded-[3px] border border-hairline bg-tone-tint px-2.5 py-1 font-signal text-[11px] text-steel"
             >
               {chip}
             </span>

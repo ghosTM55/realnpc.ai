@@ -17,7 +17,6 @@ import {
 } from "@/components/companion/useDemoDraft";
 import {
   DownloadButton,
-  FlowHeading,
   NextEncounter,
   OptionGroup,
   ScriptedReply,
@@ -25,7 +24,7 @@ import {
   Toggle,
 } from "@/components/companion/FlowUI";
 
-export default function CompanionLab({
+export default function SoulSetupSteps({
   step,
   onStepChange,
 }: {
@@ -56,11 +55,6 @@ export default function CompanionLab({
     <>
       {step === 0 && (
         <>
-          <FlowHeading
-            eyebrow="01 / Chemistry"
-            title="Choose your Soul."
-            description="One request. Three replies. Pick a personality."
-          />
           <SoulChoice
             config={config}
             onChoose={(soulId) =>
@@ -74,22 +68,12 @@ export default function CompanionLab({
       )}
       {step === 1 && (
         <>
-          <FlowHeading
-            eyebrow="02 / Everyday life"
-            title={`Life with ${profile.soul.name}.`}
-            description="See the same personality in different moments."
-          />
           <SelectedSoulScenes config={config} />
           <div className="mt-4">{changeSoul}</div>
         </>
       )}
       {step === 2 && (
         <>
-          <FlowHeading
-            eyebrow={`03 / ${profile.soul.name}`}
-            title="On your terms."
-            description="Set the pace and what carries forward."
-          />
           <div className="grid items-start gap-8 lg:grid-cols-2 lg:gap-12">
             <section aria-label="Relationship preferences">
               <OptionGroup

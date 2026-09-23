@@ -1,3 +1,5 @@
+import type { SemanticTone } from "@/types/domain";
+
 /**
  * Fake NPC population for the `/npc-world` hero globe.
  * Concept-stage placeholder data — broad global coverage, 2–3 NPCs per city.
@@ -7,7 +9,7 @@ export type WorldNpc = {
   handle: string;
   persona: string;
   trait: string;
-  tone: "vessel" | "soul" | "powers";
+  tone: SemanticTone;
   form?: "robot" | "digital human";
 };
 

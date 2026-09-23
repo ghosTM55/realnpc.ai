@@ -1,3 +1,4 @@
+import type { SemanticTone } from "@/types/domain";
 import { STORY_ACTORS, type WorldNpc } from "./npcWorld";
 
 export type ScenarioId = "leisure" | "business" | "community";
@@ -15,6 +16,7 @@ export type PermissionOption = {
 };
 export type WorldScenario = {
   id: ScenarioId;
+  tone: SemanticTone;
   label: string;
   cityId: string;
   city: string;
@@ -33,7 +35,7 @@ export type WorldScenario = {
 
 export const WORLD_SCENARIOS: readonly WorldScenario[] = [
   {
-    id: "leisure", label: "Leisure", cityId: "tokyo", city: "Tokyo", time: "AFTER HOURS",
+    id: "leisure", tone: "vessel", label: "Leisure", cityId: "tokyo", city: "Tokyo", time: "AFTER HOURS",
     teaser: "A shared interest. A new face.",
     actors: [STORY_ACTORS.kibo, STORY_ACTORS.mira],
     exchange: ["My human likes late-night snacks too.", "Shall we make the first hello?"],
@@ -55,7 +57,7 @@ export const WORLD_SCENARIOS: readonly WorldScenario[] = [
     ],
   },
   {
-    id: "business", label: "Business", cityId: "singapore", city: "Singapore", time: "BETWEEN MEETINGS",
+    id: "business", tone: "soul", label: "Business", cityId: "singapore", city: "Singapore", time: "BETWEEN MEETINGS",
     teaser: "The right pilot. The right partner.",
     actors: [STORY_ACTORS.atlas, STORY_ACTORS.nova],
     exchange: ["My team needs a store to pilot its robot.", "My founder has a store looking for exactly that."],
@@ -77,7 +79,7 @@ export const WORLD_SCENARIOS: readonly WorldScenario[] = [
     ],
   },
   {
-    id: "community", label: "Community", cityId: "london", city: "London", time: "BEFORE THE WEEKEND",
+    id: "community", tone: "powers", label: "Community", cityId: "london", city: "London", time: "BEFORE THE WEEKEND",
     teaser: "A free weekend. A small circle.",
     actors: [STORY_ACTORS.pip, STORY_ACTORS.haneul],
     exchange: ["My human would love a relaxed weekend hike.", "I know a small group with room for one more."],

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import type { SemanticTone } from "@/types/domain";
 import {
   ArrowRight,
   BadgeCheck,
@@ -23,27 +24,6 @@ const ICONS = {
   soul: BadgeCheck,
   vessel: Cpu,
   powers: Store,
-} as const;
-
-const TONE = {
-  soul: {
-    text: "text-soul",
-    border: "border-soul/40",
-    bg: "bg-soul",
-    tint: "bg-soul-tint",
-  },
-  vessel: {
-    text: "text-vessel",
-    border: "border-vessel/40",
-    bg: "bg-vessel",
-    tint: "bg-vessel-tint",
-  },
-  powers: {
-    text: "text-powers",
-    border: "border-powers/45",
-    bg: "bg-powers",
-    tint: "bg-powers-tint",
-  },
 } as const;
 
 type Lane = (typeof PARTNERSHIP.lanes)[number];
@@ -133,27 +113,27 @@ function PartnerPaths() {
 }
 
 function PartnerLane({ lane }: { lane: Lane }) {
-  const tone = TONE[lane.tone];
   const Icon = ICONS[lane.tone];
 
   return (
     <article
-      className={`group relative overflow-hidden rounded-[8px] border bg-white shadow-[0_16px_44px_rgba(21,24,29,0.055)] transition-[border-color,transform] duration-300 hover:-translate-y-0.5 ${tone.border}`}
+      data-tone={lane.tone}
+      className="group relative overflow-hidden rounded-[8px] border bg-white shadow-[0_16px_44px_rgba(21,24,29,0.055)] transition-[border-color,transform] duration-300 hover:-translate-y-0.5 border-tone/40 data-[tone=powers]:border-tone/45"
     >
       <div
         aria-hidden
-        className={`absolute left-0 top-0 h-full w-1 ${tone.bg}`}
+        className="absolute left-0 top-0 h-full w-1 bg-tone"
       />
       <div className="grid lg:grid-cols-[150px_minmax(0,1fr)_318px]">
         <div className="flex items-start justify-between border-b border-hairline p-6 lg:block lg:border-b-0 lg:border-r">
-          <span className={`font-signal text-[32px] font-bold ${tone.text}`}>
+          <span className="font-signal text-[32px] font-bold text-tone">
             {lane.index}
           </span>
-          <Icon className={`${tone.text} lg:mt-24`} size={26} />
+          <Icon className="text-tone lg:mt-24" size={26} />
         </div>
 
         <div className="p-6 lg:px-8 lg:py-7">
-          <p className={`font-signal text-[12px] font-bold tracking-[0.16em] ${tone.text}`}>
+          <p className="font-signal text-[12px] font-bold tracking-[0.16em] text-tone">
             {lane.label.toUpperCase()}
           </p>
           <h2 className="mt-3 max-w-[690px] font-display text-[28px] font-semibold leading-[1.08] text-ink md:text-[36px]">
@@ -164,7 +144,7 @@ function PartnerLane({ lane }: { lane: Lane }) {
           </p>
         </div>
 
-        <div className={`${tone.tint} border-t border-hairline p-6 lg:border-l lg:border-t-0`}>
+        <div className="bg-tone-tint border-t border-hairline p-6 lg:border-l lg:border-t-0">
           <dl className="space-y-5">
             <div>
               <dt className="font-signal text-[11px] font-bold tracking-[0.12em] text-ink">
@@ -240,16 +220,15 @@ function ModelStep({
   label,
   text,
 }: {
-  tone: keyof typeof TONE;
+  tone: SemanticTone;
   label: string;
   text: string;
 }) {
-  const toneStyle = TONE[tone];
-
   return (
     <>
       <span
-        className={`mt-1 flex h-10 w-10 items-center justify-center rounded-full ${toneStyle.bg} text-white`}
+        data-tone={tone}
+        className="mt-1 flex h-10 w-10 items-center justify-center rounded-full bg-tone text-white"
       >
         <Handshake size={17} />
       </span>
