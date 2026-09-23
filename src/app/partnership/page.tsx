@@ -50,7 +50,7 @@ type Lane = (typeof PARTNERSHIP.lanes)[number];
 
 export default function PartnershipPage() {
   return (
-    <main className="bg-paper">
+    <main>
       <Nav />
       <Hero />
       <SectionDivider label="PARTNER PATHS" />
@@ -204,7 +204,7 @@ function OperatingModel() {
         </p>
       </div>
 
-      <div className="relative border border-hairline bg-white p-6 shadow-[0_18px_48px_rgba(21,24,29,0.06)]">
+      <div className="relative border border-hairline bg-paper/45 p-6 shadow-[0_18px_48px_rgba(21,24,29,0.06)]">
         <span
           aria-hidden
           className="absolute -left-px -top-px h-5 w-5 border-l-2 border-t-2 border-vessel/60"

@@ -93,12 +93,12 @@ try {
   await page.close();
 
   const world = await pageFor({ width: 1440, height: 900 });
-  await world.route("**/countries-110m.geojson", route => route.abort());
+  await world.route("**/countries-110m*.geojson", route => route.abort());
   await world.goto(`${base}/npc-world/`);
   await world.getByText("The 3D view is unavailable.", { exact: true }).waitFor();
   await world.locator('.npc-scenario-choice[data-scenario="business"]').click();
   assert.equal(await world.locator('.npc-scenario-choice[data-scenario="business"]').getAttribute("aria-pressed"), "true");
-  await world.unroute("**/countries-110m.geojson");
+  await world.unroute("**/countries-110m*.geojson");
   await world.getByRole("button", { name: "Try the globe again" }).click();
   await world.locator(".npc-globe-canvas canvas").waitFor();
   await world.waitForTimeout(700);

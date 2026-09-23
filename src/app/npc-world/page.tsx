@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 
 export default function NpcWorldPage() {
   return (
-    <main className="bg-paper">
+    <main>
       <Nav />
       <NpcWorldExperience />
       <Footer />

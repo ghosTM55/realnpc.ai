@@ -1,16 +1,19 @@
 "use client";
 
 import { Component, useCallback, useEffect, useRef, useState, type ComponentType, type ReactNode } from "react";
+import { preload } from "react-dom";
 import { ArrowRight, Globe2, RotateCcw, X } from "lucide-react";
 import type { GlobeCanvasProps } from "./GlobeCanvas";
 import { NPC_WORLD_PAGE, WORLD_SCENARIOS, type ScenarioId, type WorldScenario } from "@/data/npcWorldPage";
 import { NPC_WORLD, type WorldCity } from "@/data/npcWorld";
 import { useSceneActivity } from "./useWorldPlayback";
+import { WORLD_MAP_URL } from "@/data/worldMap";
 
 export default function GlobeNpcExplorer({ scenario, onScenarioChange }: {
   scenario: WorldScenario;
   onScenarioChange: (id: ScenarioId) => void;
 }) {
+  preload(WORLD_MAP_URL, { as: "fetch", crossOrigin: "anonymous" });
   const wrapRef = useRef<HTMLDivElement>(null);
   const { active, reducedMotion } = useSceneActivity(wrapRef);
   const [GlobeComp, setGlobeComp] = useState<ComponentType<GlobeCanvasProps> | null>(null);
@@ -26,7 +29,7 @@ export default function GlobeNpcExplorer({ scenario, onScenarioChange }: {
     let mounted = true;
     Promise.all([
       import("./GlobeCanvas"),
-      fetch("/data/countries-110m.geojson", { signal: controller.signal })
+      fetch(WORLD_MAP_URL, { signal: controller.signal })
         .then((response) => {
           if (!response.ok) throw new Error("Map unavailable");
           return response.json();

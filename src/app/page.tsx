@@ -9,7 +9,7 @@ import Footer from "@/components/Footer";
 
 export default function Home() {
   return (
-    <main className="bg-paper">
+    <main>
       <Nav />
       <IntroSequence />
       <SectionDivider label="WHY REALNPC" />

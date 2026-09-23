@@ -43,8 +43,8 @@ export function FlowShell({
   children: ReactNode;
 }) {
   return (
-    <main className="companion-flow min-h-screen bg-paper pb-36 pt-[72px] text-ink">
-      <div className="border-b border-hairline bg-panel">
+    <main className="companion-flow min-h-screen pb-36 pt-[72px] text-ink">
+      <div className="border-b border-hairline">
         <div className="mx-auto flex max-w-[1184px] flex-wrap items-center justify-between gap-x-4 gap-y-1 px-5 py-3 text-xs sm:px-8">
           <span className="font-semibold tracking-wide">
             <span className="sm:hidden">{label.replace("REALNPC / ", "")}</span>

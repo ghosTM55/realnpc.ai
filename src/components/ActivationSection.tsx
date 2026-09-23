@@ -10,17 +10,17 @@ const TONE = {
   vessel: {
     line: "bg-vessel",
     chip: "border-vessel/25 bg-vessel-tint text-vessel",
-    glow: "shadow-[0_0_0_5px_rgba(212,13,61,0.09),0_10px_28px_-10px_rgba(212,13,61,0.62)]",
+    glow: "shadow-[0_0_0_5px_color-mix(in_srgb,var(--vessel-red)_9%,transparent),0_10px_28px_-10px_color-mix(in_srgb,var(--vessel-red)_62%,transparent)]",
   },
   soul: {
     line: "bg-soul",
     chip: "border-soul/25 bg-soul-tint text-soul",
-    glow: "shadow-[0_0_0_5px_rgba(67,169,201,0.1),0_10px_28px_-10px_rgba(67,169,201,0.62)]",
+    glow: "shadow-[0_0_0_5px_color-mix(in_srgb,var(--soul-blue)_10%,transparent),0_10px_28px_-10px_color-mix(in_srgb,var(--soul-blue)_62%,transparent)]",
   },
   powers: {
     line: "bg-powers",
     chip: "border-powers/30 bg-powers-tint text-powers",
-    glow: "shadow-[0_0_0_5px_rgba(230,164,43,0.12),0_10px_28px_-10px_rgba(230,164,43,0.64)]",
+    glow: "shadow-[0_0_0_5px_color-mix(in_srgb,var(--powers-amber)_12%,transparent),0_10px_28px_-10px_color-mix(in_srgb,var(--powers-amber)_64%,transparent)]",
   },
 } as const;
 
@@ -150,7 +150,7 @@ export default function ActivationSection() {
           <div
             data-activation-signal
             aria-hidden
-            className="absolute bottom-4 left-[7px] top-4 w-px origin-top bg-[linear-gradient(to_bottom,var(--vessel-red),var(--soul-blue),var(--powers-amber))] shadow-[0_0_16px_rgba(67,169,201,0.42)]"
+            className="absolute bottom-4 left-[7px] top-4 w-px origin-top bg-[linear-gradient(to_bottom,var(--vessel-red),var(--soul-blue),var(--powers-amber))] shadow-[0_0_16px_color-mix(in_srgb,var(--soul-blue)_42%,transparent)]"
           />
 
           <ol className="space-y-5">

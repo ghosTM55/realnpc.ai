@@ -13,7 +13,7 @@ export default function NpcWorldExperience() {
   const scenario = getScenario(scenarioId);
 
   return (
-    <div className="npc-world bg-paper text-ink">
+    <div className="npc-world text-ink">
       <NpcWorldHero scenario={scenario} onScenarioChange={setScenarioId} />
       <section id="encounter" className="flow-surface npc-section scroll-mt-[72px] bg-ink text-paper">
         <FlowSurface />
@@ -251,7 +251,7 @@ function PrivacyExchange({ scenario }: { scenario: WorldScenario }) {
 function ContinuityPayoff({ scenario }: { scenario: WorldScenario }) {
   const [showLater, setShowLater] = useState(false);
   return (
-    <section className="npc-section border-y border-hairline bg-panel">
+    <section className="npc-section border-y border-hairline">
       <div className="npc-container">
         <SectionHeading {...NPC_WORLD_PAGE.continuity} />
         <div className="npc-continuity mt-10">

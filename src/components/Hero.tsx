@@ -1,37 +1,12 @@
-"use client";
-
-import { useRef } from "react";
 import Link from "next/link";
 import { SlidersHorizontal } from "lucide-react";
-import { gsap, useGSAP } from "@/lib/gsap";
+import styles from "./HeroEntrance.module.css";
 import SceneImage from "@/components/SceneImage";
 import { HERO } from "@/data/site";
 
 export default function Hero() {
-  const ref = useRef<HTMLElement>(null);
-
-  useGSAP(
-    () => {
-      const mm = gsap.matchMedia();
-
-      mm.add("(prefers-reduced-motion: no-preference)", () => {
-        gsap.from("[data-hero-left-item]", {
-          y: 28,
-          opacity: 0,
-          duration: 0.9,
-          stagger: 0.12,
-          ease: "power3.out",
-          delay: 0.15,
-        });
-      });
-
-      return () => mm.revert();
-    },
-    { scope: ref },
-  );
-
   return (
-    <section ref={ref} className="relative h-screen w-full overflow-hidden">
+    <section className={`${styles.home} relative h-screen w-full overflow-hidden`}>
       <div
         data-hero-background
         className="absolute inset-x-0 bottom-0 top-[72px] will-change-transform"

@@ -1,57 +1,42 @@
 "use client";
 
-import { useRef } from "react";
-import { gsap, useGSAP, SplitText } from "@/lib/gsap";
+import { useEffect, useRef } from "react";
+import styles from "./SectionDivider.module.css";
 
 export default function SectionDivider({ label }: { label: string }) {
   const ref = useRef<HTMLDivElement>(null);
 
-  useGSAP(
-    () => {
-      const mm = gsap.matchMedia();
-
-      mm.add("(prefers-reduced-motion: no-preference)", () => {
-        gsap.from("[data-rail]", {
-          scaleX: 0,
-          duration: 0.8,
-          ease: "power2.out",
-          scrollTrigger: { trigger: ref.current, start: "top 85%" },
-        });
-        gsap.from("[data-pulse]", {
-          opacity: 0,
-          scaleX: 0,
-          duration: 0.5,
-          delay: 0.5,
-          ease: "power2.out",
-          scrollTrigger: { trigger: ref.current, start: "top 85%" },
-        });
-
-        const titleEl = ref.current?.querySelector<HTMLElement>("[data-title]");
-        if (!titleEl) return;
-
-        // Characters resolve out of a soft blur, drifting up.
-        const split = SplitText.create(titleEl, { type: "chars" });
-        gsap.from(split.chars, {
-          opacity: 0,
-          filter: "blur(8px)",
-          yPercent: 35,
-          stagger: 0.04,
-          duration: 0.6,
-          ease: "power2.out",
-          scrollTrigger: { trigger: ref.current, start: "top 85%" },
-        });
-        return () => split.revert();
-      });
-
-      return () => mm.revert();
-    },
-    { scope: ref },
-  );
+  useEffect(() => {
+    const node = ref.current;
+    if (!node) return;
+    const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    let observer: IntersectionObserver | undefined;
+    const sync = () => {
+      observer?.disconnect();
+      delete node.dataset.enter;
+      // Never hide content already visible before hydration.
+      if (motion.matches || node.getBoundingClientRect().top < window.innerHeight) return;
+      node.dataset.enter = "pending";
+      observer = new IntersectionObserver(([entry]) => {
+        if (!entry.isIntersecting) return;
+        node.dataset.enter = "playing";
+        observer?.disconnect();
+      }, { rootMargin: `0px 0px -${Math.round(window.innerHeight * 0.15)}px 0px` });
+      observer.observe(node);
+    };
+    sync();
+    motion.addEventListener("change", sync);
+    return () => {
+      observer?.disconnect();
+      motion.removeEventListener("change", sync);
+      delete node.dataset.enter;
+    };
+  }, []);
 
   return (
     <div
       ref={ref}
-      className="mx-auto flex h-[72px] max-w-[1248px] items-center gap-3 px-6 lg:px-0"
+      className={`${styles.divider} mx-auto flex h-[72px] max-w-[1248px] items-center gap-3 px-6 lg:px-0`}
     >
       <span
         data-rail
@@ -60,10 +45,12 @@ export default function SectionDivider({ label }: { label: string }) {
       />
       <span data-pulse className="h-1 w-11 bg-vessel" aria-hidden />
       <span
-        data-title
         className="inline-block whitespace-nowrap font-signal text-[16px] font-bold tracking-[0.08em] text-[#2A323B] md:text-[18px]"
       >
-        {label}
+        <span className="sr-only">{label}</span>
+        <span aria-hidden>{Array.from(label).map((character, index) => (
+          <span key={index} className={styles.character} style={{ animationDelay: `${index * 40}ms` }}>{character}</span>
+        ))}</span>
       </span>
       <span data-pulse className="h-1 w-11 bg-vessel" aria-hidden />
       <span

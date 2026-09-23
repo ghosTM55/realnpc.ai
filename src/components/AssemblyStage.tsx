@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { gsap, useGSAP } from "@/lib/gsap";
 import SceneImage from "@/components/SceneImage";
 import FocusedPopover from "@/components/assembly/FocusedPopover";
@@ -17,25 +17,34 @@ export default function AssemblyStage() {
   const [hovered, setHovered] = useState<AssemblyConcept | null>(null);
   const [focusing, setFocusing] = useState(false);
   const [restoring, setRestoring] = useState(false);
-  const reduceMotion = useRef(false);
+  const animation = useRef<gsap.core.Animation | null>(null);
+  const { contextSafe } = useGSAP({ scope: ref });
 
-  const { contextSafe } = useGSAP(
-    () => {
-      reduceMotion.current = window.matchMedia(
-        "(prefers-reduced-motion: reduce)",
-      ).matches;
-    },
-    { scope: ref },
-  );
+  useEffect(() => {
+    const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const sync = () => {
+      if (!motion.matches) return;
+      animation.current?.kill();
+      if (zoomRef.current) gsap.set(zoomRef.current, { clearProps: "transform,transformOrigin" });
+      setFocusing(false);
+      setRestoring(false);
+      setDot(active ? { x: active.x, y: active.y } : null);
+    };
+    motion.addEventListener("change", sync);
+    return () => motion.removeEventListener("change", sync);
+  }, [active]);
 
   // eslint-disable-next-line react-hooks/refs -- standard @gsap/react event-handler pattern
   const resetStage = contextSafe(() => {
+    animation.current?.kill();
+    setFocusing(false);
+    setRestoring(false);
     setActive(null);
     setDot(null);
 
-    if (zoomRef.current && !reduceMotion.current) {
+    if (zoomRef.current && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       setRestoring(true);
-      gsap.to(zoomRef.current, {
+      animation.current = gsap.to(zoomRef.current, {
         scale: 1,
         xPercent: 0,
         yPercent: 0,
@@ -53,9 +62,12 @@ export default function AssemblyStage() {
       return;
     }
 
+    animation.current?.kill();
+    setFocusing(false);
+    setRestoring(false);
     setActive(spot);
 
-    if (reduceMotion.current || !zoomRef.current) {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches || !zoomRef.current) {
       setDot({ x: spot.x, y: spot.y });
       return;
     }
@@ -64,7 +76,7 @@ export default function AssemblyStage() {
     setDot({ x: frame.x, y: frame.y });
     setFocusing(true);
 
-    gsap
+    animation.current = gsap
       .timeline({
         defaults: { ease: "power3.inOut" },
         onComplete: () => setFocusing(false),
@@ -85,19 +97,6 @@ export default function AssemblyStage() {
         duration: 0.75,
       });
   });
-
-  useGSAP(
-    () => {
-      if (!active || focusing) return;
-
-      gsap.fromTo(
-        "[data-popover]",
-        { x: 18, opacity: 0 },
-        { x: 0, opacity: 1, duration: 0.35, ease: "power2.out", delay: 0.1 },
-      );
-    },
-    { scope: ref, dependencies: [active?.id, focusing] },
-  );
 
   return (
     <section

@@ -46,7 +46,8 @@ src/
   lib/companion.ts    # demo state, scripted scenes, effective permissions and review rules
 tests/                # domain tests and local browser smoke test
 assets/media/         # original images; not copied to the public export
-scripts/              # repeatable web-font and responsive-image generation
+assets/data/          # original world map; all geometry retained during generation
+scripts/              # repeatable font, responsive-image and globe-map generation
 ```
 
 Configurations produce local plan previews. A future private review intake must
@@ -100,6 +101,7 @@ python3 -m venv .venv-assets
 .venv-assets/bin/python -m pip install -r scripts/requirements-assets.txt
 .venv-assets/bin/python scripts/subset-fonts.py
 npm run assets:images
+npm run assets:map
 ```
 
 Image generation uses the Sharp version installed with Next.js. Originals live
@@ -114,6 +116,25 @@ The global flow field stays idle while the opaque intro covers it. Other flow
 surfaces initialize when visible; warm-up is batched, and reduced motion still
 gets a complete static frame. The globe renderer and its Three.js dependency
 load separately from the readable page; city stories remain usable on failure.
+
+The original globe GeoJSON lives in `assets/data/`. The generated public map
+removes unused feature properties without rounding coordinates, simplifying
+geometry or duplicating border paths. Its content-hashed URL is generated in
+`src/data/worldMap.ts`; the world page preloads that same URL before hydration.
+Regenerate and commit both outputs when updating the source map.
+
+Hero entrances run from the first CSS paint; delayed JavaScript cannot hide
+already visible copy. Section dividers use scoped CSS and IntersectionObserver,
+so the partnership page does not need GSAP. Assembly zooms remain in GSAP and
+cancel when the system switches to reduced motion; popovers use CSS media queries.
+Header navigation prefetches marketing routes on hover or keyboard focus instead
+of loading every route on arrival. The primary configuration CTA still prefetches.
+
+`test:budget` checks the exported map, preloaded fonts, per-route initial JS/CSS,
+deferred JS chunks and responsive scene images. `test:site` also delays JavaScript
+to catch title flashes and map waterfalls, checks preload reuse, and switches
+motion preferences during assembly interactions. These checks target payload and
+loading behavior; local timings are not measurements of mainland China latency.
 
 GitHub Pages controls response caching (currently ten minutes). Region-specific
 CDN hosting and longer immutable caching remain infrastructure follow-ups;

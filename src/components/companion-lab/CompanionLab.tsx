@@ -311,7 +311,7 @@ function SoulChoice({
 }) {
   return (
     <section aria-label="Compare Soul responses">
-      <div className="mb-4 border-y border-hairline bg-panel px-4 py-4 sm:mb-5 sm:px-5">
+      <div className="mb-4 border-y border-hairline bg-paper/45 px-4 py-4 sm:mb-5 sm:px-5">
         <p className="mb-2 text-xs font-semibold text-steel">YOU</p>
         <p className="max-w-[70ch] text-sm leading-relaxed">
           “{SCENARIOS.chemistry.prompt}”
@@ -404,7 +404,7 @@ function SelectedSoulScenes({ config }: { config: CompanionConfig }) {
           { value: "plan", label: "An hour together" },
         ]}
       />
-      <div className="mb-6 mt-5 border-y border-hairline bg-panel px-4 py-4 sm:px-5">
+      <div className="mb-6 mt-5 border-y border-hairline bg-paper/45 px-4 py-4 sm:px-5">
         <p className="mb-2 text-xs font-semibold text-steel">YOU</p>
         <p className="text-sm leading-relaxed">“{scene.prompt}”</p>
       </div>
