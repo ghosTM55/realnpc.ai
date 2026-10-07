@@ -13,12 +13,14 @@ import Footer from "@/components/Footer";
 import { FlowSurface } from "@/components/FlowBackground";
 import SectionDivider from "@/components/SectionDivider";
 import { PARTNERSHIP } from "@/data/site";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "RealNPC | Partnership",
   description:
     "Partner with RealNPC across character IP, robotics hardware modules, and real-world activation sites.",
-};
+  path: "/partnership/",
+});
 
 const ICONS = {
   soul: BadgeCheck,

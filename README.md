@@ -126,6 +126,17 @@ generated before commit, with no runtime image service or external font host.
 The Hero image has high fetch priority; assembly variants load at low
 priority so a fast scroll can reveal the scene without waiting for a lazy load.
 
+SEO metadata is generated per route. `src/app/sitemap.ts` and
+`src/app/robots.ts` emit `sitemap.xml` and `robots.txt`; `src/lib/seo.ts`
+centralises canonical URLs and Open Graph/Twitter cards, with `metadataBase` set
+in `src/app/layout.tsx`. The 1200×630 social preview is a committed asset at
+`public/brand/og.png`; regenerate it with `npm run assets:og` (needs a local
+Chrome/Chromium, or set `CHROME_PATH` to an executable path or command on `PATH`;
+an invalid override fails explicitly). `test:budget` checks exact per-route
+canonical and Open Graph URLs, social image dimensions, and the complete sitemap.
+The legacy `/companion-lab/` entry remains crawlable and points its canonical URL
+at `/configurator/`, while staying out of the sitemap.
+
 The global flow field stays idle while the opaque intro covers it. Other flow
 surfaces initialize when visible; warm-up is batched, and reduced motion still
 gets a complete static frame. The globe renderer and its Three.js dependency

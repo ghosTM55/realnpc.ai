@@ -36,6 +36,39 @@ for (const [route, jsBudget, cssBudget] of [["", 255_000, 12_000], ["npc-world",
   console.log(`PASS ${route || "/"}: fonts ${bytes} B; initial JS ${jsBytes} B gzip; CSS ${cssBytes} B gzip`);
 }
 
+// Crawler and social metadata: every indexable route gets a canonical URL and
+// the shared Open Graph image, and the export ships robots + sitemap.
+const socialImage = await readFile(resolve(root, "brand/og.png"));
+assert.equal(socialImage.subarray(0, 8).toString("hex"), "89504e470d0a1a0a", "Social preview must be a PNG");
+assert.equal(socialImage.readUInt32BE(16), 1200, "Social preview width");
+assert.equal(socialImage.readUInt32BE(20), 630, "Social preview height");
+const canonicalUrls = {
+  "": "https://realnpc.ai/",
+  "npc-world": "https://realnpc.ai/npc-world/",
+  configurator: "https://realnpc.ai/configurator/",
+  partnership: "https://realnpc.ai/partnership/",
+  "companion-lab": "https://realnpc.ai/configurator/",
+};
+for (const [route, canonical] of Object.entries(canonicalUrls)) {
+  const html = await readFile(resolve(root, route, "index.html"), "utf8");
+  assert.deepEqual([...html.matchAll(/<link rel="canonical" href="([^"]+)"/g)].map(match => match[1]), [canonical], `${route || "/"}: canonical must point to the correct route`);
+  assert.deepEqual([...html.matchAll(/<meta property="og:url" content="([^"]+)"/g)].map(match => match[1]), [canonical], `${route || "/"}: Open Graph URL must match canonical`);
+  assert.match(html, /<meta property="og:image" content="https:\/\/realnpc\.ai\/brand\/og\.png"/, `${route || "/"}: missing Open Graph image`);
+  assert.match(html, /<meta name="twitter:card" content="summary_large_image"/, `${route || "/"}: missing Twitter card`);
+}
+const sitemap = await readFile(resolve(root, "sitemap.xml"), "utf8");
+assert.deepEqual([...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(match => match[1]).sort(), [
+  "https://realnpc.ai/",
+  "https://realnpc.ai/configurator/",
+  "https://realnpc.ai/npc-world/",
+  "https://realnpc.ai/partnership/",
+], "Sitemap must list every canonical route exactly once, excluding the legacy redirect");
+const robots = await readFile(resolve(root, "robots.txt"), "utf8");
+assert.match(robots, /^Allow: \/$/m, "Crawlers can access the public site");
+assert.doesNotMatch(robots, /^Disallow:\s*\S+/m, "Crawlers must be able to discover the legacy redirect and canonical");
+assert.match(robots, /^Sitemap: https:\/\/realnpc\.ai\/sitemap\.xml$/m, "robots.txt points at the sitemap");
+console.log("PASS SEO: canonical, Open Graph image, sitemap and robots on every route");
+
 const chunks = resolve(root, "_next/static/chunks");
 for (const file of await readdir(chunks)) {
   if (!file.endsWith(".js")) continue;

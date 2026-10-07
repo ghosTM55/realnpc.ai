@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import FlowBackground from "@/components/FlowBackground";
+import { BRAND, SITE_DESCRIPTION, SITE_URL } from "@/data/site";
+import { SOCIAL_IMAGE } from "@/lib/seo";
 import "./globals.css";
 
 const cinzel = localFont({
@@ -22,9 +24,34 @@ const ioskeley = localFont({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: "RealNPC — Private Companion Robotics, Configured for You",
-  description:
-    "RealNPC is a build-to-order platform for modular robot companions, assembled across body, character, and capability packs.",
+  description: SITE_DESCRIPTION,
+  alternates: { canonical: "/" },
+  openGraph: {
+    type: "website",
+    url: "/",
+    siteName: BRAND,
+    title: "RealNPC — Private Companion Robotics, Configured for You",
+    description: SITE_DESCRIPTION,
+    images: [SOCIAL_IMAGE],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "RealNPC — Private Companion Robotics, Configured for You",
+    description: SITE_DESCRIPTION,
+    images: [SOCIAL_IMAGE.url],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
 };
 
 export default function RootLayout({

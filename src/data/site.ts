@@ -1,5 +1,12 @@
 export const BRAND = "RealNPC";
 
+/** Canonical origin for absolute URLs in metadata, sitemap and robots. */
+export const SITE_URL = "https://realnpc.ai";
+
+/** Default meta description, shared by the layout and social previews. */
+export const SITE_DESCRIPTION =
+  "RealNPC is a build-to-order platform for modular robot companions, assembled across body, character, and capability packs.";
+
 export const NAV_LINKS = [
   { label: "Home", href: "/" },
   { label: "NPC World", href: "/npc-world" },

@@ -15,6 +15,7 @@
     "test:budget": "node tests/export-budget.mjs",
     "assets:images": "node scripts/optimize-images.mjs",
     "assets:map": "node scripts/optimize-map.mjs",
+    "assets:og": "node scripts/generate-og.mjs",
     "typecheck": "next typegen && tsc --noEmit"
   },
   "dependencies": {
