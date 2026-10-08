@@ -16,6 +16,7 @@ import {
   SERVICES,
   VESSEL_FORMS,
   VESSEL_OPTIONS,
+  type CompanionConfig,
   type ReviewOptions,
 } from "@/lib/companion";
 import {
@@ -170,140 +171,12 @@ export default function ConfiguratorExperience() {
         description={currentStep.description}
       />
       {step <= STEP.terms && <SoulSetupSteps step={step} onStepChange={goToStep} />}
-      {step === STEP.presence && (
-        <>
-          <div className="grid items-start gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:gap-12">
-            <div>
-              <OptionGroup
-                label="Where would you meet?"
-                value={config.form}
-                onChange={(form) =>
-                  updateDemoDraft((current) => ({
-                    ...current,
-                    config: { ...current.config, form },
-                  }))
-                }
-                options={optionsOf(VESSEL_FORMS, VESSEL_OPTIONS)}
-              />
-              <p
-                role="status"
-                className="mt-3 text-sm leading-relaxed text-soul-ink"
-              >
-                {VESSEL_OPTIONS[config.form].status}
-              </p>
-            </div>
-            <BuildPath reviewCase={reviewCase} />
-          </div>
-        </>
-      )}
-
+      {step === STEP.presence && <PresenceStep config={config} reviewCase={reviewCase} />}
       {step === STEP.priorities && (
-        <>
-          <div className="grid items-start gap-8 lg:grid-cols-[1fr_0.9fr] lg:gap-12">
-            <div className="space-y-7">
-              <OptionGroup
-                label="Lead with this priority"
-                value={preferences.priority}
-                onChange={(priority) => patchReview({ priority })}
-                options={optionsOf(PRIORITIES, PRIORITY_COPY)}
-              />
-              <OptionGroup
-                label="Character source"
-                value={preferences.characterSource}
-                onChange={(characterSource) => patchReview({ characterSource })}
-                options={optionsOf(CHARACTER_SOURCES, CHARACTER_SOURCE_COPY)}
-              />
-              <p className="text-xs leading-relaxed text-steel">
-                This demo covers adult fictional characters only. Minors,
-                minor-coded characters, unsafe uses and unauthorized real-person
-                likenesses are not supported.
-              </p>
-              <details className="border-y border-divider py-2">
-                <summary className="min-h-12 cursor-pointer py-3 text-sm font-semibold">
-                  Budget and ongoing care{" "}
-                  <span className="font-normal text-steel">(optional)</span>
-                </summary>
-                <div className="space-y-6 pb-4 pt-3">
-                  <OptionGroup
-                    label="A planning range, never a quote"
-                    value={preferences.budget}
-                    onChange={(budget) => patchReview({ budget })}
-                    options={optionsOf(BUDGETS, BUDGET_LABELS)}
-                  />
-                  <OptionGroup
-                    label="What kind of support?"
-                    value={preferences.service}
-                    onChange={(service) => patchReview({ service })}
-                    options={optionsOf(SERVICES, SERVICE_LABELS)}
-                  />
-                </div>
-              </details>
-            </div>
-            <aside
-              className="border-y border-divider py-5 lg:sticky lg:top-24"
-              aria-label="Review focus"
-            >
-              <h2 className="mb-3 text-sm font-semibold">Your review focus</h2>
-              <p role="status" className="text-sm leading-relaxed">
-                {reviewCase.path.why}
-              </p>
-              <p className="mt-4 text-xs leading-relaxed text-steel">
-                No price, reservation or submission at this stage.
-              </p>
-            </aside>
-          </div>
-        </>
+        <PrioritiesStep preferences={preferences} reviewCase={reviewCase} onChange={patchReview} />
       )}
-
       {step === STEP.plan && (
-        <>
-          <CompanionProfile config={config} onChangeSoul={() => goToStep(STEP.soul)} />
-          <div className="mt-10 grid items-start gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:gap-12">
-            <div>
-              <BuildPath reviewCase={reviewCase} />
-              <section className="mt-6 border-t border-hairline pt-5">
-                <h2 className="mb-3 text-sm font-semibold">
-                  Still needs review
-                </h2>
-                <ul className="space-y-3">
-                  {reviewCase.reviewNotes.map((note) => (
-                    <li
-                      key={note}
-                      className="flex gap-3 text-sm leading-relaxed text-steel"
-                    >
-                      <ShieldCheck
-                        size={17}
-                        className="mt-0.5 shrink-0 text-soul-ink"
-                      />
-                      {note}
-                    </li>
-                  ))}
-                </ul>
-              </section>
-            </div>
-            <aside>
-              <h2 className="mb-3 text-sm font-semibold">Your choices</h2>
-              <dl className="divide-y divide-hairline text-sm">
-                <SummaryRow
-                  label="Presence"
-                  value={VESSEL_OPTIONS[config.form].summary}
-                />
-                <SummaryRow
-                  label="Planning budget"
-                  value={BUDGET_LABELS[preferences.budget]}
-                />
-                <SummaryRow
-                  label="Ongoing care"
-                  value={SERVICE_LABELS[preferences.service]}
-                />
-              </dl>
-              <p className="mt-4 text-xs leading-relaxed text-steel">
-                No model or hardware is connected. These are proposed
-                capabilities, not a delivery promise.
-              </p>
-            </aside>
-          </div>
-        </>
+        <PlanStep config={config} preferences={preferences} reviewCase={reviewCase} onChangeSoul={() => goToStep(STEP.soul)} />
       )}
       <DemoPrivacy />
       <FlowFooter
@@ -328,11 +201,165 @@ export default function ConfiguratorExperience() {
   );
 }
 
-function BuildPath({
+type ReviewCase = ReturnType<typeof createReviewCase>;
+
+function PresenceStep({ config, reviewCase }: { config: CompanionConfig; reviewCase: ReviewCase }) {
+  return (
+    <div className="grid items-start gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:gap-12">
+      <div>
+        <OptionGroup
+          label="Where would you meet?"
+          value={config.form}
+          onChange={(form) =>
+            updateDemoDraft((current) => ({
+              ...current,
+              config: { ...current.config, form },
+            }))
+          }
+          options={optionsOf(VESSEL_FORMS, VESSEL_OPTIONS)}
+        />
+        <p
+          role="status"
+          className="mt-3 text-sm leading-relaxed text-soul-ink"
+        >
+          {VESSEL_OPTIONS[config.form].status}
+        </p>
+      </div>
+      <BuildPath reviewCase={reviewCase} />
+    </div>
+  );
+}
+
+function PrioritiesStep({
+  preferences,
   reviewCase,
+  onChange: patchReview,
 }: {
-  reviewCase: ReturnType<typeof createReviewCase>;
+  preferences: ReviewOptions;
+  reviewCase: ReviewCase;
+  onChange: (patch: Partial<ReviewOptions>) => void;
 }) {
+  return (
+    <div className="grid items-start gap-8 lg:grid-cols-[1fr_0.9fr] lg:gap-12">
+      <div className="space-y-7">
+        <OptionGroup
+          label="Lead with this priority"
+          value={preferences.priority}
+          onChange={(priority) => patchReview({ priority })}
+          options={optionsOf(PRIORITIES, PRIORITY_COPY)}
+        />
+        <OptionGroup
+          label="Character source"
+          value={preferences.characterSource}
+          onChange={(characterSource) => patchReview({ characterSource })}
+          options={optionsOf(CHARACTER_SOURCES, CHARACTER_SOURCE_COPY)}
+        />
+        <p className="text-xs leading-relaxed text-steel">
+          This demo covers adult fictional characters only. Minors,
+          minor-coded characters, unsafe uses and unauthorized real-person
+          likenesses are not supported.
+        </p>
+        <details className="border-y border-divider py-2">
+          <summary className="min-h-12 cursor-pointer py-3 text-sm font-semibold">
+            Budget and ongoing care{" "}
+            <span className="font-normal text-steel">(optional)</span>
+          </summary>
+          <div className="space-y-6 pb-4 pt-3">
+            <OptionGroup
+              label="A planning range, never a quote"
+              value={preferences.budget}
+              onChange={(budget) => patchReview({ budget })}
+              options={optionsOf(BUDGETS, BUDGET_LABELS)}
+            />
+            <OptionGroup
+              label="What kind of support?"
+              value={preferences.service}
+              onChange={(service) => patchReview({ service })}
+              options={optionsOf(SERVICES, SERVICE_LABELS)}
+            />
+          </div>
+        </details>
+      </div>
+      <aside
+        className="border-y border-divider py-5 lg:sticky lg:top-24"
+        aria-label="Review focus"
+      >
+        <h2 className="mb-3 text-sm font-semibold">Your review focus</h2>
+        <p role="status" className="text-sm leading-relaxed">
+          {reviewCase.path.why}
+        </p>
+        <p className="mt-4 text-xs leading-relaxed text-steel">
+          No price, reservation or submission at this stage.
+        </p>
+      </aside>
+    </div>
+  );
+}
+
+function PlanStep({
+  config,
+  preferences,
+  reviewCase,
+  onChangeSoul,
+}: {
+  config: CompanionConfig;
+  preferences: ReviewOptions;
+  reviewCase: ReviewCase;
+  onChangeSoul: () => void;
+}) {
+  return (
+    <>
+      <CompanionProfile config={config} onChangeSoul={onChangeSoul} />
+      <div className="mt-10 grid items-start gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:gap-12">
+        <div>
+          <BuildPath reviewCase={reviewCase} />
+          <section className="mt-6 border-t border-hairline pt-5">
+            <h2 className="mb-3 text-sm font-semibold">
+              Still needs review
+            </h2>
+            <ul className="space-y-3">
+              {reviewCase.reviewNotes.map((note) => (
+                <li
+                  key={note}
+                  className="flex gap-3 text-sm leading-relaxed text-steel"
+                >
+                  <ShieldCheck
+                    size={17}
+                    className="mt-0.5 shrink-0 text-soul-ink"
+                  />
+                  {note}
+                </li>
+              ))}
+            </ul>
+          </section>
+        </div>
+        <aside>
+          <h2 className="mb-3 text-sm font-semibold">Your choices</h2>
+          <dl className="divide-y divide-hairline text-sm">
+            <SummaryRow
+              label="Presence"
+              value={VESSEL_OPTIONS[config.form].summary}
+            />
+            <SummaryRow
+              label="Planning budget"
+              value={BUDGET_LABELS[preferences.budget]}
+            />
+            <SummaryRow
+              label="Ongoing care"
+              value={SERVICE_LABELS[preferences.service]}
+            />
+          </dl>
+          <p className="mt-4 text-xs leading-relaxed text-steel">
+            No model or hardware is connected. These are proposed
+            capabilities, not a delivery promise.
+          </p>
+        </aside>
+      </div>
+    </>
+  );
+}
+
+function BuildPath({ reviewCase }: { reviewCase: ReviewCase }) {
   return (
     <section
       aria-label="Proposed build path"
