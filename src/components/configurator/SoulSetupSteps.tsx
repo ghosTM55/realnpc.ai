@@ -3,16 +3,9 @@
 import Link from "next/link";
 import { useState } from "react";
 import { ArrowRight, Check } from "lucide-react";
-import {
-  RHYTHMS,
-  SOULS,
-  SCENARIOS,
-  getCompanionProfile,
-  getScenePreview,
-  createProfileText,
-  type CompanionConfig,
-  type Rhythm,
-} from "@/lib/companion";
+import { SCENARIOS } from "@/domain/companion/copy";
+import { type CompanionConfig, type Rhythm, RHYTHMS, SOULS } from "@/domain/companion/model";
+import { createProfileText, getCompanionProfile, getScenePreview } from "@/domain/companion/profile";
 import {
   useDemoDraft,
   updateDemoDraft,

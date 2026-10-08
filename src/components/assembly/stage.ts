@@ -1,4 +1,4 @@
-import type { AssemblyHotspot } from "@/types/domain";
+import type { AssemblyHotspot } from "@/types/ui";
 import { focusDot } from "./focusDot";
 
 /**

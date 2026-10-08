@@ -1,4 +1,4 @@
-import type { AssemblyHotspot } from "@/types/domain";
+import type { AssemblyHotspot } from "@/types/ui";
 
 /**
  * Data-driven hotspots for the AssemblyStage (Ferrari-style click-to-focus).

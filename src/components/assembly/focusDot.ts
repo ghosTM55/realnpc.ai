@@ -1,4 +1,4 @@
-import type { AssemblyHotspot } from "@/types/domain";
+import type { AssemblyHotspot } from "@/types/ui";
 
 /**
  * Centers the focused hotspot while clamping the transform origin so the

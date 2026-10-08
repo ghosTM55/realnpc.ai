@@ -1,5 +1,5 @@
 import { assemblyHotspots } from "@/data/assemblyHotspots";
-import type { AssemblyHotspot, SemanticTone } from "@/types/domain";
+import type { AssemblyHotspot, SemanticTone } from "@/types/ui";
 
 type StageCalloutsProps = {
   suppressed: boolean;

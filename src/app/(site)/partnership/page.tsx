@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import type { SemanticTone } from "@/types/domain";
+import type { SemanticTone } from "@/types/ui";
 import {
   ArrowRight,
   BadgeCheck,

@@ -4,8 +4,9 @@ import { useRef, useState } from "react";
 import { ArrowDown, ArrowRight, Bot, Check, ChevronDown, Clock3, Fingerprint, LockKeyhole, MapPin, MonitorUp, Pause, Play, RotateCcw, ScanFace, ShieldCheck, Smartphone, Sparkles, X, type LucideIcon } from "lucide-react";
 import NpcWorldHero from "./NpcWorldHero";
 import { useSceneActivity, useWorldPlayback } from "./useWorldPlayback";
-import { NPC_WORLD_PAGE, PERMISSION_ORDER, WORLD_SCENARIOS, getScenario, permissionCapabilities, type PermissionId, type ScenarioId, type StoryEnding, type StoryStep, type WorldScenario } from "@/data/npcWorldPage";
-import type { StoryActor } from "@/data/npcWorld";
+import { NPC_WORLD_PAGE, WORLD_SCENARIOS } from "@/data/npcWorldPage";
+import { PERMISSION_ORDER, type PermissionId, type ScenarioId, type StoryActor, type StoryEnding, type StoryStep, type WorldScenario } from "@/domain/world/model";
+import { getScenario, permissionCapabilities } from "@/domain/world/story";
 import { NPC_FORM_LABELS, type NpcForm } from "@/domain/npc";
 
 const PERMISSION_ICON: Record<PermissionId, LucideIcon> = { location: MapPin, interest: Sparkles, memory: Fingerprint };

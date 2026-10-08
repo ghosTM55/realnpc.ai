@@ -4,8 +4,9 @@ import { Component, useCallback, useEffect, useRef, useState, type ComponentType
 import { preload } from "react-dom";
 import { ArrowRight, Globe2, RotateCcw, X } from "lucide-react";
 import type { GlobeCanvasProps } from "./GlobeCanvas";
-import { NPC_WORLD_PAGE, WORLD_SCENARIOS, type ScenarioId, type WorldScenario } from "@/data/npcWorldPage";
-import { getCity, type WorldCity } from "@/data/npcWorld";
+import { getCity } from "@/data/npcWorld";
+import { NPC_WORLD_PAGE, WORLD_SCENARIOS } from "@/data/npcWorldPage";
+import type { ScenarioId, WorldCity, WorldScenario } from "@/domain/world/model";
 import { useSceneActivity } from "./useWorldPlayback";
 import { WORLD_MAP_URL } from "@/data/worldMap";
 

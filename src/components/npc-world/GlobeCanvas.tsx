@@ -3,7 +3,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Globe, { type GlobeMethods } from "react-globe.gl";
 import { Color, MeshBasicMaterial, Vector2, type Object3D } from "three";
-import { NPC_WORLD, type WorldCity } from "@/data/npcWorld";
+import { NPC_WORLD } from "@/data/npcWorld";
+import type { WorldCity } from "@/domain/world/model";
 import { readTokens, withAlpha } from "@/lib/brandColors";
 import { borderLines, countryPolygons, landMesh } from "./globeLayers";
 import { limitPickingToCities } from "./globePicking";

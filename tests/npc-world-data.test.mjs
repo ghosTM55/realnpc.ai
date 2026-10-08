@@ -1,7 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { NPC_WORLD } from "../src/data/npcWorld.ts";
-import { PERMISSION_ORDER, WORLD_SCENARIOS, storyReadingDuration } from "../src/data/npcWorldPage.ts";
+import { WORLD_SCENARIOS } from "../src/data/npcWorldPage.ts";
+import { PERMISSION_ORDER } from "../src/domain/world/model.ts";
+import { storyReadingDuration } from "../src/domain/world/story.ts";
 
 // Placeholder globe NPCs that reuse a story actor's handle with a different persona.
 // Renaming them is a product decision that is deliberately deferred; this list keeps

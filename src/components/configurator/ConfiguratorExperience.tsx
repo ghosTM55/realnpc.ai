@@ -6,19 +6,19 @@ import SoulSetupSteps, {
   CompanionProfile,
 } from "./SoulSetupSteps";
 import { getConfiguratorSteps, STEP, type StepIndex } from "@/data/configuratorSteps";
+import { VESSEL_OPTIONS } from "@/domain/companion/copy";
 import {
   BUDGETS,
   CHARACTER_SOURCES,
-  createReviewCase,
-  getCompanionProfile,
+  type CompanionConfig,
   isOneOf,
   PRIORITIES,
+  type ReviewOptions,
   SERVICES,
   VESSEL_FORMS,
-  VESSEL_OPTIONS,
-  type CompanionConfig,
-  type ReviewOptions,
-} from "@/lib/companion";
+} from "@/domain/companion/model";
+import { getCompanionProfile } from "@/domain/companion/profile";
+import { createReviewCase } from "@/domain/companion/review";
 import {
   useDemoDraft,
   updateDemoDraft,

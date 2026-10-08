@@ -1,12 +1,7 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
-import {
-  DEFAULT_DRAFT,
-  normalizeDemoDraft,
-  parseDemoDraft,
-  type DemoDraft,
-} from "@/lib/companion";
+import { DEFAULT_DRAFT, type DemoDraft, normalizeDemoDraft, parseDemoDraft } from "@/domain/companion/draft";
 
 const STORAGE_KEY = "realnpc:companion-demo:v1";
 const serverSnapshot = { draft: DEFAULT_DRAFT, storageAvailable: true };

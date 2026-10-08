@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState, type RefObject } from "react";
-import { storyReadingDuration, type WorldScenario } from "@/data/npcWorldPage";
+import type { WorldScenario } from "@/domain/world/model";
+import { storyReadingDuration } from "@/domain/world/story";
 
 export function useSceneActivity(ref: RefObject<HTMLElement | null>, threshold = 0.1) {
   const [visible, setVisible] = useState(false);

@@ -9,12 +9,9 @@ import {
   LockKeyhole,
   RotateCcw,
 } from "lucide-react";
-import {
-  getCompanionProfile,
-  type CompanionConfig,
-  type DemoDraft,
-  type SoulId,
-} from "@/lib/companion";
+import type { DemoDraft } from "@/domain/companion/draft";
+import type { CompanionConfig, SoulId } from "@/domain/companion/model";
+import { getCompanionProfile } from "@/domain/companion/profile";
 import { clearDemoDraft, updateDemoDraft, useDemoDraft } from "./useDemoDraft";
 
 export const primaryButton =

@@ -1,21 +1,4 @@
-import type { NpcForm } from "@/domain/npc";
-import type { SemanticTone } from "@/types/domain";
-
-/**
- * Fake NPC population for the `/npc-world` hero globe.
- * Concept-stage placeholder data — broad global coverage, 2–3 NPCs per city.
- * `tone` drives marker / chip color (Vessel red · Soul blue · Powers amber).
- */
-export type WorldNpc = {
-  handle: string;
-  persona: string;
-  trait: string;
-  tone: SemanticTone;
-  form?: NpcForm;
-};
-
-/** Story actors always have a known body; globe placeholders may not. */
-export type StoryActor = WorldNpc & { form: NpcForm };
+import type { StoryActor, WorldCity } from "@/domain/world/model";
 
 // The globe and the illustrated encounters share these identities.
 export const STORY_ACTORS = {
@@ -27,15 +10,11 @@ export const STORY_ACTORS = {
   haneul: { handle: "Haneul", persona: "Brings a small circle of people together.", trait: "Host", tone: "soul", form: "digital-human" },
 } as const satisfies Record<string, StoryActor>;
 
-export type WorldCity = {
-  readonly id: string;
-  readonly city: string;
-  readonly country: string;
-  readonly lat: number;
-  readonly lng: number;
-  readonly npcs: readonly WorldNpc[];
-};
-
+/**
+ * Fake NPC population for the `/npc-world` hero globe.
+ * Concept-stage placeholder data — broad global coverage, 2–3 NPCs per city.
+ * `tone` drives marker / chip color (Vessel red · Soul blue · Powers amber).
+ */
 export const NPC_WORLD = [
   // ── North America ──
   {

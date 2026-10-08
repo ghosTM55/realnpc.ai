@@ -2,7 +2,7 @@
 
 import styles from "../HeroEntrance.module.css";
 import GlobeNpcExplorer from "@/components/npc-world/GlobeNpcExplorer";
-import type { ScenarioId, WorldScenario } from "@/data/npcWorldPage";
+import type { ScenarioId, WorldScenario } from "@/domain/world/model";
 
 export default function NpcWorldHero({ scenario, onScenarioChange }: {
   scenario: WorldScenario;

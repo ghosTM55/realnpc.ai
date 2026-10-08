@@ -1,19 +1,15 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { VESSEL_OPTIONS } from "../src/domain/companion/copy.ts";
 import {
-  DEFAULT_CONFIG,
   DEFAULT_DRAFT,
-  DEFAULT_REVIEW,
-  getCompanionProfile,
-  getScenePreview,
+  normalizeDemoDraft,
   parseDemoDraft,
   serializeDemoDraft,
-  normalizeDemoDraft,
-  createReviewCase,
-  createProfileText,
-  VESSEL_FORMS,
-  VESSEL_OPTIONS,
-} from "../src/lib/companion.ts";
+} from "../src/domain/companion/draft.ts";
+import { DEFAULT_CONFIG, DEFAULT_REVIEW, VESSEL_FORMS } from "../src/domain/companion/model.ts";
+import { createProfileText, getCompanionProfile, getScenePreview } from "../src/domain/companion/profile.ts";
+import { createReviewCase } from "../src/domain/companion/review.ts";
 import { NPC_FORMS } from "../src/domain/npc.ts";
 
 test("turning off both memory permissions removes remembered preferences and moments from the profile", () => {

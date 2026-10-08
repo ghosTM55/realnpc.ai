@@ -8,7 +8,7 @@ import StageCallouts from "@/components/assembly/StageCallouts";
 import StageHotspots from "@/components/assembly/StageHotspots";
 import { focusDot } from "@/components/assembly/focusDot";
 import { IDLE, stageSpot, type Stage } from "@/components/assembly/stage";
-import type { AssemblyHotspot, SemanticTone } from "@/types/domain";
+import type { AssemblyHotspot, SemanticTone } from "@/types/ui";
 
 export default function AssemblyStage() {
   const ref = useRef<HTMLElement>(null);
