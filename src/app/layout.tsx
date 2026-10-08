@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import FlowBackground from "@/components/FlowBackground";
-import { BRAND, SITE_DESCRIPTION, SITE_URL } from "@/data/site";
-import { SOCIAL_IMAGE } from "@/lib/seo";
+import { SITE_DESCRIPTION, SITE_URL } from "@/data/site";
+import { pageMetadata } from "@/lib/seo";
 import "./globals.css";
 
 const cinzel = localFont({
@@ -25,23 +25,12 @@ const ioskeley = localFont({
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: "RealNPC — Private Companion Robotics, Configured for You",
-  description: SITE_DESCRIPTION,
-  alternates: { canonical: "/" },
-  openGraph: {
-    type: "website",
-    url: "/",
-    siteName: BRAND,
+  // The home page's cards double as the defaults for routes without their own pageMetadata().
+  ...pageMetadata({
     title: "RealNPC — Private Companion Robotics, Configured for You",
     description: SITE_DESCRIPTION,
-    images: [SOCIAL_IMAGE],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "RealNPC — Private Companion Robotics, Configured for You",
-    description: SITE_DESCRIPTION,
-    images: [SOCIAL_IMAGE.url],
-  },
+    path: "/",
+  }),
   robots: {
     index: true,
     follow: true,
