@@ -23,7 +23,7 @@ function FlowCanvas({ className, background = false }: { className: string; back
     return () => {
       flow?.dispose();
       flowRef.current = null;
-      canvas.remove();
+      host.replaceChildren();
     };
   }, [background]);
 

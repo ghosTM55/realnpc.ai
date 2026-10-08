@@ -11,7 +11,9 @@ addEventListener("message", ({ data }: MessageEvent<FlowMessage>) => {
   switch (data.type) {
     case "init": {
       const context = data.canvas.getContext("2d");
-      field = context && createFlowField(context, data.line, frames);
+      if (!context) throw new Error("Flow worker could not create a 2D context");
+      field = createFlowField(context, data.line, frames);
+      self.postMessage({ type: "ready" });
       break;
     }
     case "size":

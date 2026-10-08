@@ -20,22 +20,87 @@ type FlowDriver = { resize(size: FlowSize): void; update(state: FlowState): void
  * A canvas can be handed over once, so each call needs a fresh canvas.
  */
 function startField(canvas: HTMLCanvasElement, line: string): FlowDriver | null {
-  if (typeof canvas.transferControlToOffscreen === "function" && typeof Worker === "function") {
-    const offscreen = canvas.transferControlToOffscreen();
-    const worker = new Worker(new URL("./flowWorker.ts", import.meta.url), { type: "module" });
-    const post = (message: FlowMessage, transfer: Transferable[] = []) => worker.postMessage(message, transfer);
-    post({ type: "init", canvas: offscreen, line }, [offscreen]);
-    return {
-      resize: (size) => post({ type: "size", size }),
-      update: (state) => post({ type: "state", state }),
-      dispose: () => worker.terminate(),
+  const onMainThread = () => {
+    const context = canvas.getContext("2d");
+    return context && createFlowField(context, line, {
+      request: (callback) => requestAnimationFrame(callback),
+      cancel: (id) => cancelAnimationFrame(id),
+    });
+  };
+  if (typeof canvas.transferControlToOffscreen !== "function" || typeof Worker !== "function") return onMainThread();
+
+  let worker: Worker | null = null;
+  let field: FlowDriver | null = null;
+  let transferred = false;
+  let fallback = false;
+  let disposed = false;
+  let size: FlowSize | null = null;
+  let state: FlowState = { running: false, animate: false };
+  let startupTimer: ReturnType<typeof setTimeout> | undefined;
+  const stopWorker = () => {
+    clearTimeout(startupTimer);
+    if (worker) {
+      worker.onerror = null;
+      worker.onmessage = null;
+      worker.terminate();
+      worker = null;
+    }
+  };
+  const fallBackToMainThread = () => {
+    if (disposed || fallback) return;
+    fallback = true;
+    stopWorker();
+    if (transferred) {
+      // A transferred canvas can never regain a main-thread context.
+      const replacement = canvas.cloneNode(false) as HTMLCanvasElement;
+      canvas.replaceWith(replacement);
+      canvas = replacement;
+    }
+    field = onMainThread();
+    if (size) field?.resize(size);
+    field?.update(state);
+  };
+  const post = (message: FlowMessage, transfer: Transferable[] = []) => {
+    try {
+      worker?.postMessage(message, transfer);
+    } catch {
+      fallBackToMainThread();
+    }
+  };
+  try {
+    worker = new Worker(new URL("./flowWorker.ts", import.meta.url), { type: "module" });
+    worker.onerror = (event) => {
+      event.preventDefault();
+      fallBackToMainThread();
     };
+    worker.onmessage = (event: MessageEvent<{ type: "ready" }>) => {
+      if (event.data?.type === "ready") clearTimeout(startupTimer);
+    };
+    // A stalled worker load must not leave the background blank indefinitely.
+    startupTimer = setTimeout(fallBackToMainThread, 10_000);
+    const offscreen = canvas.transferControlToOffscreen();
+    transferred = true;
+    post({ type: "init", canvas: offscreen, line }, [offscreen]);
+  } catch {
+    fallBackToMainThread();
   }
-  const context = canvas.getContext("2d");
-  return context && createFlowField(context, line, {
-    request: (callback) => requestAnimationFrame(callback),
-    cancel: (id) => cancelAnimationFrame(id),
-  });
+  return {
+    resize(next) {
+      size = next;
+      if (fallback) field?.resize(next);
+      else post({ type: "size", size: next });
+    },
+    update(next) {
+      state = next;
+      if (fallback) field?.update(next);
+      else post({ type: "state", state: next });
+    },
+    dispose() {
+      disposed = true;
+      stopWorker();
+      field?.dispose();
+    },
+  };
 }
 
 /**
@@ -43,6 +108,8 @@ function startField(canvas: HTMLCanvasElement, line: string): FlowDriver | null 
  * IntersectionObserver, so it pauses itself while a page's cover hides it.
  */
 export function initFlowBackground(canvas: HTMLCanvasElement, { occludable = false } = {}) {
+  // Observe the stable host: a worker failure may replace its transferred canvas.
+  const surface = canvas.parentElement ?? canvas;
   const line = getComputedStyle(document.documentElement).getPropertyValue("--muted-text").trim();
   const field = startField(canvas, line);
   if (!field) return null;
@@ -58,7 +125,7 @@ export function initFlowBackground(canvas: HTMLCanvasElement, { occludable = fal
     animate: !reduced.matches && !paused,
   });
   const measure = () => {
-    const rect = canvas.getBoundingClientRect();
+    const rect = surface.getBoundingClientRect();
     field.resize({ width: rect.width, height: rect.height, dpr: Math.min(devicePixelRatio || 1, 1.25) });
   };
   const onResize = () => {
@@ -69,12 +136,12 @@ export function initFlowBackground(canvas: HTMLCanvasElement, { occludable = fal
   measure();
   window.addEventListener("resize", onResize, { passive: true });
   const sizeObserver = new ResizeObserver(onResize);
-  sizeObserver.observe(canvas);
+  sizeObserver.observe(surface);
   const visibilityObserver = new IntersectionObserver(([entry]) => {
     visible = entry.isIntersecting && entry.intersectionRatio > 0;
     sync();
   }, { threshold: [0, 0.001] });
-  visibilityObserver.observe(canvas);
+  visibilityObserver.observe(surface);
   const checkCover = () => {
     const nextCovered = viewportCovered(covers);
     if (covered !== nextCovered) {
