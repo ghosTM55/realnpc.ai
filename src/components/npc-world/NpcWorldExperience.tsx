@@ -1,12 +1,22 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { ArrowDown, ArrowRight, Bot, Check, ChevronDown, Clock3, Fingerprint, LockKeyhole, MapPin, MonitorUp, Pause, Play, RotateCcw, ShieldCheck, Smartphone, Sparkles, X } from "lucide-react";
+import { ArrowDown, ArrowRight, Bot, Check, ChevronDown, Clock3, Fingerprint, LockKeyhole, MapPin, MonitorUp, Pause, Play, RotateCcw, ScanFace, ShieldCheck, Smartphone, Sparkles, X, type LucideIcon } from "lucide-react";
 import NpcWorldHero from "./NpcWorldHero";
 import { useSceneActivity, useWorldPlayback } from "./useWorldPlayback";
-import { NPC_WORLD_PAGE, WORLD_SCENARIOS, getScenario, permissionCapabilities, type PermissionId, type ScenarioId, type StoryEnding, type WorldScenario } from "@/data/npcWorldPage";
-import type { WorldNpc } from "@/data/npcWorld";
-import { NPC_FORM_LABELS } from "@/domain/npc";
+import { NPC_WORLD_PAGE, PERMISSION_ORDER, WORLD_SCENARIOS, getScenario, permissionCapabilities, type PermissionId, type ScenarioId, type StoryEnding, type StoryStep, type WorldScenario } from "@/data/npcWorldPage";
+import type { StoryActor } from "@/data/npcWorld";
+import { NPC_FORM_LABELS, type NpcForm } from "@/domain/npc";
+
+const PERMISSION_ICON: Record<PermissionId, LucideIcon> = { location: MapPin, interest: Sparkles, memory: Fingerprint };
+const BODY: Record<NpcForm, { Icon: LucideIcon; label: string }> = {
+  robot: { Icon: Bot, label: "Robot body" },
+  "digital-human": { Icon: ScanFace, label: "Digital human" },
+};
+const DEVICE = {
+  phone: { Icon: Smartphone, label: "On your phone" },
+  laptop: { Icon: MonitorUp, label: "On your laptop" },
+} as const satisfies Record<WorldScenario["device"], { Icon: LucideIcon; label: string }>;
 import { FlowSurface } from "@/components/FlowBackground";
 
 export default function NpcWorldExperience() {
@@ -98,45 +108,13 @@ function Encounter({ scenario }: { scenario: WorldScenario }) {
         <div className="npc-scene">
           <div className="npc-actor-pair">
             {scenario.actors.map((actor) => <Actor key={actor.handle} actor={actor} />)}
-            <div className="npc-connection" data-connected={playback.index > 0 && !declined} aria-hidden>
-              <span /><span className="npc-connection-mark">{playback.index === 0 ? <Sparkles size={16} /> : declined ? <X size={16} /> : <Check size={16} />}</span><span />
+            <div className="npc-connection" data-connected={step.kind !== "discover" && !declined} aria-hidden>
+              <span /><span className="npc-connection-mark">{step.kind === "discover" ? <Sparkles size={16} /> : declined ? <X size={16} /> : <Check size={16} />}</span><span />
             </div>
           </div>
 
           <div className="npc-scene-event" key={playback.index + ending}>
-            {playback.index === 0 ? (
-              <div className="npc-discovery">
-                <span className="npc-eyebrow text-paper/60">A REASON TO CONNECT</span>
-                <p>{scenario.permissions[1].value}</p>
-                <span className="flex items-center gap-2 text-[12px] text-paper/70"><ShieldCheck size={14} />Only an approved detail is visible.</span>
-              </div>
-            ) : playback.index === 1 ? (
-              <div className="npc-exchange">
-                {scenario.exchange.map((line, index) => (
-                  <div key={line} className="npc-speech">
-                    <span className="npc-eyebrow">{scenario.actors[index].handle}</span>
-                    <p>“{line}”</p>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="npc-invitation flow-surface" data-declined={declined}>
-                <FlowSurface />
-                <p className="npc-eyebrow flex items-center gap-2">
-                  {playback.index === 2 ? <LockKeyhole size={14} /> : declined ? <X size={14} /> : <Check size={14} />}
-                  {playback.index === 2 ? "PRIVATE INVITATION" : declined ? "INVITATION CLOSED" : "BOTH ACCEPTED · EXAMPLE"}
-                </p>
-                <h4>{declined ? "Maybe another time." : scenario.invitation}</h4>
-                <p className="npc-invitation-detail">{declined ? "No contact details exchanged. No explanation needed." : scenario.invitationDetail}</p>
-                <div className="npc-human-decisions">
-                  {scenario.actors.map((actor, index) => (
-                    <span key={actor.handle}>{playback.index === 2 ? <Clock3 size={13} /> : declined && index === 1 ? <X size={13} /> : <Check size={13} />}
-                      {actor.handle}&apos;s human · {playback.index === 2 ? "pending" : declined && index === 1 ? "passed" : "accepted"}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
+            <StoryScene scenario={scenario} step={step} declined={declined} />
           </div>
           {playback.finished ? (
             <div className="npc-ending-options">
@@ -156,7 +134,53 @@ function Encounter({ scenario }: { scenario: WorldScenario }) {
   );
 }
 
-function Actor({ actor }: { actor: WorldNpc }) {
+function StoryScene({ scenario, step, declined }: { scenario: WorldScenario; step: StoryStep; declined: boolean }) {
+  switch (step.kind) {
+    case "discover":
+      return (
+        <div className="npc-discovery">
+          <span className="npc-eyebrow text-paper/60">A REASON TO CONNECT</span>
+          <p>{scenario.permissions.interest.value}</p>
+          <span className="flex items-center gap-2 text-[12px] text-paper/70"><ShieldCheck size={14} />Only an approved detail is visible.</span>
+        </div>
+      );
+    case "connect":
+      return (
+        <div className="npc-exchange">
+          {scenario.exchange.map((line, index) => (
+            <div key={line} className="npc-speech">
+              <span className="npc-eyebrow">{scenario.actors[index].handle}</span>
+              <p>“{line}”</p>
+            </div>
+          ))}
+        </div>
+      );
+    case "invite":
+    case "continue": {
+      const pending = step.kind === "invite";
+      return (
+        <div className="npc-invitation flow-surface" data-declined={declined}>
+          <FlowSurface />
+          <p className="npc-eyebrow flex items-center gap-2">
+            {pending ? <LockKeyhole size={14} /> : declined ? <X size={14} /> : <Check size={14} />}
+            {pending ? "PRIVATE INVITATION" : declined ? "INVITATION CLOSED" : "BOTH ACCEPTED · EXAMPLE"}
+          </p>
+          <h4>{declined ? "Maybe another time." : scenario.invitation}</h4>
+          <p className="npc-invitation-detail">{declined ? "No contact details exchanged. No explanation needed." : scenario.invitationDetail}</p>
+          <div className="npc-human-decisions">
+            {scenario.actors.map((actor, index) => (
+              <span key={actor.handle}>{pending ? <Clock3 size={13} /> : declined && index === 1 ? <X size={13} /> : <Check size={13} />}
+                {actor.handle}&apos;s human · {pending ? "pending" : declined && index === 1 ? "passed" : "accepted"}
+              </span>
+            ))}
+          </div>
+        </div>
+      );
+    }
+  }
+}
+
+function Actor({ actor }: { actor: StoryActor }) {
   const robot = actor.form === "robot";
   return (
     <div className="npc-actor">
@@ -176,7 +200,7 @@ function Actor({ actor }: { actor: WorldNpc }) {
         </svg>
       </div>
       <span className="text-[17px] font-semibold sm:text-[20px]">{actor.handle}</span>
-      {actor.form && <span className="text-[11px] text-paper/65">{NPC_FORM_LABELS[actor.form]}</span>}
+      <span className="text-[11px] text-paper/65">{NPC_FORM_LABELS[actor.form]}</span>
     </div>
   );
 }
@@ -199,17 +223,18 @@ function PrivacyExchange({ scenario }: { scenario: WorldScenario }) {
             <span>You choose what to share</span>
             <span className="hidden md:block">What this enables</span>
           </div>
-          {scenario.permissions.map((option) => {
-            const enabled = shared.includes(option.id);
-            const Icon = option.id === "location" ? MapPin : option.id === "interest" ? Sparkles : Fingerprint;
+          {PERMISSION_ORDER.map((id) => {
+            const option = scenario.permissions[id];
+            const enabled = shared.includes(id);
+            const Icon = PERMISSION_ICON[id];
             return (
-              <div key={option.id} className="npc-permission-row" data-enabled={enabled}>
+              <div key={id} className="npc-permission-row" data-enabled={enabled}>
                 <div className="npc-permission-choice">
                   <label className="npc-permission-label">
-                    <input type="checkbox" checked={enabled} onChange={() => toggle(option.id)} aria-describedby={option.id + "-preview"} />
+                    <input type="checkbox" checked={enabled} onChange={() => toggle(id)} aria-describedby={id + "-preview"} />
                     <span>
                       <span className="block text-[17px] font-semibold">{option.label}</span>
-                      <span id={option.id + "-preview"} className="mt-2 block text-[13px] leading-relaxed text-steel">{option.value}</span>
+                      <span id={id + "-preview"} className="mt-2 block text-[13px] leading-relaxed text-steel">{option.value}</span>
                     </span>
                   </label>
                   <details className="npc-permission-details">
@@ -251,6 +276,8 @@ function PrivacyExchange({ scenario }: { scenario: WorldScenario }) {
 
 function ContinuityPayoff({ scenario }: { scenario: WorldScenario }) {
   const [showLater, setShowLater] = useState(false);
+  const body = BODY[scenario.actors[0].form];
+  const device = DEVICE[scenario.device];
   return (
     <section className="npc-section border-y border-hairline">
       <div className="npc-container">
@@ -271,12 +298,10 @@ function ContinuityPayoff({ scenario }: { scenario: WorldScenario }) {
           </div>
           <div className="npc-memory-visual" data-later={showLater}>
             <div className="npc-memory-identity">
-              <span className="npc-device" aria-label="Robot body"><Bot size={30} /></span>
+              <span className="npc-device" aria-label={body.label}><body.Icon size={30} /></span>
               <div><p className="text-[20px] font-semibold">{scenario.actors[0].handle}</p><p className="mt-1 text-[12px] text-steel">Same NPC identity</p></div>
               <ArrowRight size={20} className="ml-auto text-soul" aria-hidden />
-              <span className="npc-device" aria-label={scenario.id === "business" ? "On your laptop" : "On your phone"}>
-                {scenario.id === "business" ? <MonitorUp size={30} /> : <Smartphone size={30} />}
-              </span>
+              <span className="npc-device" aria-label={device.label}><device.Icon size={30} /></span>
             </div>
             <div className="npc-memory-note">
               <p className="npc-eyebrow flex items-center gap-2 text-steel"><Fingerprint size={14} />ONE APPROVED MEMORY</p>

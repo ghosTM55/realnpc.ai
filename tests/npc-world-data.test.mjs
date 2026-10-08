@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { NPC_WORLD } from "../src/data/npcWorld.ts";
-import { WORLD_SCENARIOS } from "../src/data/npcWorldPage.ts";
+import { PERMISSION_ORDER, WORLD_SCENARIOS, storyReadingDuration } from "../src/data/npcWorldPage.ts";
 
 // Placeholder globe NPCs that reuse a story actor's handle with a different persona.
 // Renaming them is a product decision that is deliberately deferred; this list keeps
@@ -40,7 +40,24 @@ test("handles are unique within a city and only known handles repeat across citi
 
 test("each story offers every permission exactly once", () => {
   for (const scenario of WORLD_SCENARIOS) {
-    const ids = scenario.permissions.map((permission) => permission.id).sort();
-    assert.deepEqual(ids, ["interest", "location", "memory"], scenario.id);
+    assert.deepEqual(Object.keys(scenario.permissions).sort(), [...PERMISSION_ORDER].sort(), scenario.id);
+  }
+});
+
+test("each story runs discover, connect, invite, continue", () => {
+  for (const scenario of WORLD_SCENARIOS) {
+    assert.deepEqual(scenario.steps.map((step) => step.kind), ["discover", "connect", "invite", "continue"], scenario.id);
+  }
+});
+
+test("reading time per step is unchanged by rendering steps by kind", () => {
+  // Values computed from the index-based implementation before steps had a kind.
+  const before = {
+    leisure: [9000, 10060, 10340, 11740],
+    business: [9220, 10900, 11460, 12580],
+    community: [9500, 10900, 12020, 12020],
+  };
+  for (const scenario of WORLD_SCENARIOS) {
+    assert.deepEqual(scenario.steps.map((_, index) => storyReadingDuration(scenario, index)), before[scenario.id]);
   }
 });

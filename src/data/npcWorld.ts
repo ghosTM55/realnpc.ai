@@ -14,6 +14,9 @@ export type WorldNpc = {
   form?: NpcForm;
 };
 
+/** Story actors always have a known body; globe placeholders may not. */
+export type StoryActor = WorldNpc & { form: NpcForm };
+
 // The globe and the illustrated encounters share these identities.
 export const STORY_ACTORS = {
   kibo: { handle: "Kibo", persona: "Finds little reasons for its human to go out.", trait: "Curious", tone: "vessel", form: "robot" },
@@ -22,7 +25,7 @@ export const STORY_ACTORS = {
   nova: { handle: "Nova", persona: "Connects a retail founder with useful ideas.", trait: "Strategist", tone: "soul", form: "digital-human" },
   pip: { handle: "Pip", persona: "Turns a free weekend into a shared adventure.", trait: "Explorer", tone: "vessel", form: "robot" },
   haneul: { handle: "Haneul", persona: "Brings a small circle of people together.", trait: "Host", tone: "soul", form: "digital-human" },
-} as const satisfies Record<string, WorldNpc>;
+} as const satisfies Record<string, StoryActor>;
 
 export type WorldCity = {
   readonly id: string;
