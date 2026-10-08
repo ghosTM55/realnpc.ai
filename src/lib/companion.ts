@@ -1,3 +1,5 @@
+import type { NpcForm } from "@/domain/npc";
+
 export const SOULS = [
   {
     id: "anchor",
@@ -35,7 +37,7 @@ export const SOULS = [
 ] as const;
 
 export type SoulId = (typeof SOULS)[number]["id"];
-export type VesselForm = "robot" | "digital-human" | "undecided";
+export type VesselForm = NpcForm | "undecided";
 export type Rhythm = "unhurried" | "playful" | "direct";
 export type SceneId = "chemistry" | "everyday" | "boundary";
 

@@ -6,6 +6,7 @@ import NpcWorldHero from "./NpcWorldHero";
 import { useSceneActivity, useWorldPlayback } from "./useWorldPlayback";
 import { NPC_WORLD_PAGE, WORLD_SCENARIOS, getScenario, permissionCapabilities, type PermissionId, type ScenarioId, type StoryEnding, type WorldScenario } from "@/data/npcWorldPage";
 import type { WorldNpc } from "@/data/npcWorld";
+import { NPC_FORM_LABELS } from "@/domain/npc";
 import { FlowSurface } from "@/components/FlowBackground";
 
 export default function NpcWorldExperience() {
@@ -175,7 +176,7 @@ function Actor({ actor }: { actor: WorldNpc }) {
         </svg>
       </div>
       <span className="text-[17px] font-semibold sm:text-[20px]">{actor.handle}</span>
-      <span className="text-[11px] capitalize text-paper/65">{actor.form}</span>
+      {actor.form && <span className="text-[11px] text-paper/65">{NPC_FORM_LABELS[actor.form]}</span>}
     </div>
   );
 }
