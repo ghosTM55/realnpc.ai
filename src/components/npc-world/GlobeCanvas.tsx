@@ -5,6 +5,7 @@ import Globe, { type GlobeMethods } from "react-globe.gl";
 import { Color, MeshBasicMaterial } from "three";
 import { NPC_WORLD, type WorldCity } from "@/data/npcWorld";
 import { readTokens, withAlpha } from "@/lib/brandColors";
+import { limitPickingToCities } from "./globePicking";
 
 export interface GlobeCanvasProps {
   countries: object[];
@@ -76,6 +77,12 @@ export default function GlobeCanvas({ countries, width, height, active, reducedM
     globe.pointOfView({ lat: 32, lng: 125, altitude: 1.65 });
     setReady(true);
   }, []);
+
+  useEffect(() => {
+    const globe = globeRef.current;
+    if (!globe || !ready) return;
+    return limitPickingToCities(globe.scene(), globe.camera());
+  }, [ready]);
 
   useEffect(() => {
     const globe = globeRef.current;
