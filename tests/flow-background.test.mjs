@@ -7,11 +7,13 @@ function browser(t, reducedMotion = false) {
   const observers = [];
   let nextFrame = 0;
   let paints = 0;
+  let clock = 0;
   const rect = { width: 390, height: 844, top: 0 };
   const context = new Proxy({}, { get: (_, key) => key === "clearRect" ? () => paints++ : () => {} });
   const canvas = { width: 0, height: 0, getContext: () => context, getBoundingClientRect: () => rect };
   const events = new EventTarget();
-  const doc = Object.assign(new EventTarget(), { hidden: false, documentElement: {} });
+  const covers = [];
+  const doc = Object.assign(new EventTarget(), { hidden: false, documentElement: {}, querySelectorAll: () => covers });
   const motion = Object.assign(new EventTarget(), { matches: reducedMotion });
   const replacements = {
     window: Object.assign(events, { innerHeight: 844 }), document: doc,
@@ -32,7 +34,7 @@ function browser(t, reducedMotion = false) {
     t.after(() => old ? Object.defineProperty(globalThis, key, old) : delete globalThis[key]);
   }
   return {
-    canvas, doc, motion, rect,
+    canvas, doc, motion, rect, covers,
     scroll: () => events.dispatchEvent(new Event("scroll")),
     paints: () => paints,
     intersect(target, ratio, top = 0) {
@@ -43,7 +45,8 @@ function browser(t, reducedMotion = false) {
     tick(count = 20) {
       for (let index = 0; index < count; index++) {
         const work = [...frames.values()]; frames.clear();
-        work.forEach(callback => callback(performance.now() + index * 40));
+        clock = Math.max(clock + 40, performance.now() + 40);
+        work.forEach(callback => callback(clock));
       }
     },
   };
@@ -63,24 +66,71 @@ test("offscreen and zero-area canvases do no initialization or drawing", t => {
   flow.dispose();
 });
 
-test("the global field handles jumps past the intro and back without marker intersections", t => {
+// A page section at `top` (viewport px) that is `height` tall.
+const cover = (top, height) => ({ top, getBoundingClientRect() { return { top: this.top, bottom: this.top + height }; } });
+
+test("the global field handles jumps past the intro and back without cover intersections", t => {
   const page = browser(t);
-  let top = 2000;
-  const marker = { getBoundingClientRect: () => ({ top }) };
-  const flow = initFlowBackground(page.canvas, marker);
+  const intro = cover(0, 2025);
+  page.covers.push(intro);
+  const flow = initFlowBackground(page.canvas, { occludable: true });
   page.intersect(page.canvas, 1);
   page.tick();
   assert.equal(page.paints(), 0);
-  top = -1000;
+  intro.top = -3000;
   page.scroll();
   page.tick();
   assert.ok(page.paints() > 0);
-  top = 2000;
+  intro.top = 0;
   page.scroll();
   page.tick(1);
   const stopped = page.paints();
   page.tick();
   assert.equal(page.paints(), stopped);
+  flow.dispose();
+});
+
+test("any cover spanning the viewport below the header pauses the global field; surfaces ignore covers", t => {
+  const page = browser(t);
+  const intro = cover(-3000, 2025);
+  const encounter = cover(400, 1800);
+  page.covers.push(intro, encounter);
+  const flow = initFlowBackground(page.canvas, { occludable: true });
+  let surfacePaints = 0;
+  const surfaceContext = new Proxy({}, { get: (_, key) => key === "clearRect" ? () => surfacePaints++ : () => {} });
+  const surfaceCanvas = { ...page.canvas, getContext: () => surfaceContext };
+  const surface = initFlowBackground(surfaceCanvas);
+  page.intersect(page.canvas, 1);
+  page.intersect(surfaceCanvas, 1);
+  page.tick();
+  assert.ok(page.paints() > 0);
+  encounter.top = 72;
+  page.scroll();
+  page.tick(1);
+  const stopped = page.paints();
+  const surfaceBefore = surfacePaints;
+  page.tick();
+  assert.equal(page.paints(), stopped, "covered by the second cover");
+  assert.ok(surfacePaints > surfaceBefore, "the surface inside the cover keeps running");
+  encounter.top = 73;
+  page.scroll();
+  page.tick();
+  assert.ok(page.paints() > stopped, "one pixel of field shows under the header");
+  surface.dispose();
+  flow.dispose();
+});
+
+test("a client-side navigation re-reads the new page's covers without scrolling", t => {
+  const page = browser(t);
+  page.covers.push(cover(0, 2025));
+  const flow = initFlowBackground(page.canvas, { occludable: true });
+  page.intersect(page.canvas, 1);
+  page.tick();
+  assert.equal(page.paints(), 0);
+  page.covers.splice(0, 1, cover(900, 1800));
+  flow.refreshCovers();
+  page.tick();
+  assert.ok(page.paints() > 0);
   flow.dispose();
 });
 

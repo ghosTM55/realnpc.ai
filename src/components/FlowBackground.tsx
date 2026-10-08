@@ -15,18 +15,21 @@ function FlowCanvas({ background = false }: { background?: boolean }) {
 
   useEffect(() => {
     if (!canvasRef.current) return;
-    const coverEnd = background ? document.querySelector<HTMLElement>("[data-flow-cover-end]") : null;
-    const flow = initFlowBackground(canvasRef.current, coverEnd);
+    const flow = initFlowBackground(canvasRef.current, { occludable: background });
     flowRef.current = flow;
     return () => {
       flow?.dispose();
       flowRef.current = null;
     };
-  }, [background, pathname]);
+  }, [background]);
 
   useEffect(() => {
     flowRef.current?.setPaused(paused);
-  }, [paused, pathname]);
+  }, [paused]);
+
+  useEffect(() => {
+    flowRef.current?.refreshCovers();
+  }, [pathname]);
 
   return <canvas ref={canvasRef} />;
 }

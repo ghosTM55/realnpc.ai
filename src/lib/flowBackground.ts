@@ -1,6 +1,23 @@
 // Adapted from NONG.github.io's flowBackground: the same descending currents,
 // with RealNPC's paper and neutral signal colors. No additional animation library.
-export function initFlowBackground(canvas: HTMLCanvasElement, coverEnd: HTMLElement | null = null) {
+
+// The fixed site header is opaque, so a cover only has to span the viewport below it.
+const HEADER_HEIGHT = 72;
+
+/** True while an opaque `[data-flow-cover]` block hides the whole viewport below the header. */
+function viewportCovered(covers: Iterable<Element>) {
+  for (const cover of covers) {
+    const rect = cover.getBoundingClientRect();
+    if (rect.top <= HEADER_HEIGHT && rect.bottom >= window.innerHeight) return true;
+  }
+  return false;
+}
+
+/**
+ * `occludable` marks the fixed site-wide field: it is always "visible" to
+ * IntersectionObserver, so it pauses itself while a page's cover hides it.
+ */
+export function initFlowBackground(canvas: HTMLCanvasElement, { occludable = false } = {}) {
   const context = canvas.getContext("2d");
   if (!context) return null;
   const reduced = matchMedia("(prefers-reduced-motion: reduce)");
@@ -29,7 +46,8 @@ export function initFlowBackground(canvas: HTMLCanvasElement, coverEnd: HTMLElem
   let disposed = false;
   let paused = false;
   let visible = false;
-  let covered = Boolean(coverEnd && coverEnd.getBoundingClientRect().top >= window.innerHeight - 1);
+  let covers: Element[] = [];
+  let covered = false;
   let needsResize = true;
   let warmup = 0;
   const random = () => {
@@ -178,7 +196,7 @@ export function initFlowBackground(canvas: HTMLCanvasElement, coverEnd: HTMLElem
   };
   const onResize = () => {
     needsResize = true;
-    if (coverEnd) covered = coverEnd.getBoundingClientRect().top >= window.innerHeight - 1;
+    covered = viewportCovered(covers);
     sync();
   };
   window.addEventListener("resize", onResize, { passive: true });
@@ -189,19 +207,32 @@ export function initFlowBackground(canvas: HTMLCanvasElement, coverEnd: HTMLElem
     sync();
   }, { threshold: [0, 0.001] });
   visibilityObserver.observe(canvas);
-  // A scroll jump can cross the entire marker without an intersection event.
+  const checkCover = () => {
+    const nextCovered = viewportCovered(covers);
+    if (covered !== nextCovered) {
+      covered = nextCovered;
+      sync();
+    }
+  };
+  // A cover that grows or shrinks in place (a story step changing height) moves its edge without a scroll.
+  const coverObserver = new ResizeObserver(checkCover);
+  const refreshCovers = () => {
+    if (!occludable) return;
+    coverObserver.disconnect();
+    covers = [...document.querySelectorAll("[data-flow-cover]")];
+    covers.forEach((cover) => coverObserver.observe(cover));
+    checkCover();
+  };
+  refreshCovers();
+  // Re-checked once per frame while scrolling; a jump can cross a whole cover between events.
   const onScroll = () => {
     if (coverFrame) return;
     coverFrame = requestAnimationFrame(() => {
       coverFrame = 0;
-      const nextCovered = Boolean(coverEnd && coverEnd.getBoundingClientRect().top >= window.innerHeight - 1);
-      if (covered !== nextCovered) {
-        covered = nextCovered;
-        sync();
-      }
+      checkCover();
     });
   };
-  if (coverEnd) window.addEventListener("scroll", onScroll, { passive: true });
+  if (occludable) window.addEventListener("scroll", onScroll, { passive: true });
   document.addEventListener("visibilitychange", sync);
   reduced.addEventListener("change", sync);
   return {
@@ -209,6 +240,8 @@ export function initFlowBackground(canvas: HTMLCanvasElement, coverEnd: HTMLElem
       paused = value;
       sync();
     },
+    /** A client-side navigation swapped the page's covers without necessarily scrolling. */
+    refreshCovers,
     dispose() {
       disposed = true;
       cancelAnimationFrame(frame);
@@ -216,6 +249,7 @@ export function initFlowBackground(canvas: HTMLCanvasElement, coverEnd: HTMLElem
       window.removeEventListener("resize", onResize);
       window.removeEventListener("scroll", onScroll);
       sizeObserver.disconnect();
+      coverObserver.disconnect();
       visibilityObserver.disconnect();
       document.removeEventListener("visibilitychange", sync);
       reduced.removeEventListener("change", sync);

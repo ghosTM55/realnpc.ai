@@ -162,6 +162,7 @@ export default function IntroSequence() {
   return (
     <section
       ref={ref}
+      data-flow-cover
       className="relative h-[240vh] bg-paper motion-reduce:h-auto"
     >
       <div className="sticky top-0 h-screen overflow-hidden motion-reduce:static motion-reduce:h-auto">
@@ -178,7 +179,6 @@ export default function IntroSequence() {
           <AssemblyStage />
         </div>
       </div>
-      <span data-flow-cover-end aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-px" />
     </section>
   );
 }

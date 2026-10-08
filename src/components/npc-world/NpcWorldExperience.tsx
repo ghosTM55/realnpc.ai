@@ -26,7 +26,7 @@ export default function NpcWorldExperience() {
   return (
     <div className="npc-world text-ink">
       <NpcWorldHero scenario={scenario} onScenarioChange={setScenarioId} />
-      <section id="encounter" className="flow-surface npc-section scroll-mt-[72px] bg-ink text-paper">
+      <section id="encounter" data-flow-cover className="flow-surface npc-section scroll-mt-[72px] bg-ink text-paper">
         <FlowSurface />
         <div className="npc-container">
           <SectionHeading {...NPC_WORLD_PAGE.encounter} inverse />
