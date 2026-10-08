@@ -19,12 +19,9 @@ import {
 } from "@/domain/companion/model";
 import { getCompanionProfile } from "@/domain/companion/profile";
 import { createReviewCase } from "@/domain/companion/review";
+import { updateDemoDraft, useDemoDraft } from "./draftStore";
+import { DemoPrivacy } from "./DemoPrivacy";
 import {
-  useDemoDraft,
-  updateDemoDraft,
-} from "@/components/companion/useDemoDraft";
-import {
-  DemoPrivacy,
   DownloadButton,
   FlowFooter,
   FlowHeading,
@@ -32,10 +29,10 @@ import {
   FlowSteps,
   NextButton,
   OptionGroup,
-  SoulSeal,
   focusFlowHeading,
   optionsOf,
-} from "@/components/companion/FlowUI";
+} from "./FlowUI";
+import { SoulSeal } from "./SoulSeal";
 
 const PRIORITY_COPY = {
   privacy: { label: "Discreet and private", description: "Memory permissions and data handling come first." },

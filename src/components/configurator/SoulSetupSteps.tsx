@@ -6,19 +6,10 @@ import { ArrowRight, Check } from "lucide-react";
 import { SCENARIOS } from "@/domain/companion/copy";
 import { type CompanionConfig, type Rhythm, RHYTHMS, SOULS } from "@/domain/companion/model";
 import { createProfileText, getCompanionProfile, getScenePreview } from "@/domain/companion/profile";
-import {
-  useDemoDraft,
-  updateDemoDraft,
-} from "@/components/companion/useDemoDraft";
-import {
-  DownloadButton,
-  NextEncounter,
-  OptionGroup,
-  ScriptedReply,
-  SoulSeal,
-  Toggle,
-  optionsOf,
-} from "@/components/companion/FlowUI";
+import { updateDemoDraft, useDemoDraft } from "./draftStore";
+import { NextEncounter, ScriptedReply } from "./Encounter";
+import { DownloadButton, OptionGroup, Toggle, optionsOf } from "./FlowUI";
+import { SoulSeal } from "./SoulSeal";
 import { STEP } from "@/data/configuratorSteps";
 
 const RHYTHM_LABELS = {

@@ -1,18 +1,9 @@
 "use client";
 
-import { useEffect, useId, useState, type ReactNode } from "react";
-import {
-  ArrowLeft,
-  ArrowRight,
-  Check,
-  Download,
-  LockKeyhole,
-  RotateCcw,
-} from "lucide-react";
-import type { DemoDraft } from "@/domain/companion/draft";
-import type { CompanionConfig, SoulId } from "@/domain/companion/model";
-import { getCompanionProfile } from "@/domain/companion/profile";
-import { clearDemoDraft, updateDemoDraft, useDemoDraft } from "./useDemoDraft";
+import { useId, useState, type ReactNode } from "react";
+import { ArrowLeft, ArrowRight, Check, Download } from "lucide-react";
+
+// Configurator UI primitives: no draft store and no companion domain imports.
 
 export const primaryButton =
   "inline-flex min-h-12 items-center justify-center gap-2 rounded-md bg-vessel px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-vessel-hover active:translate-y-px sm:px-5";
@@ -292,116 +283,6 @@ export function Toggle({
   );
 }
 
-export function SoulSeal({
-  soulId,
-  large = false,
-}: {
-  soulId: SoulId;
-  large?: boolean;
-}) {
-  return (
-    <svg
-      aria-hidden
-      viewBox="0 0 48 48"
-      className={`${large ? "h-20 w-20" : "h-11 w-11"} shrink-0 text-soul-ink`}
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.4"
-    >
-      {soulId === "anchor" ? (
-        <>
-          <circle cx="24" cy="24" r="18" />
-          <path d="M10 24h28M24 10v28" />
-          <circle cx="24" cy="24" r="5" fill="currentColor" />
-        </>
-      ) : soulId === "instigator" ? (
-        <>
-          <path d="m25 4 18 34H7L25 4ZM18 14l12 23M34 14 13 34" />
-          <circle cx="25" cy="25" r="3" fill="currentColor" />
-        </>
-      ) : (
-        <>
-          <ellipse
-            cx="24"
-            cy="24"
-            rx="20"
-            ry="10"
-            transform="rotate(-40 24 24)"
-          />
-          <ellipse
-            cx="24"
-            cy="24"
-            rx="20"
-            ry="10"
-            transform="rotate(40 24 24)"
-          />
-          <circle cx="24" cy="24" r="3" fill="currentColor" />
-        </>
-      )}
-    </svg>
-  );
-}
-
-export function ScriptedReply({ text }: { text: string }) {
-  const [length, setLength] = useState(42);
-  useEffect(() => {
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
-    let cursor = 42;
-    const timer = window.setInterval(() => {
-      cursor = Math.min(
-        text.length,
-        cursor + (reduced.matches ? text.length : 12),
-      );
-      setLength(cursor);
-      if (cursor === text.length) window.clearInterval(timer);
-    }, 35);
-    return () => window.clearInterval(timer);
-  }, [text]);
-  return (
-    <p className="text-[15px] leading-[1.75] text-ink">
-      <span aria-hidden>
-        {text.slice(0, length)}
-        {length < text.length && (
-          <span className="ml-0.5 inline-block h-4 w-1 bg-soul-ink motion-safe:animate-cursor-blink" />
-        )}
-      </span>
-      <span className="sr-only">{text}</span>
-    </p>
-  );
-}
-
-export function NextEncounter({ config }: { config: CompanionConfig }) {
-  const profile = getCompanionProfile(config);
-  const encounter = profile.nextEncounter;
-  return (
-    <section
-      aria-label="Your next encounter"
-      className="border-y border-divider py-6"
-    >
-      <div className="mb-4 flex items-center justify-between gap-3">
-        <h2
-          id="encounter-heading"
-          tabIndex={-1}
-          className="scroll-mt-24 text-sm font-semibold outline-none"
-        >
-          {encounter.title}
-        </h2>
-        <span className="text-xs text-steel">Scene preview</span>
-      </div>
-      <p className="mb-5 text-sm text-steel">You: “{encounter.prompt}”</p>
-      <div className="flex items-start gap-4">
-        <SoulSeal soulId={config.soulId} />
-        <div>
-          <p className="mb-2 text-sm font-semibold">{profile.soul.name}</p>
-          <p className="max-w-[64ch] text-[15px] leading-[1.75]">
-            {encounter.reply}
-          </p>
-        </div>
-      </div>
-    </section>
-  );
-}
-
 export function DownloadButton({
   filename,
   data,
@@ -457,55 +338,6 @@ export function DownloadButton({
       >
         {status}
       </p>
-    </div>
-  );
-}
-
-export function DemoPrivacy() {
-  const { draft, storageAvailable } = useDemoDraft();
-  const [undo, setUndo] = useState<DemoDraft | null>(null);
-  return (
-    <div className="mt-8 flex flex-col items-start justify-between gap-3 border-t border-hairline pt-5 sm:flex-row">
-      <details className="max-w-[70ch] text-xs leading-relaxed text-steel">
-        <summary className="flex min-h-11 cursor-pointer items-center gap-2 font-semibold text-ink">
-          <LockKeyhole size={14} />
-          {storageAvailable
-            ? "Demo choices stay in this tab"
-            : "Browser storage unavailable"}
-        </summary>
-        <p className="pb-3">
-          {storageAvailable
-            ? "Only preset choices are saved for this browser session. No dialogue is stored or submitted. Memory settings are a preview, not a connected service."
-            : "You can still finish and download your preview. Choices are kept in page memory, so a full reload or a new tab will reset them."}
-        </p>
-      </details>
-      <div className="flex items-center gap-3">
-        <button
-          type="button"
-          className="inline-flex min-h-11 items-center gap-2 text-xs font-semibold text-steel hover:text-ink"
-          onClick={() => {
-            setUndo(draft);
-            clearDemoDraft();
-            focusFlowHeading();
-          }}
-        >
-          <RotateCcw size={14} />
-          Reset demo
-        </button>
-        {undo && (
-          <button
-            type="button"
-            className="min-h-11 text-xs font-semibold text-soul-ink underline"
-            onClick={() => {
-              updateDemoDraft(() => undo);
-              setUndo(null);
-              focusFlowHeading();
-            }}
-          >
-            Undo reset
-          </button>
-        )}
-      </div>
     </div>
   );
 }
