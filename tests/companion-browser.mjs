@@ -12,7 +12,7 @@ assert.ok(
   "Run this smoke test against a local preview only.",
 );
 const artifacts = await mkdtemp(join(tmpdir(), "realnpc-companion-qa-"));
-const browser = await chromium.launch({ channel: "chrome", headless: true });
+const browser = await chromium.launch({ channel: process.env.REALNPC_BROWSER_CHANNEL || undefined, headless: true });
 const errors = [];
 const externalRequests = [];
 

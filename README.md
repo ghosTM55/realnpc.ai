@@ -95,7 +95,9 @@ To preview the production export locally, run `npm run build`, then
 `next start` does not serve a static export. Run `npm run test:browser` and
 `npm run test:site` against the preview using `REALNPC_BASE_URL`. If Playwright
 is provided by your environment, set `REALNPC_PLAYWRIGHT_MODULE` to its module
-path; otherwise install it in an isolated test environment.
+path; otherwise install it in an isolated test environment. The browser tests
+use Playwright's bundled Chromium by default; set `REALNPC_BROWSER_CHANNEL=chrome`
+to run them in an installed Google Chrome instead.
 
 Use Node 24. `/configurator` is one six-step flow, from choosing a Soul to saving
 the complete plan. Existing `/companion-lab` links redirect there. No typing is

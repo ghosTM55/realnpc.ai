@@ -6,7 +6,7 @@ const { chromium } = await import(process.env.REALNPC_PLAYWRIGHT_MODULE ?? "play
 
 const base = process.env.REALNPC_BASE_URL ?? "http://127.0.0.1:4173";
 assert.ok(["localhost", "127.0.0.1", "[::1]"].includes(new URL(base).hostname));
-const browser = await chromium.launch({ channel: "chrome", headless: true });
+const browser = await chromium.launch({ channel: process.env.REALNPC_BROWSER_CHANNEL || undefined, headless: true });
 const artifacts = await mkdtemp(join(tmpdir(), "realnpc-site-qa-"));
 const errors = [];
 

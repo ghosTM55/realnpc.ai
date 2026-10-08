@@ -8,7 +8,7 @@ const { chromium } = await import(
 );
 const base = process.env.REALNPC_BASE_URL ?? "http://127.0.0.1:3000";
 assert.ok(["localhost", "127.0.0.1", "[::1]"].includes(new URL(base).hostname));
-const browser = await chromium.launch({ channel: "chrome", headless: true });
+const browser = await chromium.launch({ channel: process.env.REALNPC_BROWSER_CHANNEL || undefined, headless: true });
 const failures = [];
 const errors = [];
 const artifacts = await mkdtemp(join(tmpdir(), "realnpc-navigation-qa-"));
