@@ -5,8 +5,9 @@ from fontTools.ttLib import TTFont
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "src"
-# Keep Latin for future copy, plus every supported character in the current UI.
-codepoints = set(range(0x20, 0x250)) | set(range(0x2000, 0x2070))
+# Latin-1 (Western European names typed into the configurator) and general
+# punctuation, plus every supported character in the current UI.
+codepoints = set(range(0x20, 0x7F)) | set(range(0xA0, 0x100)) | set(range(0x2000, 0x2070))
 for path in SOURCE.rglob("*"):
     if path.suffix in {".ts", ".tsx"}:
         codepoints.update(map(ord, path.read_text()))
