@@ -46,4 +46,5 @@ next-env.d.ts
 /docs/
 
 # local agent config
+/AGENTS.md
 /CLAUDE.md
