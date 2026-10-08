@@ -79,7 +79,7 @@ export default function GlobeNpcExplorer({ scenario, onScenarioChange }: {
         </a>
       </div>
 
-      <div ref={wrapRef} className="npc-globe-canvas" aria-label="Explore the NPC World demo globe">
+      <div ref={wrapRef} className="npc-globe-canvas" role="region" aria-label="Explore the NPC World demo globe">
         {loadError ? <GlobeFallback onRetry={retry} /> : GlobeComp && dims.w > 0 ? (
           <GlobeBoundary key={attempt} fallback={<GlobeFallback onRetry={retry} />}>
             <GlobeComp countries={countries} width={dims.w} height={dims.h}
@@ -119,7 +119,7 @@ export default function GlobeNpcExplorer({ scenario, onScenarioChange }: {
         )}
         <div className="mt-6 border-t border-hairline pt-5">
           <p className="npc-eyebrow npc-control-label">CHOOSE A SOCIAL SCENE</p>
-          <div className="mt-3 grid grid-cols-3 gap-1" aria-label="Choose a social scene">
+          <div className="mt-3 grid grid-cols-3 gap-1" role="group" aria-label="Choose a social scene">
             {WORLD_SCENARIOS.map((story) => (
               <button key={story.id} type="button" className="npc-scenario-choice" data-scenario={story.id} data-tone={story.tone}
                 aria-pressed={!exploredCity && scenario.id === story.id}

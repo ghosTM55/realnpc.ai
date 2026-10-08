@@ -31,7 +31,7 @@ export default function NpcWorldExperience() {
         <div className="npc-container">
           <SectionHeading {...NPC_WORLD_PAGE.encounter} inverse />
           <div className="mt-8 flex flex-wrap items-center justify-between gap-5">
-            <div className="npc-scenario-tabs" aria-label="Choose a story">
+            <div className="npc-scenario-tabs" role="group" aria-label="Choose a story">
               {WORLD_SCENARIOS.map((item) => (
                 <button key={item.id} type="button" aria-pressed={item.id === scenario.id} data-scenario={item.id} data-tone={item.tone}
                   onClick={() => setScenarioId(item.id)} className="npc-scenario-tab">
@@ -83,7 +83,7 @@ function Encounter({ scenario }: { scenario: WorldScenario }) {
 
       <div ref={readingRef} className="npc-story-layout">
         <div className="npc-story-reading">
-          <div className="npc-step-nav" aria-label="Story progress">
+          <div className="npc-step-nav" role="group" aria-label="Story progress">
             {scenario.steps.map((item, index) => (
               <button key={item.label} type="button" aria-current={index === playback.index ? "step" : undefined}
                 aria-label={"Step " + (index + 1) + ": " + item.label}
@@ -284,7 +284,7 @@ function ContinuityPayoff({ scenario }: { scenario: WorldScenario }) {
         <SectionHeading {...NPC_WORLD_PAGE.continuity} />
         <div className="npc-continuity mt-10">
           <div className="npc-memory-context">
-            <div className="npc-moment-tabs" aria-label="View a moment">
+            <div className="npc-moment-tabs" role="group" aria-label="View a moment">
               <button type="button" aria-pressed={!showLater} onClick={() => setShowLater(false)}>This time</button>
               <button type="button" aria-pressed={showLater} onClick={() => setShowLater(true)}>Next time</button>
             </div>

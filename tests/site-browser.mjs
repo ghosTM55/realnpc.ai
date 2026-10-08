@@ -80,6 +80,17 @@ try {
 
   {
     const page = await pageFor({ width: 1440, height: 900 }, "reduce");
+    await page.goto(`${base}/npc-world/`);
+    for (const name of ["Choose a story", "Story progress", "View a moment", "Choose a social scene"]) {
+      assert.equal(await page.getByRole("group", { name, exact: true }).count(), 1, `"${name}" must be a named group`);
+    }
+    assert.equal(await page.getByRole("region", { name: "Explore the NPC World demo globe", exact: true }).count(), 1);
+    await page.close();
+    console.log("PASS NPC World: labelled control groups and the globe region reach the accessibility tree");
+  }
+
+  {
+    const page = await pageFor({ width: 1440, height: 900 }, "reduce");
     await page.goto(base, { waitUntil: "networkidle" });
     // Walks the real Tab order once and reports each stop's name and whether it is invisible.
     const tabStops = async () => {
