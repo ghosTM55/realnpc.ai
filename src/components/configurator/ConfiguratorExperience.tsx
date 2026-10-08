@@ -5,7 +5,7 @@ import { Check, ShieldCheck } from "lucide-react";
 import SoulSetupSteps, {
   CompanionProfile,
 } from "./SoulSetupSteps";
-import { getConfiguratorSteps } from "@/data/configuratorSteps";
+import { getConfiguratorSteps, STEP, type StepIndex } from "@/data/configuratorSteps";
 import {
   BUDGETS,
   CHARACTER_SOURCES,
@@ -59,6 +59,14 @@ const SERVICE_LABELS = {
   ongoing: "Ongoing care and support",
 } as const satisfies Record<ReviewOptions["service"], string>;
 
+/** Campaign links can open a step by name; locked steps are still clamped to progress. */
+const VIEW_STEP: ReadonlyMap<string, StepIndex> = new Map([
+  ["choose", STEP.soul],
+  ["presence", STEP.presence],
+  ["profile", STEP.plan],
+  ["plan", STEP.plan],
+]);
+
 export default function ConfiguratorExperience() {
   const { draft } = useDemoDraft();
   const { config, review: preferences, step, unlockedStep } = draft;
@@ -71,14 +79,7 @@ export default function ConfiguratorExperience() {
     const requestedForm = url.searchParams.get("form");
     const initialForm = isOneOf(VESSEL_FORMS, requestedForm) ? requestedForm : undefined;
     const view = url.searchParams.get("view");
-    const initialStep =
-      view === "choose"
-        ? 0
-        : view === "presence"
-          ? 3
-          : view === "profile" || view === "plan"
-            ? 5
-            : undefined;
+    const initialStep = view ? VIEW_STEP.get(view) : undefined;
     const applyForm = initialForm && url.searchParams.has("form");
     const applyView = initialStep !== undefined && url.searchParams.has("view");
     if (!applyForm && !applyView) return;
@@ -87,7 +88,7 @@ export default function ConfiguratorExperience() {
       step: applyView
         ? Math.min(initialStep, current.unlockedStep)
         : current.step,
-      unlockedStep: view === "choose" ? 0 : current.unlockedStep,
+      unlockedStep: initialStep === STEP.soul ? STEP.soul : current.unlockedStep,
       config: applyForm
         ? { ...current.config, form: initialForm }
         : current.config,
@@ -137,7 +138,7 @@ export default function ConfiguratorExperience() {
         unlockedStep={unlockedStep}
         onChange={goToStep}
       />
-      {step > 2 && step < 5 && (
+      {(step === STEP.presence || step === STEP.priorities) && (
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3 border-b border-hairline pb-4">
           <div className="flex items-center gap-3">
             <SoulSeal soulId={config.soulId} />
@@ -155,7 +156,7 @@ export default function ConfiguratorExperience() {
           </div>
           <button
             type="button"
-            onClick={() => goToStep(0)}
+            onClick={() => goToStep(STEP.soul)}
             className="inline-flex min-h-11 items-center gap-2 text-xs font-semibold text-soul-ink underline underline-offset-4"
           >
             Change Soul
@@ -168,8 +169,8 @@ export default function ConfiguratorExperience() {
         title={currentStep.title}
         description={currentStep.description}
       />
-      {step < 3 && <SoulSetupSteps step={step} onStepChange={goToStep} />}
-      {step === 3 && (
+      {step <= STEP.terms && <SoulSetupSteps step={step} onStepChange={goToStep} />}
+      {step === STEP.presence && (
         <>
           <div className="grid items-start gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:gap-12">
             <div>
@@ -196,7 +197,7 @@ export default function ConfiguratorExperience() {
         </>
       )}
 
-      {step === 4 && (
+      {step === STEP.priorities && (
         <>
           <div className="grid items-start gap-8 lg:grid-cols-[1fr_0.9fr] lg:gap-12">
             <div className="space-y-7">
@@ -254,9 +255,9 @@ export default function ConfiguratorExperience() {
         </>
       )}
 
-      {step === 5 && (
+      {step === STEP.plan && (
         <>
-          <CompanionProfile config={config} onChangeSoul={() => goToStep(0)} />
+          <CompanionProfile config={config} onChangeSoul={() => goToStep(STEP.soul)} />
           <div className="mt-10 grid items-start gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:gap-12">
             <div>
               <BuildPath reviewCase={reviewCase} />
@@ -306,7 +307,7 @@ export default function ConfiguratorExperience() {
       )}
       <DemoPrivacy />
       <FlowFooter
-        onBack={step > 0 ? () => goToStep(step - 1) : undefined}
+        onBack={step > STEP.soul ? () => goToStep(step - 1) : undefined}
         note={`${profile.soul.name} · ${step + 1} of ${steps.length}`}
       >
         {currentStep.nextLabel !== null ? (

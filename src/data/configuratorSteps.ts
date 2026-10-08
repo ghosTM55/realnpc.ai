@@ -1,4 +1,8 @@
 // Order matches draft schema v3. Reordering steps requires a draft migration.
+export const STEP = { soul: 0, meet: 1, terms: 2, presence: 3, priorities: 4, plan: 5 } as const;
+export type StepIndex = (typeof STEP)[keyof typeof STEP];
+export const LAST_STEP = STEP.plan;
+
 export function getConfiguratorSteps(soulName: string) {
   return [
     {

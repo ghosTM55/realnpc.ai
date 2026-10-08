@@ -26,6 +26,7 @@ import {
   Toggle,
   optionsOf,
 } from "@/components/companion/FlowUI";
+import { STEP } from "@/data/configuratorSteps";
 
 const RHYTHM_LABELS = {
   unhurried: "Unhurried",
@@ -53,7 +54,7 @@ export default function SoulSetupSteps({
   const changeSoul = (
     <button
       type="button"
-      onClick={() => onStepChange(0)}
+      onClick={() => onStepChange(STEP.soul)}
       className="inline-flex min-h-11 items-center text-sm font-semibold text-soul-ink underline underline-offset-4"
     >
       Change Soul
@@ -62,7 +63,7 @@ export default function SoulSetupSteps({
 
   return (
     <>
-      {step === 0 && (
+      {step === STEP.soul && (
         <>
           <SoulChoice
             config={config}
@@ -75,13 +76,13 @@ export default function SoulSetupSteps({
           />
         </>
       )}
-      {step === 1 && (
+      {step === STEP.meet && (
         <>
           <SelectedSoulScenes config={config} />
           <div className="mt-4">{changeSoul}</div>
         </>
       )}
-      {step === 2 && (
+      {step === STEP.terms && (
         <>
           <div className="grid items-start gap-8 lg:grid-cols-2 lg:gap-12">
             <section aria-label="Relationship preferences">

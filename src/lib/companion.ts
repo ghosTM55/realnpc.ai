@@ -1,4 +1,5 @@
 import type { NpcForm } from "@/domain/npc";
+import { LAST_STEP } from "../data/configuratorSteps.ts";
 
 export const SOULS = [
   {
@@ -111,6 +112,7 @@ export function parseDemoDraft(serialized: string | null): DemoDraft {
     const config = value?.config;
     const review = value?.review;
     // Older drafts allowed arbitrary jumps, so their step is not completion evidence.
+    // The 3 and 2 below are v1's own two-flow bounds (lab 0-3, review 0-2), not current step ids.
     const legacyStepsValid =
       value?.version === 1 &&
       Number.isInteger(value.labStep) &&
@@ -129,7 +131,7 @@ export function parseDemoDraft(serialized: string | null): DemoDraft {
     if (
       !Number.isInteger(step) ||
       step < 0 ||
-      step > 5 ||
+      step > LAST_STEP ||
       !review ||
       !isOneOf(PRIORITIES, review.priority) ||
       !isOneOf(CHARACTER_SOURCES, review.characterSource) ||
@@ -151,7 +153,7 @@ export function parseDemoDraft(serialized: string | null): DemoDraft {
       value.version === 3 &&
       Number.isInteger(value.unlockedStep) &&
       value.unlockedStep >= 0 &&
-      value.unlockedStep <= 5
+      value.unlockedStep <= LAST_STEP
         ? value.unlockedStep
         : 0;
     return {
