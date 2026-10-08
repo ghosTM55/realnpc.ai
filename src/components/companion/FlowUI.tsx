@@ -18,7 +18,7 @@ import {
 import { clearDemoDraft, updateDemoDraft, useDemoDraft } from "./useDemoDraft";
 
 export const primaryButton =
-  "inline-flex min-h-12 items-center justify-center gap-2 rounded-md bg-vessel px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#ae1035] active:translate-y-px sm:px-5";
+  "inline-flex min-h-12 items-center justify-center gap-2 rounded-md bg-vessel px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-vessel-hover active:translate-y-px sm:px-5";
 export const secondaryButton =
   "inline-flex min-h-12 items-center justify-center gap-2 rounded-md border border-divider bg-paper px-4 py-3 text-sm font-semibold text-ink transition-colors hover:bg-panel";
 

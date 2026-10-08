@@ -10,9 +10,12 @@
   --muted-text: #8792a0;
   --hairline: #e4e7eb;
   --divider-line: #dce0e5;
+  --ink-soft: #2a323b;
+  --globe-water: #d2e8f5;
 
   /* semantic signal colors — thin lines, markers, chips only; never large fills */
   --vessel-red: #d40d3d;
+  --vessel-hover: #ae1035;
   --soul-blue: #43a9c9;
   --powers-amber: #e6a42b;
   --soul-ink: #24677d;
@@ -34,7 +37,9 @@
   --color-muted: var(--muted-text);
   --color-hairline: var(--hairline);
   --color-divider: var(--divider-line);
+  --color-ink-soft: var(--ink-soft);
   --color-vessel: var(--vessel-red);
+  --color-vessel-hover: var(--vessel-hover);
   --color-soul: var(--soul-blue);
   --color-powers: var(--powers-amber);
   --color-soul-ink: var(--soul-ink);

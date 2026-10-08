@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Globe, { type GlobeMethods } from "react-globe.gl";
 import { Color, MeshBasicMaterial } from "three";
 import { NPC_WORLD, type WorldCity } from "@/data/npcWorld";
+import { readTokens, withAlpha } from "@/lib/brandColors";
 
 export interface GlobeCanvasProps {
   countries: object[];
@@ -28,19 +29,21 @@ const cityLng = (point: object) => isWorldCity(point) ? point.lng : 0;
 const cityLabel = (point: object) => isWorldCity(point) ? `${point.city} · demo` : "";
 const pathLat = (point: number[]) => point[1];
 const pathLng = (point: number[]) => point[0];
+// This module only loads in the browser (dynamic import), so the VI tokens can be read once here.
+const TOKENS = readTokens(["paper-white", "soul-blue", "powers-amber", "vessel-red", "globe-water"]);
 // String props are property-name accessors in three-globe, so keep constant functions stable.
-const landColor = () => "#fbfbfc";
-const borderColor = () => "rgba(67,169,201,0.9)";
+const landColor = () => TOKENS["paper-white"];
+const borderColor = () => withAlpha(TOKENS["soul-blue"], 0.9);
 const empty = () => "";
 // three-globe types its data props as mutable object[]; copy once so the array stays stable across renders.
 const CITY_POINTS: object[] = [...NPC_WORLD];
-const ringColor = () => ["rgba(230,164,43,0.6)", "rgba(230,164,43,0)"];
+const ringColor = () => [withAlpha(TOKENS["powers-amber"], 0.6), withAlpha(TOKENS["powers-amber"], 0)];
 
 export default function GlobeCanvas({ countries, width, height, active, reducedMotion, focused, selectedCity, onSelectCity }: GlobeCanvasProps) {
   const globeRef = useRef<GlobeMethods | undefined>(undefined);
   const [ready, setReady] = useState(false);
   const globeMaterial = useMemo(() => new MeshBasicMaterial({
-    color: new Color("#d2e8f5"), transparent: true, opacity: 0.9,
+    color: new Color(TOKENS["globe-water"]), transparent: true, opacity: 0.9,
   }), []);
   useEffect(() => () => { globeMaterial.dispose(); }, [globeMaterial]);
 
@@ -57,7 +60,7 @@ export default function GlobeCanvas({ countries, width, height, active, reducedM
   }, [countries]);
   const rings = useMemo(() => !reducedMotion && active && focused ? [selectedCity] : [], [active, focused, reducedMotion, selectedCity]);
   const pointRadius = useCallback((point: object) => isWorldCity(point) && selectedCity.id === point.id ? 0.85 : 0.45, [selectedCity.id]);
-  const pointColor = useCallback((point: object) => isWorldCity(point) && selectedCity.id === point.id ? "#e6a42b" : "#d40d3d", [selectedCity.id]);
+  const pointColor = useCallback((point: object) => isWorldCity(point) && selectedCity.id === point.id ? TOKENS["powers-amber"] : TOKENS["vessel-red"], [selectedCity.id]);
   const onPointClick = useCallback((point: object) => { if (isWorldCity(point)) onSelectCity(point); }, [onSelectCity]);
   const autoRotate = active && !reducedMotion && !focused;
   const onPointHover = useCallback((point: object | null) => {
@@ -90,7 +93,7 @@ export default function GlobeCanvas({ countries, width, height, active, reducedM
   return (
     <Globe ref={globeRef} width={width} height={height} onGlobeReady={configure}
       backgroundColor="rgba(0,0,0,0)" globeMaterial={globeMaterial}
-      showAtmosphere atmosphereColor="#43a9c9" atmosphereAltitude={0.12}
+      showAtmosphere atmosphereColor={TOKENS["soul-blue"]} atmosphereAltitude={0.12}
       polygonsData={countries} polygonCapColor={landColor} polygonSideColor={empty}
       polygonAltitude={0.005} polygonsTransitionDuration={0} polygonLabel={empty}
       pathsData={borderPaths} pathPointLat={pathLat} pathPointLng={pathLng}

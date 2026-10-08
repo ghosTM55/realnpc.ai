@@ -55,7 +55,7 @@ export default function WhySection() {
 
       <div className="mt-12 grid gap-12 lg:grid-cols-[minmax(0,0.78fr)_minmax(0,1.22fr)] lg:items-start">
         <div data-supporting className="lg:sticky lg:top-28">
-          <div className="flex max-w-[520px] flex-col gap-4 text-[17px] leading-[1.55] text-[#2A323B] md:text-[19px]">
+          <div className="flex max-w-[520px] flex-col gap-4 text-[17px] leading-[1.55] text-ink-soft md:text-[19px]">
             {WHY.supporting.map((paragraph) => (
               <p key={paragraph}>{paragraph}</p>
             ))}

@@ -45,7 +45,7 @@ export default function SectionDivider({ label }: { label: string }) {
       />
       <span data-pulse className="h-1 w-11 bg-vessel" aria-hidden />
       <span
-        className="inline-block whitespace-nowrap font-signal text-[16px] font-bold tracking-[0.08em] text-[#2A323B] md:text-[18px]"
+        className="inline-block whitespace-nowrap font-signal text-[16px] font-bold tracking-[0.08em] text-ink-soft md:text-[18px]"
       >
         <span className="sr-only">{label}</span>
         <span aria-hidden>{Array.from(label).map((character, index) => (

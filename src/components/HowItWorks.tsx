@@ -2,6 +2,7 @@
 
 import { useRef } from "react";
 import { gsap, useGSAP } from "@/lib/gsap";
+import { readTokens, withAlpha } from "@/lib/brandColors";
 import { HOW_IT_WORKS } from "@/data/site";
 
 export default function HowItWorks() {
@@ -54,17 +55,17 @@ export default function HowItWorks() {
           0,
         );
 
+        const tokens = readTokens(["soul-blue", "soul-tint"]);
         const nodes = gsap.utils.toArray<HTMLElement>("[data-node]");
         const last = Math.max(nodes.length - 1, 1);
         nodes.forEach((node, i) => {
           tl.to(
             node,
             {
-              backgroundColor: "#43a9c9",
-              borderColor: "#43a9c9",
+              backgroundColor: tokens["soul-blue"],
+              borderColor: tokens["soul-blue"],
               color: "#ffffff",
-              boxShadow:
-                "0 0 0 5px #ecf6fa, 0 8px 20px -6px rgba(67,169,201,0.55)",
+              boxShadow: `0 0 0 5px ${tokens["soul-tint"]}, 0 8px 20px -6px ${withAlpha(tokens["soul-blue"], 0.55)}`,
               scale: 1.08,
               duration: 0.12,
               ease: "power1.out",
@@ -96,7 +97,7 @@ export default function HowItWorks() {
           className="absolute left-0 right-0 top-[19px] hidden h-0.5 lg:block"
           style={{
             backgroundImage:
-              "repeating-linear-gradient(to right, rgba(212,13,61,0.28) 0 9px, transparent 9px 15px)",
+              "repeating-linear-gradient(to right, color-mix(in srgb, var(--vessel-red) 28%, transparent) 0 9px, transparent 9px 15px)",
           }}
         />
         <div
