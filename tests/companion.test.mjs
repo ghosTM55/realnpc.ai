@@ -10,7 +10,10 @@ import {
   serializeDemoDraft,
   createReviewCase,
   createProfileText,
+  VESSEL_FORMS,
+  VESSEL_OPTIONS,
 } from "../src/lib/companion.ts";
+import { NPC_FORMS } from "../src/domain/npc.ts";
 
 test("turning off both memory permissions removes remembered preferences and moments from the profile", () => {
   const profile = getCompanionProfile({
@@ -280,4 +283,9 @@ test("restored navigation cannot exceed completed progress or trust invalid prog
     assert.equal(restored.step, 0);
     assert.equal(restored.unlockedStep, 0);
   }
+});
+
+test("the Vessel choice is every NPC form plus undecided, each with option copy", () => {
+  assert.deepEqual([...VESSEL_FORMS].sort(), [...NPC_FORMS, "undecided"].sort());
+  assert.deepEqual(Object.keys(VESSEL_OPTIONS).sort(), [...VESSEL_FORMS].sort());
 });

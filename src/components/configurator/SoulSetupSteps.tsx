@@ -4,12 +4,14 @@ import Link from "next/link";
 import { useState } from "react";
 import { ArrowRight, Check } from "lucide-react";
 import {
+  RHYTHMS,
   SOULS,
   SCENARIOS,
   getCompanionProfile,
   getScenePreview,
   createProfileText,
   type CompanionConfig,
+  type Rhythm,
 } from "@/lib/companion";
 import {
   useDemoDraft,
@@ -22,7 +24,14 @@ import {
   ScriptedReply,
   SoulSeal,
   Toggle,
+  optionsOf,
 } from "@/components/companion/FlowUI";
+
+const RHYTHM_LABELS = {
+  unhurried: "Unhurried",
+  playful: "Playful",
+  direct: "Direct",
+} as const satisfies Record<Rhythm, string>;
 
 export default function SoulSetupSteps({
   step,
@@ -81,11 +90,7 @@ export default function SoulSetupSteps({
                 value={config.rhythm}
                 onChange={(rhythm) => patchPreferences({ rhythm })}
                 compact
-                options={[
-                  { value: "unhurried", label: "Unhurried" },
-                  { value: "playful", label: "Playful" },
-                  { value: "direct", label: "Direct" },
-                ]}
+                options={optionsOf(RHYTHMS, RHYTHM_LABELS)}
               />
               <p
                 role="status"
@@ -192,13 +197,7 @@ export function CompanionProfile({
         <dl className="mt-6 grid grid-cols-2 gap-x-6 gap-y-5 border-t border-soul-ink/20 pt-5">
           <ProfileFact
             label="Conversation style"
-            value={
-              {
-                unhurried: "Unhurried",
-                playful: "Playful",
-                direct: "Direct",
-              }[config.rhythm]
-            }
+            value={RHYTHM_LABELS[config.rhythm]}
           />
           <ProfileFact
             label="Initiative"
@@ -383,8 +382,8 @@ function SelectedSoulScenes({ config }: { config: CompanionConfig }) {
         value={sceneId}
         onChange={setSceneId}
         options={[
-          { value: "everyday", label: "A rough day" },
-          { value: "boundary", label: "A change of mind" },
+          { value: "everyday", label: SCENARIOS.everyday.label },
+          { value: "boundary", label: SCENARIOS.boundary.label },
           { value: "plan", label: "An hour together" },
         ]}
       />

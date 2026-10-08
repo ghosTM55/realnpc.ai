@@ -185,6 +185,19 @@ export function NextButton({
   );
 }
 
+/** Builds OptionGroup options from an ordered value list and a copy table keyed by value. */
+export function optionsOf<T extends string>(
+  values: readonly T[],
+  copy: Readonly<Record<T, string | { label: string; description?: string }>>,
+) {
+  return values.map((value) => {
+    const entry = copy[value];
+    return typeof entry === "string"
+      ? { value, label: entry }
+      : { value, label: entry.label, description: entry.description };
+  });
+}
+
 export function OptionGroup<T extends string>({
   label,
   value,

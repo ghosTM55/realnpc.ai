@@ -7,9 +7,15 @@ import SoulSetupSteps, {
 } from "./SoulSetupSteps";
 import { getConfiguratorSteps } from "@/data/configuratorSteps";
 import {
+  BUDGETS,
+  CHARACTER_SOURCES,
   createReviewCase,
   getCompanionProfile,
-  VESSEL_LABELS,
+  isOneOf,
+  PRIORITIES,
+  SERVICES,
+  VESSEL_FORMS,
+  VESSEL_OPTIONS,
   type ReviewOptions,
 } from "@/lib/companion";
 import {
@@ -27,20 +33,31 @@ import {
   OptionGroup,
   SoulSeal,
   focusFlowHeading,
+  optionsOf,
 } from "@/components/companion/FlowUI";
 
+const PRIORITY_COPY = {
+  privacy: { label: "Discreet and private", description: "Memory permissions and data handling come first." },
+  presence: { label: "A convincing presence", description: "Appearance, expression and interaction matter most." },
+  everyday: { label: "Part of everyday life", description: "Continuity, companionship and useful routines." },
+} as const satisfies Record<ReviewOptions["priority"], { label: string; description: string }>;
+const CHARACTER_SOURCE_COPY = {
+  original: "This original demo character",
+  "my-character": "An original character I own",
+  licensed: { label: "A licensed fictional character", description: "Rights and permitted uses must be verified first." },
+} as const satisfies Record<ReviewOptions["characterSource"], string | { label: string; description: string }>;
 const BUDGET_LABELS = {
   discuss: "Discuss later",
   "under-10k": "Under $10K",
   "10-25k": "$10K–25K",
   "25-50k": "$25K–50K",
   "50k-plus": "$50K+",
-};
+} as const satisfies Record<ReviewOptions["budget"], string>;
 const SERVICE_LABELS = {
   discuss: "Discuss later",
   software: "Software and personality updates",
   ongoing: "Ongoing care and support",
-};
+} as const satisfies Record<ReviewOptions["service"], string>;
 
 export default function ConfiguratorExperience() {
   const { draft } = useDemoDraft();
@@ -52,12 +69,7 @@ export default function ConfiguratorExperience() {
   useEffect(() => {
     const url = new URL(window.location.href);
     const requestedForm = url.searchParams.get("form");
-    const initialForm =
-      requestedForm === "robot" ||
-      requestedForm === "digital-human" ||
-      requestedForm === "undecided"
-        ? requestedForm
-        : undefined;
+    const initialForm = isOneOf(VESSEL_FORMS, requestedForm) ? requestedForm : undefined;
     const view = url.searchParams.get("view");
     const initialStep =
       view === "choose"
@@ -170,34 +182,13 @@ export default function ConfiguratorExperience() {
                     config: { ...current.config, form },
                   }))
                 }
-                options={[
-                  {
-                    value: "digital-human",
-                    label: "A digital companion",
-                    description: "On screen, with voice and expression.",
-                  },
-                  {
-                    value: "robot",
-                    label: "A physical companion",
-                    description:
-                      "An embodied Vessel. Hardware and service review required.",
-                  },
-                  {
-                    value: "undecided",
-                    label: "Keep the form open",
-                    description: "Explore digital and physical options.",
-                  },
-                ]}
+                options={optionsOf(VESSEL_FORMS, VESSEL_OPTIONS)}
               />
               <p
                 role="status"
                 className="mt-3 text-sm leading-relaxed text-soul-ink"
               >
-                {config.form === "robot"
-                  ? "Your path now includes hardware, safety and maintenance review."
-                  : config.form === "digital-human"
-                    ? "Your path starts on screen. No hardware commitment."
-                    : "Your path keeps digital and physical options open."}
+                {VESSEL_OPTIONS[config.form].status}
               </p>
             </div>
             <BuildPath reviewCase={reviewCase} />
@@ -213,44 +204,13 @@ export default function ConfiguratorExperience() {
                 label="Lead with this priority"
                 value={preferences.priority}
                 onChange={(priority) => patchReview({ priority })}
-                options={[
-                  {
-                    value: "privacy",
-                    label: "Discreet and private",
-                    description:
-                      "Memory permissions and data handling come first.",
-                  },
-                  {
-                    value: "presence",
-                    label: "A convincing presence",
-                    description:
-                      "Appearance, expression and interaction matter most.",
-                  },
-                  {
-                    value: "everyday",
-                    label: "Part of everyday life",
-                    description:
-                      "Continuity, companionship and useful routines.",
-                  },
-                ]}
+                options={optionsOf(PRIORITIES, PRIORITY_COPY)}
               />
               <OptionGroup
                 label="Character source"
                 value={preferences.characterSource}
                 onChange={(characterSource) => patchReview({ characterSource })}
-                options={[
-                  { value: "original", label: "This original demo character" },
-                  {
-                    value: "my-character",
-                    label: "An original character I own",
-                  },
-                  {
-                    value: "licensed",
-                    label: "A licensed fictional character",
-                    description:
-                      "Rights and permitted uses must be verified first.",
-                  },
-                ]}
+                options={optionsOf(CHARACTER_SOURCES, CHARACTER_SOURCE_COPY)}
               />
               <p className="text-xs leading-relaxed text-steel">
                 This demo covers adult fictional characters only. Minors,
@@ -267,23 +227,13 @@ export default function ConfiguratorExperience() {
                     label="A planning range, never a quote"
                     value={preferences.budget}
                     onChange={(budget) => patchReview({ budget })}
-                    options={Object.entries(BUDGET_LABELS).map(
-                      ([value, label]) => ({
-                        value: value as ReviewOptions["budget"],
-                        label,
-                      }),
-                    )}
+                    options={optionsOf(BUDGETS, BUDGET_LABELS)}
                   />
                   <OptionGroup
                     label="What kind of support?"
                     value={preferences.service}
                     onChange={(service) => patchReview({ service })}
-                    options={Object.entries(SERVICE_LABELS).map(
-                      ([value, label]) => ({
-                        value: value as ReviewOptions["service"],
-                        label,
-                      }),
-                    )}
+                    options={optionsOf(SERVICES, SERVICE_LABELS)}
                   />
                 </div>
               </details>
@@ -335,7 +285,7 @@ export default function ConfiguratorExperience() {
               <dl className="divide-y divide-hairline text-sm">
                 <SummaryRow
                   label="Presence"
-                  value={VESSEL_LABELS[config.form]}
+                  value={VESSEL_OPTIONS[config.form].summary}
                 />
                 <SummaryRow
                   label="Planning budget"

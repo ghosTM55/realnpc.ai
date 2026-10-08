@@ -37,9 +37,22 @@ export const SOULS = [
 ] as const;
 
 export type SoulId = (typeof SOULS)[number]["id"];
+/** Every NPC form, plus the configurator's option to decide later. */
 export type VesselForm = NpcForm | "undecided";
-export type Rhythm = "unhurried" | "playful" | "direct";
 export type SceneId = "chemistry" | "everyday" | "boundary";
+
+// Each choice's allowed values, in display order. Types, draft validation and
+// the option lists all derive from these arrays, so they cannot drift apart.
+export const VESSEL_FORMS = ["digital-human", "robot", "undecided"] as const satisfies readonly VesselForm[];
+export const RHYTHMS = ["unhurried", "playful", "direct"] as const;
+export const PRIORITIES = ["privacy", "presence", "everyday"] as const;
+export const CHARACTER_SOURCES = ["original", "my-character", "licensed"] as const;
+export const BUDGETS = ["discuss", "under-10k", "10-25k", "25-50k", "50k-plus"] as const;
+export const SERVICES = ["discuss", "software", "ongoing"] as const;
+export type Rhythm = (typeof RHYTHMS)[number];
+
+export const isOneOf = <T extends string>(values: readonly T[], value: unknown): value is T =>
+  typeof value === "string" && (values as readonly string[]).includes(value);
 
 export type CompanionConfig = {
   soulId: SoulId;
@@ -62,10 +75,10 @@ export const DEFAULT_CONFIG: CompanionConfig = {
 };
 
 export type ReviewOptions = {
-  priority: "privacy" | "presence" | "everyday";
-  characterSource: "original" | "my-character" | "licensed";
-  budget: "discuss" | "under-10k" | "10-25k" | "25-50k" | "50k-plus";
-  service: "discuss" | "software" | "ongoing";
+  priority: (typeof PRIORITIES)[number];
+  characterSource: (typeof CHARACTER_SOURCES)[number];
+  budget: (typeof BUDGETS)[number];
+  service: (typeof SERVICES)[number];
 };
 
 export const DEFAULT_REVIEW: ReviewOptions = {
@@ -118,18 +131,14 @@ export function parseDemoDraft(serialized: string | null): DemoDraft {
       step < 0 ||
       step > 5 ||
       !review ||
-      !["privacy", "presence", "everyday"].includes(review.priority) ||
-      !["original", "my-character", "licensed"].includes(
-        review.characterSource,
-      ) ||
-      !["discuss", "under-10k", "10-25k", "25-50k", "50k-plus"].includes(
-        review.budget,
-      ) ||
-      !["discuss", "software", "ongoing"].includes(review.service) ||
+      !isOneOf(PRIORITIES, review.priority) ||
+      !isOneOf(CHARACTER_SOURCES, review.characterSource) ||
+      !isOneOf(BUDGETS, review.budget) ||
+      !isOneOf(SERVICES, review.service) ||
       !config ||
       !SOULS.some((soul) => soul.id === config.soulId) ||
-      !["unhurried", "playful", "direct"].includes(config.rhythm) ||
-      !["robot", "digital-human", "undecided"].includes(config.form) ||
+      !isOneOf(RHYTHMS, config.rhythm) ||
+      !isOneOf(VESSEL_FORMS, config.form) ||
       ![
         "takesInitiative",
         "rememberPreferences",
@@ -377,11 +386,27 @@ export function getCompanionProfile(config: CompanionConfig) {
   };
 }
 
-export const VESSEL_LABELS: Record<VesselForm, string> = {
-  "digital-human": "Digital companion",
-  robot: "Physical companion",
-  undecided: "Keep the form open",
-};
+/** `label` is the option, `summary` the plan's summary row; the wording differs on purpose. */
+export const VESSEL_OPTIONS = {
+  "digital-human": {
+    label: "A digital companion",
+    summary: "Digital companion",
+    description: "On screen, with voice and expression.",
+    status: "Your path starts on screen. No hardware commitment.",
+  },
+  robot: {
+    label: "A physical companion",
+    summary: "Physical companion",
+    description: "An embodied Vessel. Hardware and service review required.",
+    status: "Your path now includes hardware, safety and maintenance review.",
+  },
+  undecided: {
+    label: "Keep the form open",
+    summary: "Keep the form open",
+    description: "Explore digital and physical options.",
+    status: "Your path keeps digital and physical options open.",
+  },
+} as const satisfies Record<VesselForm, { label: string; summary: string; description: string; status: string }>;
 
 export function createProfileText(config: CompanionConfig) {
   const profile = getCompanionProfile(config);
