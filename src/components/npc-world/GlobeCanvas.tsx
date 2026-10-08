@@ -59,9 +59,10 @@ export default function GlobeCanvas({ countries, width, height, active, reducedM
   const pointRadius = useCallback((point: object) => isWorldCity(point) && selectedCity.id === point.id ? 0.85 : 0.45, [selectedCity.id]);
   const pointColor = useCallback((point: object) => isWorldCity(point) && selectedCity.id === point.id ? "#e6a42b" : "#d40d3d", [selectedCity.id]);
   const onPointClick = useCallback((point: object) => { if (isWorldCity(point)) onSelectCity(point); }, [onSelectCity]);
+  const autoRotate = active && !reducedMotion && !focused;
   const onPointHover = useCallback((point: object | null) => {
-    if (globeRef.current) globeRef.current.controls().autoRotate = !point && active && !reducedMotion && !focused;
-  }, [active, focused, reducedMotion]);
+    if (globeRef.current) globeRef.current.controls().autoRotate = !point && autoRotate;
+  }, [autoRotate]);
 
   const configure = useCallback(() => {
     const globe = globeRef.current;
@@ -76,10 +77,10 @@ export default function GlobeCanvas({ countries, width, height, active, reducedM
   useEffect(() => {
     const globe = globeRef.current;
     if (!globe || !ready) return;
-    globe.controls().autoRotate = active && !reducedMotion && !focused;
+    globe.controls().autoRotate = autoRotate;
     if (active) globe.resumeAnimation();
     else globe.pauseAnimation();
-  }, [active, focused, ready, reducedMotion]);
+  }, [active, autoRotate, ready]);
 
   useEffect(() => {
     if (!focused || !ready) return;

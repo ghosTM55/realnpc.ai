@@ -12,8 +12,7 @@ export default function Nav() {
   const prefetchDestination = (href: string) => {
     if (href !== pathname) router.prefetch(href);
   };
-  const inLab = pathname === "/companion-lab";
-  const inCompanionFlow = inLab || pathname === "/configurator";
+  const inCompanionFlow = pathname === "/configurator";
 
   return (
     <header className="fixed top-0 inset-x-0 z-50 h-[72px] border-b border-hairline bg-paper shadow-[0_1px_20px_rgba(21,24,29,0.045)]">

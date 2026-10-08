@@ -1,10 +1,10 @@
 import { assemblyHotspots } from "@/data/assemblyHotspots";
-import type { AssemblyConcept, AssemblyHotspot } from "@/types/domain";
+import type { AssemblyHotspot, SemanticTone } from "@/types/domain";
 
 type StageCalloutsProps = {
   suppressed: boolean;
   onFocus: (spot: AssemblyHotspot) => void;
-  onHover: (concept: AssemblyConcept | null) => void;
+  onHover: (concept: SemanticTone | null) => void;
 };
 
 export default function StageCallouts({

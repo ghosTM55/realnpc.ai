@@ -81,16 +81,14 @@ export default function ConfiguratorExperience() {
     const initialForm = isOneOf(VESSEL_FORMS, requestedForm) ? requestedForm : undefined;
     const view = url.searchParams.get("view");
     const initialStep = view ? VIEW_STEP.get(view) : undefined;
-    const applyForm = initialForm && url.searchParams.has("form");
-    const applyView = initialStep !== undefined && url.searchParams.has("view");
-    if (!applyForm && !applyView) return;
+    if (initialForm === undefined && initialStep === undefined) return;
     updateDemoDraft((current) => ({
       ...current,
-      step: applyView
+      step: initialStep !== undefined
         ? Math.min(initialStep, current.unlockedStep)
         : current.step,
       unlockedStep: initialStep === STEP.soul ? STEP.soul : current.unlockedStep,
-      config: applyForm
+      config: initialForm !== undefined
         ? { ...current.config, form: initialForm }
         : current.config,
     }));
@@ -189,7 +187,6 @@ export default function ConfiguratorExperience() {
           </NextButton>
         ) : (
           <DownloadButton
-            key={JSON.stringify(reviewCase)}
             primary
             filename={`realnpc-${profile.soul.name.toLowerCase()}-plan.json`}
             data={reviewCase}

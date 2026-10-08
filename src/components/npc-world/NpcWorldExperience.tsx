@@ -88,7 +88,7 @@ function Encounter({ scenario }: { scenario: WorldScenario }) {
               <button key={item.label} type="button" aria-current={index === playback.index ? "step" : undefined}
                 aria-label={"Step " + (index + 1) + ": " + item.label}
                 onClick={() => playback.select(index)}>
-                <span className="npc-step-number">{index < playback.index ? <Check size={13} /> : "0" + (index + 1)}</span>
+                <span className="npc-step-number">{index < playback.index ? <Check size={13} /> : String(index + 1).padStart(2, "0")}</span>
                 <span>{item.label}</span>
               </button>
             ))}
@@ -96,7 +96,7 @@ function Encounter({ scenario }: { scenario: WorldScenario }) {
           <div className="npc-reading-copy"
             onMouseUp={() => { if (window.getSelection()?.toString()) playback.pause(); }}
             aria-live={playback.paused ? "polite" : "off"} aria-atomic="true">
-            <p className="npc-eyebrow text-soul">{declined ? "A CHOICE RESPECTED" : "0" + (playback.index + 1) + " / " + step.label.toUpperCase()}</p>
+            <p className="npc-eyebrow text-soul">{declined ? "A CHOICE RESPECTED" : String(playback.index + 1).padStart(2, "0") + " / " + step.label.toUpperCase()}</p>
             <h3 className="npc-story-title">{declined ? "No pressure. No introduction." : step.title}</h3>
             <p className="npc-story-detail">{declined ? "In this version, one human passes. Contact stays closed and no shared memory is created." : step.detail}</p>
           </div>

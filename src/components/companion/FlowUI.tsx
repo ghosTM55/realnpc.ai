@@ -10,7 +10,6 @@ import {
   RotateCcw,
 } from "lucide-react";
 import {
-  DEFAULT_DRAFT,
   getCompanionProfile,
   type CompanionConfig,
   type DemoDraft,
@@ -501,7 +500,7 @@ export function DemoPrivacy() {
             type="button"
             className="min-h-11 text-xs font-semibold text-soul-ink underline"
             onClick={() => {
-              updateDemoDraft(() => undo ?? DEFAULT_DRAFT);
+              updateDemoDraft(() => undo);
               setUndo(null);
               focusFlowHeading();
             }}

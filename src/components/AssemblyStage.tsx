@@ -8,13 +8,13 @@ import StageCallouts from "@/components/assembly/StageCallouts";
 import StageHotspots from "@/components/assembly/StageHotspots";
 import { focusDot } from "@/components/assembly/focusDot";
 import { IDLE, stageSpot, type Stage } from "@/components/assembly/stage";
-import type { AssemblyConcept, AssemblyHotspot } from "@/types/domain";
+import type { AssemblyHotspot, SemanticTone } from "@/types/domain";
 
 export default function AssemblyStage() {
   const ref = useRef<HTMLElement>(null);
   const zoomRef = useRef<HTMLDivElement>(null);
   const [stage, setStage] = useState<Stage>(IDLE);
-  const [hovered, setHovered] = useState<AssemblyConcept | null>(null);
+  const [hovered, setHovered] = useState<SemanticTone | null>(null);
   const animation = useRef<gsap.core.Animation | null>(null);
   const { contextSafe } = useGSAP({ scope: ref });
   const active = stageSpot(stage);

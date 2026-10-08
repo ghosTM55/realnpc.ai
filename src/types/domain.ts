@@ -1,9 +1,8 @@
 export type SemanticTone = "vessel" | "soul" | "powers";
-export type AssemblyConcept = SemanticTone;
 
 export interface AssemblyHotspot {
   id: string;
-  concept: AssemblyConcept;
+  concept: SemanticTone;
   label: string;
   summary: string;
   /** Normalized 0-1 coordinates over the stage image. */

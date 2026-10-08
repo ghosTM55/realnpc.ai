@@ -118,27 +118,27 @@ export const ACTIVATION = {
     {
       name: "Vessel online",
       description: "Body, sensors, motion, and service baseline are active.",
-      tone: "vessel" as const,
+      tone: "vessel",
     },
     {
       name: "Soul initialized",
       description: "Persona, voice, taste, and memory boundaries are set.",
-      tone: "soul" as const,
+      tone: "soul",
     },
     {
       name: "First Power installed",
       description: "The initial capability pack is ready for use.",
-      tone: "powers" as const,
+      tone: "powers",
     },
     {
       name: "Routines learned",
       description: "Preferences and interaction patterns refine over time.",
-      tone: "soul" as const,
+      tone: "soul",
     },
     {
       name: "New Powers added",
       description: "Capability packs extend the same companion.",
-      tone: "powers" as const,
+      tone: "powers",
     },
   ],
   cta: {
@@ -169,7 +169,7 @@ export const PARTNERSHIP = {
   lanes: [
     {
       index: "01",
-      tone: "soul" as const,
+      tone: "soul",
       label: "IP Owners",
       title: "Turn characters into companions people can live with.",
       description:
@@ -179,7 +179,7 @@ export const PARTNERSHIP = {
     },
     {
       index: "02",
-      tone: "vessel" as const,
+      tone: "vessel",
       label: "Robotics Hardware Suppliers",
       title: "Make more builds possible through standardized modules.",
       description:
@@ -189,7 +189,7 @@ export const PARTNERSHIP = {
     },
     {
       index: "03",
-      tone: "powers" as const,
+      tone: "powers",
       label: "Offline Retail & Venue Networks",
       title: "Create places where robots can prove new behaviors.",
       description:

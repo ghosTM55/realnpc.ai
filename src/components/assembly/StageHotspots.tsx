@@ -1,11 +1,11 @@
 import { assemblyHotspots } from "@/data/assemblyHotspots";
-import type { AssemblyConcept, AssemblyHotspot } from "@/types/domain";
+import type { AssemblyHotspot, SemanticTone } from "@/types/domain";
 
 type StageHotspotsProps = {
   active: AssemblyHotspot | null;
-  hovered: AssemblyConcept | null;
+  hovered: SemanticTone | null;
   onFocus: (spot: AssemblyHotspot) => void;
-  onHover: (concept: AssemblyConcept | null) => void;
+  onHover: (concept: SemanticTone | null) => void;
 };
 
 export default function StageHotspots({
