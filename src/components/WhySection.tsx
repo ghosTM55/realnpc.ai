@@ -47,14 +47,11 @@ export default function WhySection() {
 
   return (
     <section ref={ref} className="mx-auto max-w-[1248px] px-6 py-14 lg:px-0">
-      <div data-thesis>
-        <h2 className="font-display text-[34px] font-semibold leading-[1.04] text-ink md:whitespace-nowrap md:text-[46px] lg:text-[50px]">
-          {WHY.statementLine1}
-        </h2>
-        <h2 className="font-display text-[34px] font-semibold leading-[1.04] text-vessel md:whitespace-nowrap md:text-[46px] lg:text-[50px]">
-          {WHY.statementLine2}
-        </h2>
-      </div>
+      {/* One sentence, one heading; each line still enters on its own. */}
+      <h2 data-thesis className="font-display text-[34px] font-semibold leading-[1.04] md:text-[46px] lg:text-[50px]">
+        <span className="block text-ink md:whitespace-nowrap">{WHY.statementLine1}</span>{" "}
+        <span className="block text-vessel md:whitespace-nowrap">{WHY.statementLine2}</span>
+      </h2>
 
       <div className="mt-12 grid gap-12 lg:grid-cols-[minmax(0,0.78fr)_minmax(0,1.22fr)] lg:items-start">
         <div data-supporting className="lg:sticky lg:top-28">
