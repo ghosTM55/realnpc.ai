@@ -19,7 +19,11 @@ config, and documentation drift first.
   `npm run build`, then `npm run test:budget` before deployment.
 - Against a local production export, run `npm run test:browser` and
   `npm run test:site`. Set `REALNPC_BASE_URL` and, if Playwright is provided
-  by the host, `REALNPC_PLAYWRIGHT_MODULE` to its module path.
+  by the host, `REALNPC_PLAYWRIGHT_MODULE` to its module path;
+  `REALNPC_BROWSER_CHANNEL=chrome` runs them in installed Chrome instead of
+  Playwright's bundled Chromium.
 - Web fonts and responsive images are committed build-time assets. Regenerate
-  with `scripts/subset-fonts.py` and `npm run assets:images`; see README.
+  fonts with `scripts/subset-fonts.py` (Python deps in
+  `scripts/requirements-assets.txt`), images with `npm run assets:images`
+  and the globe map with `npm run assets:map`.
   Original typefaces and source images must remain available for regeneration.
