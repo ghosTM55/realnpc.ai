@@ -106,7 +106,11 @@ body {
 .site-flow-background {
   position: fixed;
   z-index: -1;
-  inset: 0;
+  /* Large-viewport height: mobile toolbars showing or hiding must not resize (and reseed) the field. */
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 100lvh;
   overflow: hidden;
   pointer-events: none;
 }
