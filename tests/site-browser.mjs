@@ -10,9 +10,11 @@ const browser = await chromium.launch({ channel: process.env.REALNPC_BROWSER_CHA
 const artifacts = await mkdtemp(join(tmpdir(), "realnpc-site-qa-"));
 const errors = [];
 
-async function pageFor(viewport, reducedMotion = "no-preference") {
+// mainThreadFlow: hide OffscreenCanvas so the flow field draws on the page, where paints can be counted.
+async function pageFor(viewport, reducedMotion = "no-preference", { mainThreadFlow = false } = {}) {
   const page = await browser.newPage({ viewport, reducedMotion });
   page.on("pageerror", error => errors.push(error.message));
+  if (mainThreadFlow) await page.addInitScript(() => { delete HTMLCanvasElement.prototype.transferControlToOffscreen; });
   await page.addInitScript(() => {
     window.canvasPaints = new WeakMap();
     const paint = CanvasRenderingContext2D.prototype.clearRect;
@@ -129,7 +131,7 @@ try {
     console.log("PASS assembly keyboard: one stop per layer, no invisible stops, Escape closes and restores focus");
   }
 
-  const page = await pageFor({ width: 1440, height: 900 });
+  const page = await pageFor({ width: 1440, height: 900 }, "no-preference", { mainThreadFlow: true });
   await page.goto(base, { waitUntil: "networkidle" });
   await page.waitForTimeout(500);
   assert.equal(await paints(page, ".site-flow-background canvas"), 0, "Covered global background must not initialize");
@@ -152,6 +154,39 @@ try {
   await page.waitForFunction(() => window.canvasPaints.get(document.querySelector(".flow-surface-background canvas")) > 0);
   console.log("PASS flow field: covered/offscreen idle, scroll-in starts, user pause stops");
   await page.close();
+
+  {
+    const live = await pageFor({ width: 1440, height: 900 });
+    const workers = [];
+    live.on("worker", worker => workers.push(worker));
+    await live.goto(base, { waitUntil: "networkidle" });
+    await live.getByRole("navigation").getByRole("link", { name: "Partnership", exact: true }).click();
+    await live.waitForURL("**/partnership/");
+    await live.waitForTimeout(2500);
+    assert.equal(workers.length, 2, "Navigation keeps the global field's worker and adds one for the page's surface");
+    const field = live.locator(".site-flow-background");
+    const before = await field.screenshot();
+    await live.waitForTimeout(300);
+    assert.ok(!before.equals(await field.screenshot()), "The worker-drawn global field must animate");
+    await live.getByRole("button", { name: "Pause background animation", exact: true }).click();
+    await live.waitForTimeout(150);
+    const paused = await field.screenshot();
+    await live.waitForTimeout(300);
+    assert.ok(paused.equals(await field.screenshot()), "Pausing must stop the worker-drawn field");
+    await live.close();
+
+    const stills = [];
+    for (const mainThreadFlow of [false, true]) {
+      const still = await pageFor({ width: 1440, height: 900 }, "reduce", { mainThreadFlow });
+      await still.goto(`${base}/partnership/`, { waitUntil: "networkidle" });
+      await still.locator(".flow-surface").scrollIntoViewIfNeeded();
+      await still.waitForTimeout(1500);
+      stills.push(await still.locator(".flow-surface").screenshot());
+      await still.close();
+    }
+    assert.ok(stills[0].equals(stills[1]), "The worker must draw the same still as the main-thread field");
+    console.log("PASS flow worker: survives navigation, animates, pauses, draws the main-thread still");
+  }
 
   const world = await pageFor({ width: 1440, height: 900 });
   await world.route("**/countries-110m*.geojson", route => route.abort());

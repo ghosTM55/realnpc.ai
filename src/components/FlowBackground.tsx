@@ -7,19 +7,23 @@ import { initFlowBackground } from "@/lib/flowBackground";
 
 const FlowPaused = createContext(false);
 
-function FlowCanvas({ background = false }: { background?: boolean }) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+function FlowCanvas({ className, background = false }: { className: string; background?: boolean }) {
+  const hostRef = useRef<HTMLDivElement>(null);
   const flowRef = useRef<ReturnType<typeof initFlowBackground>>(null);
   const paused = useContext(FlowPaused);
   const pathname = usePathname();
 
   useEffect(() => {
-    if (!canvasRef.current) return;
-    const flow = initFlowBackground(canvasRef.current, { occludable: background });
+    const host = hostRef.current;
+    if (!host) return;
+    // A fresh canvas per mount: a canvas can hand its drawing to a worker only once.
+    const canvas = host.appendChild(document.createElement("canvas"));
+    const flow = initFlowBackground(canvas, { occludable: background });
     flowRef.current = flow;
     return () => {
       flow?.dispose();
       flowRef.current = null;
+      canvas.remove();
     };
   }, [background]);
 
@@ -31,11 +35,11 @@ function FlowCanvas({ background = false }: { background?: boolean }) {
     flowRef.current?.refreshCovers();
   }, [pathname]);
 
-  return <canvas ref={canvasRef} />;
+  return <div ref={hostRef} className={className} aria-hidden="true" />;
 }
 
 export function FlowSurface() {
-  return <div className="flow-surface-background" aria-hidden="true"><FlowCanvas /></div>;
+  return <FlowCanvas className="flow-surface-background" />;
 }
 
 export default function FlowBackground({ children }: { children: ReactNode }) {
@@ -43,9 +47,7 @@ export default function FlowBackground({ children }: { children: ReactNode }) {
 
   return (
     <FlowPaused.Provider value={paused}>
-      <div className="site-flow-background" aria-hidden="true">
-        <FlowCanvas background />
-      </div>
+      <FlowCanvas className="site-flow-background" background />
       {children}
       <button
         type="button"
