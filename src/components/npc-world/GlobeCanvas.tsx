@@ -2,11 +2,10 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Globe, { type GlobeMethods } from "react-globe.gl";
-import { Color, MeshBasicMaterial, Vector2, type Object3D } from "three";
+import { Color, MeshBasicMaterial } from "three";
 import { NPC_WORLD } from "@/data/npcWorld";
 import type { WorldCity } from "@/domain/world/model";
 import { readTokens, withAlpha } from "@/lib/brandColors";
-import { borderLines, countryPolygons, landMesh } from "./globeLayers";
 import { limitPickingToCities } from "./globePicking";
 
 export interface GlobeCanvasProps {
@@ -30,17 +29,14 @@ const isWorldCity = (point: unknown): point is WorldCity => {
 const cityLat = (point: object) => isWorldCity(point) ? point.lat : 0;
 const cityLng = (point: object) => isWorldCity(point) ? point.lng : 0;
 const cityLabel = (point: object) => isWorldCity(point) ? `${point.city} · demo` : "";
-// three-globe's globe radius in scene units.
-const GLOBE_RADIUS = 100;
+const pathLat = (point: number[]) => point[1];
+const pathLng = (point: number[]) => point[0];
 // This module only loads in the browser (dynamic import), so the VI tokens can be read once here.
 const TOKENS = readTokens(["paper-white", "soul-blue", "powers-amber", "vessel-red", "globe-water"]);
 // String props are property-name accessors in three-globe, so keep constant functions stable.
-// Land and borders are each one custom-layer object; three-globe would draw 288 + 289.
-// Built when three-globe asks, after its own globe objects exist: transparent objects with equal depth
-// draw in creation order, and the water must come before the borders to hide those on the far side.
-type StaticLayer = { build: () => Object3D };
-const buildStaticLayer = (datum: object) => (datum as StaticLayer).build();
-const keepStaticLayer = () => {};
+const landColor = () => TOKENS["paper-white"];
+const borderColor = () => withAlpha(TOKENS["soul-blue"], 0.9);
+const empty = () => "";
 // three-globe types its data props as mutable object[]; copy once so the array stays stable across renders.
 const CITY_POINTS: object[] = [...NPC_WORLD];
 const ringColor = () => [withAlpha(TOKENS["powers-amber"], 0.6), withAlpha(TOKENS["powers-amber"], 0)];
@@ -53,16 +49,17 @@ export default function GlobeCanvas({ countries, width, height, active, reducedM
   }), []);
   useEffect(() => () => { globeMaterial.dispose(); }, [globeMaterial]);
 
-  const polygons = useMemo(() => countryPolygons(countries), [countries]);
-  // The border width is in screen pixels, so its material needs the canvas size.
-  const borderResolution = useMemo(() => new Vector2(), []);
-  useEffect(() => { borderResolution.set(width, height); }, [borderResolution, width, height]);
-  const staticLayers = useMemo((): StaticLayer[] => !polygons.length ? [] : [
-    { build: () => landMesh(polygons, GLOBE_RADIUS, { color: TOKENS["paper-white"], altitude: 0.005 }) },
-    { build: () => borderLines(polygons.flat(), GLOBE_RADIUS, {
-      color: TOKENS["soul-blue"], opacity: 0.9, altitude: 0.006, width: 1.6, resolution: borderResolution,
-    }) },
-  ], [polygons, borderResolution]);
+  const borderPaths = useMemo(() => {
+    const paths: number[][][] = [];
+    for (const feature of countries) {
+      const geometry = (feature as { geometry?: { type: string; coordinates: unknown } }).geometry;
+      if (geometry?.type === "Polygon") paths.push(...geometry.coordinates as number[][][]);
+      else if (geometry?.type === "MultiPolygon") {
+        for (const polygon of geometry.coordinates as number[][][][]) paths.push(...polygon);
+      }
+    }
+    return paths;
+  }, [countries]);
   const rings = useMemo(() => !reducedMotion && active && focused ? [selectedCity] : [], [active, focused, reducedMotion, selectedCity]);
   const pointRadius = useCallback((point: object) => isWorldCity(point) && selectedCity.id === point.id ? 0.85 : 0.45, [selectedCity.id]);
   const pointColor = useCallback((point: object) => isWorldCity(point) && selectedCity.id === point.id ? TOKENS["powers-amber"] : TOKENS["vessel-red"], [selectedCity.id]);
@@ -105,7 +102,10 @@ export default function GlobeCanvas({ countries, width, height, active, reducedM
     <Globe ref={globeRef} width={width} height={height} onGlobeReady={configure}
       backgroundColor="rgba(0,0,0,0)" globeMaterial={globeMaterial}
       showAtmosphere atmosphereColor={TOKENS["soul-blue"]} atmosphereAltitude={0.12}
-      customLayerData={staticLayers} customThreeObject={buildStaticLayer} customThreeObjectUpdate={keepStaticLayer}
+      polygonsData={countries} polygonCapColor={landColor} polygonSideColor={empty}
+      polygonAltitude={0.005} polygonsTransitionDuration={0} polygonLabel={empty}
+      pathsData={borderPaths} pathPointLat={pathLat} pathPointLng={pathLng}
+      pathPointAlt={0.006} pathColor={borderColor} pathStroke={1.6} pathTransitionDuration={0} pathLabel={empty}
       pointsData={CITY_POINTS} pointLat={cityLat} pointLng={cityLng} pointAltitude={0.007}
       pointRadius={pointRadius} pointColor={pointColor} pointLabel={cityLabel}
       onPointClick={onPointClick} onPointHover={onPointHover}
