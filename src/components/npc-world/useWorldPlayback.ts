@@ -1,38 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState, type RefObject } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { WorldScenario } from "@/domain/world/model";
 import { storyReadingDuration } from "@/domain/world/story";
-
-export function useSceneActivity(ref: RefObject<HTMLElement | null>, threshold = 0.1) {
-  const [visible, setVisible] = useState(false);
-  const [foreground, setForeground] = useState(false);
-  const [reducedMotion, setReducedMotion] = useState(false);
-
-  useEffect(() => {
-    const node = ref.current;
-    if (!node) return;
-    const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const syncVisibility = () => setForeground(document.visibilityState === "visible");
-    const syncMotion = () => setReducedMotion(motion.matches);
-    syncVisibility();
-    syncMotion();
-    const observer = new IntersectionObserver(
-      ([entry]) => setVisible(Boolean(entry?.isIntersecting && entry.intersectionRatio >= threshold)),
-      { threshold: [0, threshold], rootMargin: "-76px 0px -5% 0px" },
-    );
-    observer.observe(node);
-    document.addEventListener("visibilitychange", syncVisibility);
-    motion.addEventListener("change", syncMotion);
-    return () => {
-      observer.disconnect();
-      document.removeEventListener("visibilitychange", syncVisibility);
-      motion.removeEventListener("change", syncMotion);
-    };
-  }, [ref, threshold]);
-
-  return { active: visible && foreground, reducedMotion };
-}
 
 export function useWorldPlayback(scenario: WorldScenario, active: boolean) {
   const [index, setIndex] = useState(0);

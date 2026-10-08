@@ -21,7 +21,7 @@ export default function Hero() {
             data-hero-left-item
             className="font-signal text-[12px] font-semibold tracking-[0.08em] text-vessel"
           >
-            BESPOKE COMPANION ROBOTICS
+            {HERO.eyebrow}
           </p>
           <h1
             data-hero-left-item

@@ -18,6 +18,7 @@ export const CONFIG_CTA_LABEL = "Create a Soul";
 export const CONFIG_CTA_HREF = "/configurator/?view=choose";
 
 export const HERO = {
+  eyebrow: "BESPOKE COMPANION ROBOTICS",
   kicker: BRAND,
   title: "The first NPC that lives in your world.",
   /** Right-column HUD readout. */

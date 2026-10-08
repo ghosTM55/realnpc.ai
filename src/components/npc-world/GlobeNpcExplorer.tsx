@@ -7,7 +7,7 @@ import type { GlobeCanvasProps } from "./GlobeCanvas";
 import { getCity } from "@/data/npcWorld";
 import { NPC_WORLD_PAGE, WORLD_SCENARIOS } from "@/data/npcWorldPage";
 import type { ScenarioId, WorldCity, WorldScenario } from "@/domain/world/model";
-import { useSceneActivity } from "./useWorldPlayback";
+import { useSceneActivity } from "./useSceneActivity";
 import { WORLD_MAP_URL } from "@/data/worldMap";
 
 export default function GlobeNpcExplorer({ scenario, onScenarioChange }: {
