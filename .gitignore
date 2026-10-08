@@ -44,3 +44,6 @@ next-env.d.ts
 
 # internal planning docs (not for repo)
 /docs/
+
+# local agent config
+/CLAUDE.md
