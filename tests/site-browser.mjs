@@ -68,6 +68,16 @@ try {
     console.log(`PASS ${width}px assembly: all layer controls and detail fit`);
   }
 
+  for (const path of ["/", "/npc-world/", "/partnership/"]) {
+    const page = await pageFor({ width: 1440, height: 900 }, "reduce");
+    await page.goto(`${base}${path}`);
+    for (const role of ["banner", "main", "contentinfo"]) {
+      assert.equal(await page.getByRole(role).count(), 1, `${path} must expose exactly one ${role} landmark`);
+    }
+    await page.close();
+  }
+  console.log("PASS landmarks: banner, main and contentinfo are siblings on marketing pages");
+
   {
     const page = await pageFor({ width: 1440, height: 900 }, "reduce");
     await page.goto(base, { waitUntil: "networkidle" });

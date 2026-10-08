@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
 import "@/components/npc-world/npc-world.css";
-import Nav from "@/components/Nav";
-import Footer from "@/components/Footer";
 import NpcWorldExperience from "@/components/npc-world/NpcWorldExperience";
 import { pageMetadata } from "@/lib/seo";
 
@@ -13,11 +11,5 @@ export const metadata: Metadata = pageMetadata({
 });
 
 export default function NpcWorldPage() {
-  return (
-    <main>
-      <Nav />
-      <NpcWorldExperience />
-      <Footer />
-    </main>
-  );
+  return <NpcWorldExperience />;
 }

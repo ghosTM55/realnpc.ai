@@ -8,8 +8,6 @@ import {
   Network,
   Store,
 } from "lucide-react";
-import Nav from "@/components/Nav";
-import Footer from "@/components/Footer";
 import { FlowSurface } from "@/components/FlowBackground";
 import SectionDivider from "@/components/SectionDivider";
 import { PARTNERSHIP } from "@/data/site";
@@ -32,16 +30,14 @@ type Lane = (typeof PARTNERSHIP.lanes)[number];
 
 export default function PartnershipPage() {
   return (
-    <main>
-      <Nav />
+    <>
       <Hero />
       <SectionDivider label="PARTNER PATHS" />
       <PartnerPaths />
       <SectionDivider label="OPERATING MODEL" />
       <OperatingModel />
       <Close />
-      <Footer />
-    </main>
+    </>
   );
 }
 
