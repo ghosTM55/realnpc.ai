@@ -15,7 +15,8 @@ const compressedBytes = async urls => (await Promise.all([...new Set(urls)].map(
   gzipSync(await readFile(resolve(root, `.${url}`)), { level: 9 }).length,
 ))).reduce((sum, value) => sum + value, 0);
 
-for (const [route, jsBudget, cssBudget] of [["", 255_000, 12_000], ["npc-world", 225_000, 16_000], ["configurator", 225_000, 11_000], ["partnership", 215_000, 12_000]]) {
+// JS budgets sit about 3% above the modern-browser cost measured on 2026-10-08, so regressions show up.
+for (const [route, jsBudget, cssBudget] of [["", 220_000, 12_000], ["npc-world", 181_000, 16_000], ["configurator", 180_000, 11_000], ["partnership", 166_000, 12_000]]) {
   const html = await readFile(resolve(root, route, "index.html"), "utf8");
   const fonts = [...new Set([...html.matchAll(/<link\b[^>]*>/g)]
     .filter(([tag]) => /as="font"/.test(tag))
@@ -25,7 +26,11 @@ for (const [route, jsBudget, cssBudget] of [["", 255_000, 12_000], ["npc-world",
     return url.endsWith(".woff2") ? (await stat(file)).size : gzipSync(await readFile(file)).length;
   }))).reduce((sum, value) => sum + value, 0);
   assert.ok(bytes <= 200_000, `${route || "/"}: preloaded fonts cost ${bytes} bytes (budget 200,000)`);
-  const jsBytes = await compressedBytes([...html.matchAll(/<script\b[^>]*\bsrc="([^"]+)"/g)].map(match => match[1]));
+  // Modern browsers skip noModule polyfills, so they are not part of the initial JS cost.
+  const jsBytes = await compressedBytes([...html.matchAll(/<script\b[^>]*>/g)]
+    .filter(([tag]) => !/\bnomodule\b/i.test(tag))
+    .map(([tag]) => tag.match(/\bsrc="([^"]+)"/)?.[1])
+    .filter(Boolean));
   assert.ok(jsBytes > 0 && jsBytes <= jsBudget, `${route || "/"}: initial JS costs ${jsBytes} bytes gzip (budget ${jsBudget})`);
   const styles = [...html.matchAll(/<link\b[^>]*>/g)].filter(([tag]) => /rel="stylesheet"/.test(tag)).map(([tag]) => tag.match(/href="([^"]+)"/)[1]);
   const cssBytes = await compressedBytes(styles);
