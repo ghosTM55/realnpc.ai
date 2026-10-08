@@ -20,3 +20,9 @@ for (const [name, original] of [
     console.log(`hero-portrait.webp: ${result.size} bytes`);
   }
 }
+
+// The header shows the logo at most ~215 CSS px wide (.brand-logo crops a 127.87% image); 3× covers phone screens.
+const logo = fileURLToPath(new URL("public/brand/realnpc-logo.png", root));
+const logoResult = await sharp(fileURLToPath(new URL("assets/media/realnpc-logo.png", root)))
+  .resize({ width: 645 }).png({ compressionLevel: 9, palette: false }).toFile(logo);
+console.log(`realnpc-logo.png: ${logoResult.width}x${logoResult.height}, ${logoResult.size} bytes`);

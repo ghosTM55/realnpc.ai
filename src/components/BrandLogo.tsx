@@ -6,8 +6,8 @@ export default function BrandLogo() {
       <Image
         src="/brand/realnpc-logo.png"
         alt="RealNPC"
-        width={2574}
-        height={1088}
+        width={645}
+        height={273}
         className="brand-logo-image"
         loading="eager"
         unoptimized
