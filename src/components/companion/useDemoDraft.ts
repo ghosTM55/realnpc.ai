@@ -3,8 +3,8 @@
 import { useSyncExternalStore } from "react";
 import {
   DEFAULT_DRAFT,
+  normalizeDemoDraft,
   parseDemoDraft,
-  serializeDemoDraft,
   type DemoDraft,
 } from "@/lib/companion";
 
@@ -37,10 +37,12 @@ function subscribe(listener: () => void) {
 }
 
 export function updateDemoDraft(update: (draft: DemoDraft) => DemoDraft) {
-  const draft = update(getSnapshot().draft);
+  // Memory and storage hold the same validated value, so a refresh never
+  // restores something different from what was on screen.
+  const draft = normalizeDemoDraft(update(getSnapshot().draft));
   let storageAvailable = true;
   try {
-    window.sessionStorage.setItem(STORAGE_KEY, serializeDemoDraft(draft));
+    window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify(draft));
   } catch {
     storageAvailable = false;
   }

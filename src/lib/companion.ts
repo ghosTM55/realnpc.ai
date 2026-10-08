@@ -181,8 +181,13 @@ export function parseDemoDraft(serialized: string | null): DemoDraft {
   }
 }
 
+/** Round-trips a draft through the same validation used when loading from storage. */
+export function normalizeDemoDraft(draft: DemoDraft): DemoDraft {
+  return parseDemoDraft(JSON.stringify(draft));
+}
+
 export function serializeDemoDraft(draft: DemoDraft) {
-  return JSON.stringify(parseDemoDraft(JSON.stringify(draft)));
+  return JSON.stringify(normalizeDemoDraft(draft));
 }
 
 export const SCENARIOS = {

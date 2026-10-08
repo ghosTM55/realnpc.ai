@@ -8,6 +8,7 @@ import {
   getScenePreview,
   parseDemoDraft,
   serializeDemoDraft,
+  normalizeDemoDraft,
   createReviewCase,
   createProfileText,
   VESSEL_FORMS,
@@ -288,4 +289,11 @@ test("restored navigation cannot exceed completed progress or trust invalid prog
 test("the Vessel choice is every NPC form plus undecided, each with option copy", () => {
   assert.deepEqual([...VESSEL_FORMS].sort(), [...NPC_FORMS, "undecided"].sort());
   assert.deepEqual(Object.keys(VESSEL_OPTIONS).sort(), [...VESSEL_FORMS].sort());
+});
+
+test("normalizing a draft clamps progress exactly as reloading it from storage would", () => {
+  const draft = { ...DEFAULT_DRAFT, step: 5, unlockedStep: 2 };
+  assert.deepEqual(normalizeDemoDraft(draft), parseDemoDraft(serializeDemoDraft(draft)));
+  assert.equal(normalizeDemoDraft(draft).step, 2);
+  assert.equal(serializeDemoDraft(draft), JSON.stringify(normalizeDemoDraft(draft)));
 });
