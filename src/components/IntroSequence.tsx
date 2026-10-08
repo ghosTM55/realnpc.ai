@@ -151,6 +151,14 @@ export default function IntroSequence() {
             },
             0.68,
           )
+          // The identity filter left by the exposure settle still costs an offscreen pass; scrubbing back restores it.
+          .set(
+            "[data-intro-assembly] [data-stage-background]",
+            {
+              filter: "none",
+            },
+            0.82,
+          )
           .to({}, { duration: 0.4, ease: "none" }, 0.82);
       });
 
