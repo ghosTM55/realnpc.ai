@@ -2,19 +2,16 @@ import { assemblyHotspots } from "@/data/assemblyHotspots";
 import type { AssemblyConcept, AssemblyHotspot } from "@/types/domain";
 
 type StageCalloutsProps = {
-  active: AssemblyHotspot | null;
-  restoring: boolean;
+  suppressed: boolean;
   onFocus: (spot: AssemblyHotspot) => void;
   onHover: (concept: AssemblyConcept | null) => void;
 };
 
 export default function StageCallouts({
-  active,
-  restoring,
+  suppressed: isOverlaySuppressed,
   onFocus,
   onHover,
 }: StageCalloutsProps) {
-  const isOverlaySuppressed = active !== null || restoring;
 
   return (
     <>
@@ -44,16 +41,15 @@ export default function StageCallouts({
         </div>
       </div>
 
-      {assemblyHotspots.map((spot) => {
-        const isActive = active?.id === spot.id;
-
-        return (
+      {/* Labels are a pointer shortcut only: each layer's marker is its single
+          keyboard and screen-reader target, and stays visible while focused. */}
+      {assemblyHotspots.map((spot) => (
           <button
             key={`${spot.id}-callout`}
             data-tone={spot.concept}
             type="button"
-            aria-label={`Focus the ${spot.label} layer`}
-            aria-expanded={isActive}
+            tabIndex={-1}
+            aria-hidden
             onClick={() => onFocus(spot)}
             onMouseEnter={() => onHover(spot.concept)}
             onMouseLeave={() => onHover(null)}
@@ -88,8 +84,7 @@ export default function StageCallouts({
               </span>
             </span>
           </button>
-        );
-      })}
+      ))}
     </>
   );
 }

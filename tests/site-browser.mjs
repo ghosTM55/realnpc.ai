@@ -68,6 +68,46 @@ try {
     console.log(`PASS ${width}px assembly: all layer controls and detail fit`);
   }
 
+  {
+    const page = await pageFor({ width: 1440, height: 900 }, "reduce");
+    await page.goto(base, { waitUntil: "networkidle" });
+    // Walks the real Tab order once and reports each stop's name and whether it is invisible.
+    const tabStops = async () => {
+      await page.evaluate(() => { document.activeElement?.blur(); window.__tabSeen = new WeakSet(); });
+      const stops = [];
+      for (let i = 0; i < 80; i += 1) {
+        await page.keyboard.press("Tab");
+        const stop = await page.evaluate(() => {
+          const node = document.activeElement;
+          if (!node || node === document.body || window.__tabSeen.has(node)) return null;
+          window.__tabSeen.add(node);
+          let opacity = 1;
+          for (let el = node; el; el = el.parentElement) opacity *= Number(getComputedStyle(el).opacity);
+          return { name: node.getAttribute("aria-label") ?? node.textContent.trim(), hidden: opacity === 0 };
+        });
+        if (!stop) break;
+        stops.push(stop);
+      }
+      return stops;
+    };
+    const layerStops = stops => stops.filter(stop => /^Focus the .+ layer$/.test(stop.name));
+    const before = layerStops(await tabStops());
+    assert.equal(before.length, 3, `Each assembly layer must be one Tab stop: ${JSON.stringify(before)}`);
+    assert.equal(new Set(before.map(stop => stop.name)).size, 3);
+    const marker = page.locator("[data-hotspot-marker]").first();
+    await marker.focus();
+    await page.keyboard.press("Enter");
+    await page.locator("[data-popover]").waitFor();
+    const hidden = (await tabStops()).filter(stop => stop.hidden);
+    assert.deepEqual(hidden, [], "No invisible control may stay in the Tab order while a layer is open");
+    await page.keyboard.press("Escape");
+    assert.equal(await page.locator("[data-popover]").count(), 0, "Escape must close the layer detail");
+    assert.equal(await page.evaluate(() => document.activeElement?.hasAttribute("data-hotspot-marker")), true,
+      "Escape must return focus to the layer marker");
+    await page.close();
+    console.log("PASS assembly keyboard: one stop per layer, no invisible stops, Escape closes and restores focus");
+  }
+
   const page = await pageFor({ width: 1440, height: 900 });
   await page.goto(base, { waitUntil: "networkidle" });
   await page.waitForTimeout(500);

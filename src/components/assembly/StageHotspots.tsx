@@ -24,10 +24,13 @@ export default function StageHotspots({
           <button
             key={spot.id}
             data-hotspot-marker
+            data-hotspot-id={spot.id}
             data-tone={spot.concept}
             type="button"
+            inert={isSuppressed}
             aria-label={`Focus the ${spot.label} layer`}
             aria-expanded={isActive}
+            aria-controls={isActive ? "assembly-popover" : undefined}
             onClick={() => onFocus(spot)}
             onMouseEnter={() => onHover(spot.concept)}
             onMouseLeave={() => onHover(null)}

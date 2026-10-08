@@ -7,18 +7,17 @@ import FocusedPopover from "@/components/assembly/FocusedPopover";
 import StageCallouts from "@/components/assembly/StageCallouts";
 import StageHotspots from "@/components/assembly/StageHotspots";
 import { focusDot } from "@/components/assembly/focusDot";
+import { IDLE, stageSpot, type Stage } from "@/components/assembly/stage";
 import type { AssemblyConcept, AssemblyHotspot } from "@/types/domain";
 
 export default function AssemblyStage() {
   const ref = useRef<HTMLElement>(null);
   const zoomRef = useRef<HTMLDivElement>(null);
-  const [active, setActive] = useState<AssemblyHotspot | null>(null);
-  const [dot, setDot] = useState<{ x: number; y: number } | null>(null);
+  const [stage, setStage] = useState<Stage>(IDLE);
   const [hovered, setHovered] = useState<AssemblyConcept | null>(null);
-  const [focusing, setFocusing] = useState(false);
-  const [restoring, setRestoring] = useState(false);
   const animation = useRef<gsap.core.Animation | null>(null);
   const { contextSafe } = useGSAP({ scope: ref });
+  const active = stageSpot(stage);
 
   useEffect(() => {
     const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -26,33 +25,32 @@ export default function AssemblyStage() {
       if (!motion.matches) return;
       animation.current?.kill();
       if (zoomRef.current) gsap.set(zoomRef.current, { clearProps: "transform,transformOrigin" });
-      setFocusing(false);
-      setRestoring(false);
-      setDot(active ? { x: active.x, y: active.y } : null);
+      setStage((current) =>
+        "spot" in current ? { phase: "focused", spot: current.spot, zoomed: false } : IDLE,
+      );
     };
     motion.addEventListener("change", sync);
     return () => motion.removeEventListener("change", sync);
-  }, [active]);
+  }, []);
 
   // eslint-disable-next-line react-hooks/refs -- standard @gsap/react event-handler pattern
   const resetStage = contextSafe(() => {
     animation.current?.kill();
-    setFocusing(false);
-    setRestoring(false);
-    setActive(null);
-    setDot(null);
 
-    if (zoomRef.current && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      setRestoring(true);
-      animation.current = gsap.to(zoomRef.current, {
-        scale: 1,
-        xPercent: 0,
-        yPercent: 0,
-        duration: 0.5,
-        ease: "power2.inOut",
-        onComplete: () => setRestoring(false),
-      });
+    if (!zoomRef.current || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setStage(IDLE);
+      return;
     }
+
+    setStage({ phase: "restoring" });
+    animation.current = gsap.to(zoomRef.current, {
+      scale: 1,
+      xPercent: 0,
+      yPercent: 0,
+      duration: 0.5,
+      ease: "power2.inOut",
+      onComplete: () => setStage(IDLE),
+    });
   });
 
   // eslint-disable-next-line react-hooks/refs -- standard @gsap/react event-handler pattern
@@ -63,23 +61,19 @@ export default function AssemblyStage() {
     }
 
     animation.current?.kill();
-    setFocusing(false);
-    setRestoring(false);
-    setActive(spot);
 
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches || !zoomRef.current) {
-      setDot({ x: spot.x, y: spot.y });
+      setStage({ phase: "focused", spot, zoomed: false });
       return;
     }
 
     const frame = focusDot(spot);
-    setDot({ x: frame.x, y: frame.y });
-    setFocusing(true);
+    setStage({ phase: "focusing", spot, zoomed: true });
 
     animation.current = gsap
       .timeline({
         defaults: { ease: "power3.inOut" },
-        onComplete: () => setFocusing(false),
+        onComplete: () => setStage({ phase: "focused", spot, zoomed: true }),
       })
       .to(zoomRef.current, {
         scale: 1,
@@ -97,6 +91,21 @@ export default function AssemblyStage() {
         duration: 0.75,
       });
   });
+
+  // Escape closes the open layer and returns focus to its marker, the only
+  // keyboard target for each layer.
+  useEffect(() => {
+    if (!active) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      resetStage();
+      ref.current
+        ?.querySelector<HTMLButtonElement>(`[data-hotspot-id="${active.id}"]`)
+        ?.focus();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [active, resetStage]);
 
   return (
     <section
@@ -135,12 +144,11 @@ export default function AssemblyStage() {
         className="pointer-events-none absolute inset-x-0 bottom-0 top-[72px]"
       >
         <StageCallouts
-          active={active}
-          restoring={restoring}
+          suppressed={stage.phase !== "idle"}
           onFocus={focusHotspot}
           onHover={setHovered}
         />
-        <FocusedPopover active={active} dot={dot} focusing={focusing} />
+        <FocusedPopover stage={stage} />
       </div>
     </section>
   );

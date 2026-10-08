@@ -1,21 +1,16 @@
-import type { AssemblyHotspot } from "@/types/domain";
 import styles from "./FocusedPopover.module.css";
+import { stageDot, type Stage } from "./stage";
 
-type FocusedPopoverProps = {
-  active: AssemblyHotspot | null;
-  dot: { x: number; y: number } | null;
-  focusing: boolean;
-};
-
-export default function FocusedPopover({
-  active,
-  dot,
-  focusing,
-}: FocusedPopoverProps) {
-  if (!active || !dot || focusing) return null;
+export default function FocusedPopover({ stage }: { stage: Stage }) {
+  if (stage.phase !== "focused") return null;
+  const active = stage.spot;
+  const dot = stageDot(stage);
 
   return (
     <div
+      id="assembly-popover"
+      role="region"
+      aria-label={active.title}
       data-popover
       data-tone={active.concept}
       className={`${styles.popover} pointer-events-auto absolute z-30 w-[calc(100%-48px)] max-w-[362px] rounded-[8px] border border-tone/40 bg-paper/45 p-6 shadow-[0_14px_36px_rgba(26,42,53,0.16)]`}
