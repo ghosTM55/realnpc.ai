@@ -13,7 +13,7 @@ export function permissionCapabilities(ids: readonly PermissionId[]) {
   };
 }
 
-/** The copy a step's scene shows; rendering and reading time both use it. */
+/** Scene text counted toward the automatic reading duration. */
 export function storySceneText(scenario: WorldScenario, step: StoryStep): string {
   switch (step.kind) {
     case "discover": return scenario.permissions.interest.value;
