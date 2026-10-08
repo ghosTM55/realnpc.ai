@@ -396,8 +396,12 @@ try {
       .isChecked(),
   );
   assert.equal(new URL(direct.url()).searchParams.has("form"), false);
-  await direct.goto(`${base}/companion-lab?view=profile`);
+  await direct.goto(`${base}/companion-lab?view=profile&form=robot`);
   await heading(direct, "Bring Morrow into your world.");
+  assert.ok(
+    await direct.getByRole("radio", { name: /A digital companion/ }).isChecked(),
+    "Legacy links must preserve the saved form instead of applying campaign parameters",
+  );
   await direct
     .getByRole("button", { name: "Set priorities", exact: true })
     .click();

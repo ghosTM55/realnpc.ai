@@ -8,8 +8,9 @@ export default function CompanionLabPage() {
   const router = useRouter();
 
   useEffect(() => {
-    // The configurator validates ?view= and ?form= itself, so forward the whole query.
-    router.replace(`/configurator/${window.location.search}`);
+    const view = new URL(window.location.href).searchParams.get("view");
+    const query = view === "choose" || view === "profile" ? `?view=${view}` : "";
+    router.replace(`/configurator/${query}`);
   }, [router]);
 
   return (
