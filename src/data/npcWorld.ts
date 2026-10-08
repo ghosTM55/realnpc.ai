@@ -25,15 +25,15 @@ export const STORY_ACTORS = {
 } as const satisfies Record<string, WorldNpc>;
 
 export type WorldCity = {
-  id: string;
-  city: string;
-  country: string;
-  lat: number;
-  lng: number;
-  npcs: WorldNpc[];
+  readonly id: string;
+  readonly city: string;
+  readonly country: string;
+  readonly lat: number;
+  readonly lng: number;
+  readonly npcs: readonly WorldNpc[];
 };
 
-export const NPC_WORLD: WorldCity[] = [
+export const NPC_WORLD = [
   // ── North America ──
   {
     id: "nyc", city: "New York", country: "United States", lat: 40.71, lng: -74.01,
@@ -444,4 +444,12 @@ export const NPC_WORLD: WorldCity[] = [
       { handle: "Kauri", persona: "Slows you down to island time.", trait: "Gentle", tone: "soul" },
     ],
   },
-];
+] as const satisfies readonly WorldCity[];
+
+export type WorldCityId = (typeof NPC_WORLD)[number]["id"];
+
+export function getCity(id: WorldCityId): WorldCity {
+  const city = NPC_WORLD.find((item) => item.id === id);
+  if (!city) throw new Error(`Unknown city: ${id}`);
+  return city;
+}

@@ -32,6 +32,8 @@ const pathLng = (point: number[]) => point[0];
 const landColor = () => "#fbfbfc";
 const borderColor = () => "rgba(67,169,201,0.9)";
 const empty = () => "";
+// three-globe types its data props as mutable object[]; copy once so the array stays stable across renders.
+const CITY_POINTS: object[] = [...NPC_WORLD];
 const ringColor = () => ["rgba(230,164,43,0.6)", "rgba(230,164,43,0)"];
 
 export default function GlobeCanvas({ countries, width, height, active, reducedMotion, focused, selectedCity, onSelectCity }: GlobeCanvasProps) {
@@ -92,7 +94,7 @@ export default function GlobeCanvas({ countries, width, height, active, reducedM
       polygonAltitude={0.005} polygonsTransitionDuration={0} polygonLabel={empty}
       pathsData={borderPaths} pathPointLat={pathLat} pathPointLng={pathLng}
       pathPointAlt={0.006} pathColor={borderColor} pathStroke={1.6} pathTransitionDuration={0} pathLabel={empty}
-      pointsData={NPC_WORLD} pointLat={cityLat} pointLng={cityLng} pointAltitude={0.007}
+      pointsData={CITY_POINTS} pointLat={cityLat} pointLng={cityLng} pointAltitude={0.007}
       pointRadius={pointRadius} pointColor={pointColor} pointLabel={cityLabel}
       onPointClick={onPointClick} onPointHover={onPointHover}
       ringsData={rings} ringLat={cityLat} ringLng={cityLng}

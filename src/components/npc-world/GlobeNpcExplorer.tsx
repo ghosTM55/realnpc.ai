@@ -5,7 +5,7 @@ import { preload } from "react-dom";
 import { ArrowRight, Globe2, RotateCcw, X } from "lucide-react";
 import type { GlobeCanvasProps } from "./GlobeCanvas";
 import { NPC_WORLD_PAGE, WORLD_SCENARIOS, type ScenarioId, type WorldScenario } from "@/data/npcWorldPage";
-import { NPC_WORLD, type WorldCity } from "@/data/npcWorld";
+import { getCity, type WorldCity } from "@/data/npcWorld";
 import { useSceneActivity } from "./useWorldPlayback";
 import { WORLD_MAP_URL } from "@/data/worldMap";
 
@@ -23,7 +23,7 @@ export default function GlobeNpcExplorer({ scenario, onScenarioChange }: {
   const [focused, setFocused] = useState(false);
   const [loadError, setLoadError] = useState(false);
   const [attempt, setAttempt] = useState(0);
-  const selectedCity = exploredCity ?? NPC_WORLD.find((city) => city.id === scenario.cityId)!;
+  const selectedCity = exploredCity ?? getCity(scenario.cityId);
   useEffect(() => {
     const controller = new AbortController();
     let mounted = true;
@@ -123,7 +123,7 @@ export default function GlobeNpcExplorer({ scenario, onScenarioChange }: {
             {WORLD_SCENARIOS.map((story) => (
               <button key={story.id} type="button" className="npc-scenario-choice" data-scenario={story.id} data-tone={story.tone}
                 aria-pressed={!exploredCity && scenario.id === story.id}
-                onClick={() => selectCity(NPC_WORLD.find((city) => city.id === story.cityId)!)}>
+                onClick={() => selectCity(getCity(story.cityId))}>
                 <span className="npc-scenario-name">{story.label}</span>
                 <span className="npc-scenario-place">{story.city}</span>
               </button>
