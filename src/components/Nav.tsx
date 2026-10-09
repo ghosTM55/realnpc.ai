@@ -16,7 +16,7 @@ export default function Nav() {
 
   return (
     <header className="fixed top-0 inset-x-0 z-50 h-[72px] border-b border-hairline bg-paper shadow-[0_1px_20px_rgba(21,24,29,0.045)]">
-      <nav className="mx-auto flex h-full max-w-[1440px] items-center justify-between gap-4 px-5 lg:px-24">
+      <nav className="mx-auto flex h-full max-w-[1440px] items-center justify-between gap-2 px-4 min-[360px]:gap-4 min-[360px]:px-5 lg:px-24">
         <Link href="/" prefetch={false}
           onMouseEnter={() => prefetchDestination("/")}
           onFocus={() => prefetchDestination("/")}
@@ -51,14 +51,17 @@ export default function Nav() {
               );
             })}
           </ul>
-          {!inCompanionFlow && <Link
-            href={CONFIG_CTA_HREF}
-            aria-label={CONFIG_CTA_LABEL}
-            className="flex min-h-11 shrink-0 items-center gap-2 whitespace-nowrap rounded-[4px] bg-vessel px-3 py-2.5 font-nav text-xs font-semibold tracking-[0.025em] text-white transition-opacity hover:opacity-90 min-[360px]:px-4"
+          <Link
+            href={inCompanionFlow ? "/configurator/" : CONFIG_CTA_HREF}
+            aria-label={inCompanionFlow ? "Creating a Soul" : CONFIG_CTA_LABEL}
+            aria-current={inCompanionFlow ? "page" : undefined}
+            onNavigate={event => { if (inCompanionFlow) event.preventDefault(); }}
+            style={{ width: "clamp(144px, 45vw, 172px)" }}
+            className={`flex min-h-11 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-[4px] border px-2 py-2.5 font-nav text-[11px] font-semibold tracking-[0.025em] transition-colors min-[360px]:text-xs ${inCompanionFlow ? "border-vessel bg-vessel-tint text-vessel" : "border-transparent bg-vessel text-white hover:bg-vessel-hover"}`}
           >
-            <span>{CONFIG_CTA_LABEL}</span>
-            <SlidersHorizontal size={13} />
-          </Link>}
+            <span>{inCompanionFlow ? "Creating a Soul" : CONFIG_CTA_LABEL}</span>
+            <SlidersHorizontal size={13} className="shrink-0" aria-hidden="true" />
+          </Link>
         </div>
       </nav>
     </header>

@@ -81,26 +81,28 @@ test("assembly decorative markers stay still with reduced motion", async () => {
   } finally { await page.close(); }
 });
 
-test("world scene colors survive client navigation and preserve contrast on both surfaces", async () => {
+test("world conversation selection and semantic colors survive client navigation", async () => {
   const page = await browser.newPage({ viewport: { width: 1440, height: 900 }, reducedMotion: "reduce" });
   try {
     await page.goto(`${base}/partnership/`, { waitUntil: "networkidle" });
     for (let visit = 0; visit < 2; visit++) {
       await page.getByRole("link", { name: "NPC World", exact: true }).click();
       await page.waitForURL(/\/npc-world\//);
-      for (const [index, light, dark] of [
-        [0, "rgb(212, 13, 61)", "rgb(244, 107, 136)"],
-        [1, "rgb(36, 103, 125)", "rgb(119, 199, 222)"],
-        [2, "rgb(128, 87, 16)", "rgb(239, 189, 97)"],
+      for (const [index, color, id] of [
+        [0, "rgb(212, 13, 61)", "leisure"],
+        [1, "rgb(128, 87, 16)", "business"],
+        [2, "rgb(36, 103, 125)", "community"],
       ]) {
         const choice = page.locator(".npc-scenario-choice").nth(index);
-        const tab = page.locator(".npc-scenario-tab").nth(index);
+        const topic = page.locator(`.npc-topic-list [data-scenario="${id}"]`);
         await choice.click();
-        assert.equal(await tab.getAttribute("aria-pressed"), "true");
-        assert.equal(await choice.locator(".npc-scenario-name").evaluate(node => getComputedStyle(node).color), light);
-        assert.equal(await choice.evaluate(node => getComputedStyle(node).borderBottomColor), light);
-        assert.equal(await tab.evaluate(node => getComputedStyle(node).color), dark);
-        assert.equal(await tab.evaluate(node => getComputedStyle(node).borderBottomColor), dark);
+        assert.equal(await topic.getAttribute("aria-pressed"), "true");
+        assert.equal(await choice.locator(".npc-scenario-name").evaluate(node => getComputedStyle(node).color), color);
+        assert.equal(await choice.evaluate(node => getComputedStyle(node).borderBottomColor), color);
+        for (const [name, expected] of [["Mia", "rgb(212, 13, 61)"], ["Chloe", "rgb(36, 103, 125)"], ["Raymond", "rgb(128, 87, 16)"]]) {
+          const post = page.locator(".npc-post-heading").filter({ has: page.locator(".npc-feed-identity p", { hasText: name }) }).first();
+          assert.equal(await post.locator(".npc-feed-avatar").evaluate(node => getComputedStyle(node).borderTopColor), expected);
+        }
       }
       await page.getByRole("link", { name: "RealNPC home", exact: true }).click();
       await page.waitForURL(base + "/");

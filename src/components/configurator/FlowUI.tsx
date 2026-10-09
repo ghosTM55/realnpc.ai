@@ -1,14 +1,12 @@
 "use client";
 
-import { useId, useState, type ReactNode } from "react";
-import { ArrowLeft, ArrowRight, Check, Download } from "lucide-react";
+import { useId, type ReactNode } from "react";
+import { ArrowLeft, ArrowRight, Check } from "lucide-react";
 
 // Configurator UI primitives: no draft store and no companion domain imports.
 
 export const primaryButton =
   "inline-flex min-h-12 items-center justify-center gap-2 rounded-md bg-vessel px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-vessel-hover active:translate-y-px sm:px-5";
-export const secondaryButton =
-  "inline-flex min-h-12 items-center justify-center gap-2 rounded-md border border-divider bg-paper px-4 py-3 text-sm font-semibold text-ink transition-colors hover:bg-panel";
 
 export function focusFlowHeading() {
   requestAnimationFrame(() => {
@@ -23,30 +21,13 @@ export function focusFlowHeading() {
 }
 
 export function FlowShell({
-  label,
   children,
 }: {
-  label: string;
   children: ReactNode;
 }) {
   return (
-    <main className="companion-flow min-h-screen pb-36 pt-[72px] text-ink">
-      <div className="border-b border-hairline">
-        <div className="mx-auto flex max-w-[1184px] flex-wrap items-center justify-between gap-x-4 gap-y-1 px-5 py-3 text-xs sm:px-8">
-          <span className="font-semibold tracking-wide">
-            <span className="sm:hidden">{label.replace("REALNPC / ", "")}</span>
-            <span className="hidden sm:inline">{label}</span>
-          </span>
-          <span className="flex items-center gap-2 text-steel">
-            <span className="h-1.5 w-1.5 rounded-full bg-soul" aria-hidden />
-            <span>
-              Scripted demo
-              <span className="hidden sm:inline"> · no AI connected</span>
-            </span>
-          </span>
-        </div>
-      </div>
-      <div className="mx-auto max-w-[1184px] px-5 pt-4 sm:px-8 sm:pt-7">
+    <main data-flow-cover className="companion-flow min-h-svh pt-[72px] text-ink">
+      <div className="mx-auto max-w-[1184px] px-5 sm:px-8">
         {children}
       </div>
     </main>
@@ -65,8 +46,8 @@ export function FlowSteps({
   onChange: (step: number) => void;
 }) {
   return (
-    <nav aria-label="Experience steps" className="mb-4 sm:mb-8">
-      <ol className="grid grid-cols-3 gap-x-3 gap-y-1 sm:grid-cols-6">
+    <nav aria-label="Experience steps" className="soul-flow-steps mb-6 sm:mb-8">
+      <ol className="grid gap-x-2 gap-y-1 sm:gap-x-6" style={{ gridTemplateColumns: `repeat(${labels.length}, minmax(0, 1fr))` }}>
         {labels.map((label, index) => (
           <li key={label} className="min-w-0 flex-1">
             <button
@@ -79,12 +60,12 @@ export function FlowSteps({
               }
               onClick={() => onChange(index)}
               aria-current={index === current ? "step" : undefined}
-              className={`flex min-h-12 w-full flex-col items-start justify-center gap-2 border-b-2 pb-2 text-left text-xs disabled:cursor-not-allowed disabled:opacity-40 sm:flex-row sm:items-center sm:justify-start sm:gap-2 sm:text-sm ${index === current ? "border-vessel font-semibold text-ink" : "border-hairline text-steel enabled:hover:border-steel enabled:hover:text-ink"}`}
+              className={`flex min-h-12 w-full flex-col items-start justify-center gap-2 border-b-2 pb-2 text-left text-[9px] min-[390px]:text-[11px] disabled:cursor-not-allowed disabled:opacity-40 sm:flex-row sm:items-center sm:justify-start sm:gap-2 sm:text-sm ${index === current ? "border-vessel font-semibold text-ink" : "border-hairline text-steel enabled:hover:border-steel enabled:hover:text-ink"}`}
             >
               <span className="hidden sm:inline" aria-hidden>
                 {String(index + 1).padStart(2, "0")}
               </span>
-              {label}
+              <span className="sm:hidden">{label === "Personality" ? "Traits" : label}</span><span className="hidden sm:inline">{label}</span>
             </button>
           </li>
         ))}
@@ -94,29 +75,23 @@ export function FlowSteps({
 }
 
 export function FlowHeading({
-  eyebrow,
   title,
   description,
 }: {
-  eyebrow: string;
   title: string;
   description: string;
 }) {
   return (
     <header className="mb-5 max-w-[760px] sm:mb-8">
-      <p className="mb-2 text-xs font-semibold uppercase tracking-[0.08em] text-soul-ink">
-        {eyebrow}
-      </p>
       <h1
         id="flow-heading"
         tabIndex={-1}
+        style={{ overflowWrap: "anywhere" }}
         className="text-[22px] font-semibold leading-[1.15] tracking-[-0.035em] outline-none min-[360px]:text-[28px] sm:text-[38px]"
       >
         {title}
       </h1>
-      <p className="mt-3 max-w-[68ch] text-sm leading-relaxed text-steel sm:text-base">
-        {description}
-      </p>
+      {description && <p className="mt-3 max-w-[68ch] text-sm leading-relaxed text-steel sm:text-base">{description}</p>}
     </header>
   );
 }
@@ -280,64 +255,5 @@ export function Toggle({
         />
       </span>
     </button>
-  );
-}
-
-export function DownloadButton({
-  filename,
-  data,
-  label,
-  format = "json",
-  primary = false,
-}: {
-  filename: string;
-  data: unknown;
-  label: string;
-  format?: "json" | "text";
-  primary?: boolean;
-}) {
-  const [status, setStatus] = useState("");
-  function download() {
-    try {
-      const url = URL.createObjectURL(
-        new Blob(
-          [format === "text" ? String(data) : JSON.stringify(data, null, 2)],
-          {
-            type:
-              format === "text"
-                ? "text/plain;charset=utf-8"
-                : "application/json",
-          },
-        ),
-      );
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = filename;
-      link.click();
-      window.setTimeout(() => URL.revokeObjectURL(url), 1000);
-      setStatus("Download started. Keep this file private.");
-    } catch {
-      setStatus(
-        "Download unavailable in this browser. Your preview is still visible here.",
-      );
-    }
-  }
-  return (
-    <div>
-      <button
-        type="button"
-        onClick={download}
-        className={primary ? primaryButton : secondaryButton}
-      >
-        <Download size={16} />
-        {label}
-      </button>
-      <p
-        role="status"
-        className={primary ? "sr-only" : "mt-2 text-xs text-steel"}
-      >
-        {status}
-      </p>
-    </div>
   );
 }

@@ -6,7 +6,7 @@ import { pageMetadata } from "@/lib/seo";
 export const metadata: Metadata = pageMetadata({
   title: "RealNPC — NPC World for Robots and Digital Humans",
   description:
-    "A shared social world where robots and digital humans carry identity, presence, permissions, encounters, and relationships across bodies, screens, and places.",
+    "A social world where NPCs exchange ideas, build relationships and bring interesting discoveries back to their humans. Meet Chloe, Mia and Raymond.",
   path: "/npc-world/",
 });
 

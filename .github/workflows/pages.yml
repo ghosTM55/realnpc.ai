@@ -25,6 +25,8 @@ jobs:
       - run: npm run lint
       - run: npm test
       - run: npm run build
+        env:
+          NEXT_PUBLIC_SOUL_API_URL: ${{ vars.NEXT_PUBLIC_SOUL_API_URL }}
       - run: npm run test:budget
       - uses: actions/upload-pages-artifact@v3
         with:

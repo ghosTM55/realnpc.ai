@@ -1,65 +1,45 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { NPC_WORLD } from "../src/data/npcWorld.ts";
+import { NPC_WORLD, STORY_ACTORS } from "../src/data/npcWorld.ts";
 import { WORLD_SCENARIOS } from "../src/data/npcWorldPage.ts";
-import { PERMISSION_ORDER } from "../src/domain/world/model.ts";
-import { storyReadingDuration } from "../src/domain/world/story.ts";
+import { SOULS, getSoul } from "../src/domain/companion/model.ts";
+import { getScenario } from "../src/domain/world/story.ts";
 
-// Placeholder globe NPCs that reuse a story actor's handle with a different persona.
-// Renaming them is a product decision that is deliberately deferred; this list keeps
-// any new collision from slipping in unnoticed.
-const KNOWN_DUPLICATE_HANDLES = ["Atlas", "Haneul", "Mira", "Nova"];
-
-test("every city id is unique and every story names an existing city", () => {
-  const ids = NPC_WORLD.map((city) => city.id);
-  assert.equal(new Set(ids).size, ids.length);
+test("every city id is unique and every conversation names an existing city", () => {
+  assert.equal(new Set(NPC_WORLD.map((city) => city.id)).size, NPC_WORLD.length);
   for (const scenario of WORLD_SCENARIOS) {
     const city = NPC_WORLD.find((item) => item.id === scenario.cityId);
-    assert.ok(city, `${scenario.id}: unknown city ${scenario.cityId}`);
+    assert.ok(city);
     assert.equal(scenario.city, city.city);
+    assert.equal(getScenario(scenario.id), scenario);
+    for (const actor of scenario.actors) assert.ok(city.npcs.includes(actor));
   }
 });
 
-test("both story actors live in their story's city, as the same identity", () => {
-  for (const scenario of WORLD_SCENARIOS) {
-    const city = NPC_WORLD.find((item) => item.id === scenario.cityId);
-    for (const actor of scenario.actors) {
-      assert.ok(city.npcs.includes(actor), `${scenario.id}: ${actor.handle} is not in ${city.city}`);
+test("World identities use the same names and personalities as the configurator", () => {
+  assert.deepEqual(SOULS.map((soul) => soul.name), ["Chloe", "Mia", "Raymond"]);
+  for (const actor of Object.values(STORY_ACTORS)) {
+    const soul = getSoul(actor.soulId);
+    assert.equal(actor.handle, soul.name);
+    assert.equal(actor.persona, soul.signature);
+    assert.equal(actor.trait, soul.archetype);
+  }
+});
+
+test("city identities remain distinct and recurring featured NPCs share one record", () => {
+  const featured = new Set(Object.values(STORY_ACTORS).map((actor) => actor.handle));
+  for (const city of NPC_WORLD) {
+    assert.equal(new Set(city.npcs.map((npc) => npc.handle)).size, city.npcs.length);
+    for (const npc of city.npcs) {
+      if (featured.has(npc.handle)) assert.ok(Object.values(STORY_ACTORS).includes(npc));
     }
   }
 });
 
-test("handles are unique within a city and only known handles repeat across cities", () => {
-  const seen = new Map();
-  for (const city of NPC_WORLD) {
-    const handles = city.npcs.map((npc) => npc.handle);
-    assert.equal(new Set(handles).size, handles.length, `${city.city} repeats a handle`);
-    for (const npc of city.npcs) seen.set(npc.handle, [...(seen.get(npc.handle) ?? []), npc]);
-  }
-  const duplicated = [...seen].filter(([, npcs]) => new Set(npcs).size > 1).map(([handle]) => handle).sort();
-  assert.deepEqual(duplicated, KNOWN_DUPLICATE_HANDLES);
-});
-
-test("each story offers every permission exactly once", () => {
+test("each conversation includes at least two shared personalities and something to bring home", () => {
   for (const scenario of WORLD_SCENARIOS) {
-    assert.deepEqual(Object.keys(scenario.permissions).sort(), [...PERMISSION_ORDER].sort(), scenario.id);
-  }
-});
-
-test("each story runs discover, connect, invite, continue", () => {
-  for (const scenario of WORLD_SCENARIOS) {
-    assert.deepEqual(scenario.steps.map((step) => step.kind), ["discover", "connect", "invite", "continue"], scenario.id);
-  }
-});
-
-test("reading time per step is unchanged by rendering steps by kind", () => {
-  // Values computed from the index-based implementation before steps had a kind.
-  const before = {
-    leisure: [9000, 10060, 10340, 11740],
-    business: [9220, 10900, 11460, 12580],
-    community: [9500, 10900, 12020, 12020],
-  };
-  for (const scenario of WORLD_SCENARIOS) {
-    assert.deepEqual(scenario.steps.map((_, index) => storyReadingDuration(scenario, index)), before[scenario.id]);
+    assert.ok(new Set(scenario.posts.map((post) => post.actor.handle)).size >= 2);
+    for (const post of scenario.posts) assert.ok(Object.values(STORY_ACTORS).includes(post.actor));
+    assert.ok(scenario.discovery.title && scenario.discovery.detail && scenario.takeaway && scenario.relationship);
   }
 });

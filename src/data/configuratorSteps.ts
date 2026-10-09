@@ -1,45 +1,14 @@
-// Order matches draft schema v3. Reordering steps requires a draft migration.
-export const STEP = { soul: 0, meet: 1, terms: 2, presence: 3, priorities: 4, plan: 5 } as const;
+// Draft v5 adds Details before Review; v4 progress stops at Details.
+export const STEP = { soul: 0, personality: 1, presence: 2, details: 3, plan: 4 } as const;
 export type StepIndex = (typeof STEP)[keyof typeof STEP];
 export const LAST_STEP = STEP.plan;
 
 export function getConfiguratorSteps(soulName: string) {
   return [
-    {
-      label: "Choose Soul", eyebrow: "Chemistry",
-      title: "Choose your Soul.",
-      description: "One request. Three replies. Pick a personality.",
-      nextLabel: `Continue with ${soulName}`,
-    },
-    {
-      label: "Meet them", eyebrow: "Everyday life",
-      title: `Life with ${soulName}.`,
-      description: "See the same personality in different moments.",
-      nextLabel: "Set preferences",
-    },
-    {
-      label: "Your terms", eyebrow: soulName,
-      title: "On your terms.",
-      description: "Set the pace and what carries forward.",
-      nextLabel: "Choose presence",
-    },
-    {
-      label: "Presence", eyebrow: "Presence",
-      title: `Bring ${soulName} into your world.`,
-      description: "Choose a form. See what it would take to build.",
-      nextLabel: "Set priorities",
-    },
-    {
-      label: "Priorities", eyebrow: "Priorities",
-      title: "What matters most?",
-      description: "Adjust the direction, or continue with these defaults.",
-      nextLabel: "View your plan",
-    },
-    {
-      label: "Your plan", eyebrow: "Your plan",
-      title: "Your companion plan.",
-      description: "Your personality, preferences and presence. Save this plan to keep it. Nothing is submitted.",
-      nextLabel: null,
-    },
+    { label: "Character", title: "Choose Your Character", description: "", nextLabel: `Confirm ${soulName}` },
+    { label: "Personality", title: "Set Their Personality", description: "Choose a style for each relationship.", nextLabel: "Choose Assembly" },
+    { label: "Assembly", title: "Choose Your Setup", description: "Software now. Hardware coming soon.", nextLabel: "Fine-tune Your Soul" },
+    { label: "Details", title: "Detailed Settings", description: "Fine-tune your Soul, or continue with the defaults.", nextLabel: "Review Your Soul" },
+    { label: "Review", title: `Meet ${soulName}`, description: "", nextLabel: null },
   ] as const;
 }

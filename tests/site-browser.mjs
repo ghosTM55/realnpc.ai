@@ -83,7 +83,7 @@ try {
   {
     const page = await pageFor({ width: 1440, height: 900 }, "reduce");
     await page.goto(`${base}/npc-world/`);
-    for (const name of ["Choose a story", "Story progress", "View a moment", "Choose a social scene"]) {
+    for (const name of ["Choose a conversation", "View the conversation or its outcome", "Choose a World conversation"]) {
       assert.equal(await page.getByRole("group", { name, exact: true }).count(), 1, `"${name}" must be a named group`);
     }
     assert.equal(await page.getByRole("region", { name: "Explore the NPC World demo globe", exact: true }).count(), 1);

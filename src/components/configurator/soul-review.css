@@ -1,0 +1,52 @@
+.soul-review-layout { display: grid; grid-template-columns: 350px 1fr; gap: 48px; align-items: start; }
+.soul-passport { border: 1px solid var(--divider-line); border-radius: 4px; overflow: hidden; }
+.soul-review-portrait { aspect-ratio: 3 / 4; }
+.soul-review-portrait .soul-portrait-sheet { height: auto; top: 0; }
+.soul-passport-body { padding: 24px; }
+.soul-passport h2 { font-size: 32px; letter-spacing: -.05em; font-weight: 600; margin: 8px 0; overflow-wrap: anywhere; }
+.soul-bio { font-size: 12px; line-height: 1.85; margin: 20px 0; overflow-wrap: anywhere; white-space: pre-wrap; }
+.soul-passport dl > div { border-top: 1px solid var(--hairline); padding: 12px 0; display: grid; grid-template-columns: 110px 1fr; gap: 8px; font-size: 10px; line-height: 1.6; }
+.soul-passport dt { color: var(--steel-text); }
+.soul-passport dd small { display: block; color: var(--vessel-red); font-size: 9px; margin-top: 4px; }
+.soul-text-button { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; font-size: 11px; font-weight: 600; color: var(--soul-ink); }
+@media (max-width: 900px) {
+  .soul-review-layout { grid-template-columns: 280px 1fr; gap: 24px; }
+}
+@media (max-width: 640px) {
+  .soul-review-layout { grid-template-columns: 1fr; gap: 32px; }
+  .soul-passport-body { padding: 20px; }
+}
+.soul-final-review { display: grid; grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr); gap: 64px; align-items: start; }
+.soul-review-image { position: sticky; top: 180px; }
+.soul-review-image > span { display: block; font-size: 9px; letter-spacing: .1em; color: var(--steel-text); padding: 16px 0 4px; }
+.soul-review-profile h2 { font-size: 56px; line-height: 1.1; letter-spacing: -.06em; margin: 12px 0; font-weight: 600; }
+.soul-review-background { font-size: 13px; line-height: 1.9; max-width: 48ch; margin: 20px 0 28px; }
+.soul-review-section { border-top: 1px solid var(--divider-line); padding: 18px 0 22px; }
+.soul-review-section-heading { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 12px; }
+.soul-review-section-heading h3 { font-size: 13px; font-weight: 600; }
+.soul-review-section-heading button { display: flex; align-items: center; gap: 6px; min-height: 44px; color: var(--soul-ink); font-size: 11px; }
+.soul-review-personalities { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.soul-review-personalities dt { font-size: 10px; color: var(--steel-text); margin-bottom: 8px; }
+.soul-review-personalities dd { font-size: 12px; line-height: 1.6; }
+.soul-review-assembly { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; font-size: 13px; }
+.soul-review-assembly small { color: var(--steel-text); font-size: 9px; margin-left: auto; }
+.soul-review-capabilities { display: grid; grid-template-columns: 1fr 1fr; gap: 22px 26px; }
+.soul-review-capabilities > div { display: flex; gap: 12px; align-items: start; }
+.soul-review-capabilities svg { flex-shrink: 0; color: var(--soul-ink); margin-top: 2px; }
+.soul-review-capabilities strong { display: block; font-size: 12px; font-weight: 500; margin-bottom: 7px; }
+.soul-review-capabilities small { font-size: 8px; color: var(--steel-text); margin-left: 5px; font-weight: 400; }
+.soul-review-capabilities p > span { display: block; font-size: 10px; line-height: 1.8; color: var(--steel-text); }
+.soul-review-next { font-size: 11px; line-height: 1.8; color: var(--steel-text); border-top: 1px solid var(--divider-line); padding-top: 20px; }
+@media (max-width: 900px) {
+  .soul-final-review { gap: 32px; }
+  .soul-review-capabilities { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+  .soul-final-review { grid-template-columns: 1fr; gap: 24px; }
+  .soul-review-image { position: static; }
+  .soul-review-profile h2 { font-size: 44px; }
+  .soul-review-capabilities { grid-template-columns: 1fr 1fr; gap: 22px 18px; }
+}
+@media (max-width: 359px) {
+  .soul-review-capabilities { grid-template-columns: 1fr; }
+}

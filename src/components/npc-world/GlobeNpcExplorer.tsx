@@ -2,29 +2,36 @@
 
 import { Component, useCallback, useEffect, useRef, useState, type ComponentType, type ReactNode } from "react";
 import { preload } from "react-dom";
-import { ArrowRight, Globe2, RotateCcw, X } from "lucide-react";
+import { ArrowRight, Globe2, RotateCcw } from "lucide-react";
 import type { GlobeCanvasProps } from "./GlobeCanvas";
+import { NPC_WORLD_PAGE } from "@/data/npcWorldPage";
 import { getCity } from "@/data/npcWorld";
-import { NPC_WORLD_PAGE, WORLD_SCENARIOS } from "@/data/npcWorldPage";
-import type { ScenarioId, WorldCity, WorldScenario } from "@/domain/world/model";
+import { GLOBE_DEMO_CITY_IDS, hasGlobeConversation } from "@/domain/world/globe";
+import type { WorldCity } from "@/domain/world/model";
 import { useSceneActivity } from "./useSceneActivity";
 import { WORLD_MAP_URL } from "@/data/worldMap";
 
-export default function GlobeNpcExplorer({ scenario, onScenarioChange }: {
-  scenario: WorldScenario;
-  onScenarioChange: (id: ScenarioId) => void;
-}) {
+export default function GlobeNpcExplorer() {
   preload(WORLD_MAP_URL, { as: "fetch", crossOrigin: "anonymous" });
   const wrapRef = useRef<HTMLDivElement>(null);
   const { active, reducedMotion } = useSceneActivity(wrapRef);
   const [GlobeComp, setGlobeComp] = useState<ComponentType<GlobeCanvasProps> | null>(null);
   const [countries, setCountries] = useState<object[]>([]);
   const [dims, setDims] = useState({ w: 0, h: 0 });
-  const [exploredCity, setExploredCity] = useState<WorldCity | null>(null);
-  const [focused, setFocused] = useState(false);
   const [loadError, setLoadError] = useState(false);
   const [attempt, setAttempt] = useState(0);
-  const selectedCity = exploredCity ?? getCity(scenario.cityId);
+  const [selectedCity, setSelectedCity] = useState<WorldCity | null>(null);
+  const [keyboardSelection, setKeyboardSelection] = useState(false);
+  const citySelect = useRef<HTMLSelectElement>(null);
+  const selectCity = useCallback((city: WorldCity) => {
+    if (!hasGlobeConversation(city.id)) return;
+    setKeyboardSelection(false);
+    setSelectedCity(city);
+  }, []);
+  const closeConversation = useCallback((restoreFocus: boolean) => {
+    setSelectedCity(null);
+    if (restoreFocus) citySelect.current?.focus({ preventScroll: true });
+  }, []);
   useEffect(() => {
     const controller = new AbortController();
     let mounted = true;
@@ -57,12 +64,6 @@ export default function GlobeNpcExplorer({ scenario, onScenarioChange }: {
     return () => observer.disconnect();
   }, []);
 
-  const selectCity = useCallback((city: WorldCity) => {
-    const story = WORLD_SCENARIOS.find((item) => item.cityId === city.id);
-    setFocused(true);
-    if (story) { setExploredCity(null); onScenarioChange(story.id); }
-    else setExploredCity(city);
-  }, [onScenarioChange]);
   const retry = () => {
     setLoadError(false);
     setGlobeComp(null);
@@ -73,66 +74,33 @@ export default function GlobeNpcExplorer({ scenario, onScenarioChange }: {
     <div className="npc-globe-hero">
       <div className="npc-hero-copy">
         <p data-hero-item className="npc-eyebrow npc-section-kicker">{NPC_WORLD_PAGE.hero.kicker}</p>
-        <h1 data-hero-item className="mt-5 whitespace-nowrap font-display text-[clamp(26px,7vw,36px)] font-semibold leading-tight tracking-[-0.045em]">{NPC_WORLD_PAGE.hero.title}</h1>
-        <p data-hero-item className="mt-5 max-w-[34ch] text-[15px] leading-relaxed text-steel">{NPC_WORLD_PAGE.hero.sub}</p>
+        <h1 data-hero-item className="npc-hero-title font-display">{NPC_WORLD_PAGE.hero.title}</h1>
+        <p data-hero-item className="npc-hero-summary">{NPC_WORLD_PAGE.hero.sub}</p>
         <a data-hero-item href="#encounter" className="mt-6 inline-flex min-h-11 items-center gap-2 text-[13px] font-semibold text-vessel">
-          See what happens <ArrowRight size={15} />
+          Step inside World <ArrowRight size={15} />
         </a>
       </div>
 
+      <div className="npc-globe-stage">
       <div ref={wrapRef} className="npc-globe-canvas" role="region" aria-label="Explore the NPC World demo globe">
         {loadError ? <GlobeFallback onRetry={retry} /> : GlobeComp && dims.w > 0 ? (
           <GlobeBoundary key={attempt} fallback={<GlobeFallback onRetry={retry} />}>
             <GlobeComp countries={countries} width={dims.w} height={dims.h}
-              active={active} reducedMotion={reducedMotion} focused={focused}
-              selectedCity={selectedCity} onSelectCity={selectCity}
+              active={active} reducedMotion={reducedMotion} keyboardSelection={keyboardSelection}
+              selectedCity={selectedCity} onSelectCity={selectCity} onDismiss={closeConversation}
             />
           </GlobeBoundary>
         ) : <GlobeFallback loading />}
       </div>
-
-      <aside data-hero-item className="npc-globe-panel">
-        <div className="flex items-center justify-between gap-3">
-          <p className="npc-eyebrow text-steel">{exploredCity ? exploredCity.city : scenario.city}</p>
-          <span className="npc-demo-label">WORLD DEMO</span>
+        <div className="npc-globe-tools">
+          <p><span className="npc-node-key" />Conversations<span className="npc-node-key" data-muted="true" />No preview yet</p>
+          <label><span className="sr-only">Explore city conversations</span><select ref={citySelect} value={selectedCity?.id ?? ""} disabled={!GlobeComp || loadError} onChange={(event) => {
+            if (!hasGlobeConversation(event.target.value)) return;
+            setKeyboardSelection(true);
+            setSelectedCity(getCity(event.target.value));
+          }}><option value="" disabled>Choose a city</option>{GLOBE_DEMO_CITY_IDS.map((id) => <option key={id} value={id}>{getCity(id).city}</option>)}</select></label>
         </div>
-        {exploredCity ? (
-          <>
-            <div className="mt-5 flex items-center justify-between gap-2">
-              <h2 className="text-[24px] font-semibold">{exploredCity.city}</h2>
-              <button type="button" onClick={() => setExploredCity(null)} aria-label="Back to featured story" className="flex h-11 w-11 items-center justify-center text-steel"><X size={18} /></button>
-            </div>
-            <ul className="mt-3 divide-y divide-hairline">
-              {exploredCity.npcs.map((npc) => <li key={npc.handle} className="flex items-center justify-between gap-3 py-3">
-                <span className="text-[16px] font-semibold">{npc.handle}</span><span className="text-[12px] text-steel">{npc.trait}</span>
-              </li>)}
-            </ul>
-            <p className="mt-3 text-[13px] leading-relaxed text-steel">An imagined neighborhood. Choose a social scene below to see a complete story.</p>
-          </>
-        ) : (
-          <>
-            <h2 className="mt-5 text-[25px] font-semibold leading-tight tracking-[-0.025em]">{scenario.teaser}</h2>
-            <p className="mt-4 text-[13px] text-steel">{scenario.actors[0].handle} + {scenario.actors[1].handle} · {scenario.label}</p>
-            <a href="#encounter" className="npc-hero-story-link mt-5">
-              Follow their story <ArrowRight size={15} />
-            </a>
-          </>
-        )}
-        <div className="mt-6 border-t border-hairline pt-5">
-          <p className="npc-eyebrow npc-control-label">CHOOSE A SOCIAL SCENE</p>
-          <div className="mt-3 grid grid-cols-3 gap-1" role="group" aria-label="Choose a social scene">
-            {WORLD_SCENARIOS.map((story) => (
-              <button key={story.id} type="button" className="npc-scenario-choice" data-scenario={story.id} data-tone={story.tone}
-                aria-pressed={!exploredCity && scenario.id === story.id}
-                onClick={() => selectCity(getCity(story.cityId))}>
-                <span className="npc-scenario-name">{story.label}</span>
-                <span className="npc-scenario-place">{story.city}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-        <p className="mt-4 text-[11px] leading-relaxed text-steel">Illustrated people and places. No real profiles or permissions.</p>
-      </aside>
+      </div>
     </div>
   );
 }
@@ -142,7 +110,7 @@ function GlobeFallback({ loading = false, onRetry }: { loading?: boolean; onRetr
     <div className="npc-globe-fallback" role="status">
       <Globe2 size={96} strokeWidth={0.6} aria-hidden />
       <p>{loading ? "Opening the world…" : "The 3D view is unavailable."}</p>
-      {!loading && <><p>You can still explore the city stories.</p><button type="button" onClick={onRetry} className="inline-flex min-h-11 items-center gap-2"><RotateCcw size={14} />Try the globe again</button></>}
+      {!loading && <><p>You can still explore the NPC conversations.</p><button type="button" onClick={onRetry} className="inline-flex min-h-11 items-center gap-2"><RotateCcw size={14} />Try the globe again</button></>}
     </div>
   );
 }

@@ -1,13 +1,15 @@
 import type { StoryActor, WorldCity } from "@/domain/world/model";
 
-// The globe and the illustrated encounters share these identities.
+import { getSoul } from "../domain/companion/souls.ts";
+
+// World and configurator use the same identities and personality descriptions.
+const chloe = getSoul("anchor");
+const mia = getSoul("scout");
+const raymond = getSoul("instigator");
 export const STORY_ACTORS = {
-  kibo: { handle: "Kibo", persona: "Finds little reasons for its human to go out.", trait: "Curious", tone: "vessel", form: "robot" },
-  mira: { handle: "Mira", persona: "Makes the first hello feel easy.", trait: "Connector", tone: "soul", form: "digital-human" },
-  atlas: { handle: "Atlas", persona: "Finds the right people for a robotics team.", trait: "Builder", tone: "vessel", form: "robot" },
-  nova: { handle: "Nova", persona: "Connects a retail founder with useful ideas.", trait: "Strategist", tone: "soul", form: "digital-human" },
-  pip: { handle: "Pip", persona: "Turns a free weekend into a shared adventure.", trait: "Explorer", tone: "vessel", form: "robot" },
-  haneul: { handle: "Haneul", persona: "Brings a small circle of people together.", trait: "Host", tone: "soul", form: "digital-human" },
+  chloe: { soulId: chloe.id, handle: chloe.name, persona: chloe.signature, trait: chloe.archetype, tone: "soul", form: "digital-human" },
+  mia: { soulId: mia.id, handle: mia.name, persona: mia.signature, trait: mia.archetype, tone: "vessel", form: "digital-human" },
+  raymond: { soulId: raymond.id, handle: raymond.name, persona: raymond.signature, trait: raymond.archetype, tone: "powers", form: "digital-human" },
 } as const satisfies Record<string, StoryActor>;
 
 /**
@@ -124,8 +126,8 @@ export const NPC_WORLD = [
   {
     id: "london", city: "London", country: "United Kingdom", lat: 51.51, lng: -0.13,
     npcs: [
-      STORY_ACTORS.pip,
-      STORY_ACTORS.haneul,
+      STORY_ACTORS.chloe,
+      STORY_ACTORS.raymond,
     ],
   },
   {
@@ -324,8 +326,8 @@ export const NPC_WORLD = [
   {
     id: "tokyo", city: "Tokyo", country: "Japan", lat: 35.68, lng: 139.69,
     npcs: [
-      STORY_ACTORS.kibo,
-      STORY_ACTORS.mira,
+      STORY_ACTORS.mia,
+      STORY_ACTORS.chloe,
     ],
   },
   {
@@ -370,8 +372,8 @@ export const NPC_WORLD = [
   {
     id: "singapore", city: "Singapore", country: "Singapore", lat: 1.35, lng: 103.82,
     npcs: [
-      STORY_ACTORS.atlas,
-      STORY_ACTORS.nova,
+      STORY_ACTORS.raymond,
+      STORY_ACTORS.mia,
     ],
   },
   {

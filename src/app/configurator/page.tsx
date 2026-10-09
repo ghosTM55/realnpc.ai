@@ -4,9 +4,9 @@ import ConfiguratorExperience from "@/components/configurator/ConfiguratorExperi
 import { pageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = pageMetadata({
-  title: "RealNPC | Configurator",
+  title: "RealNPC | Create a Soul",
   description:
-    "Choose a Soul, explore its personality, set your preferences and see your complete companion plan. A no-input scripted demo.",
+    "Meet Chloe, Mia or Raymond. Choose a character, shape how you connect, pick a form, fine-tune capabilities, and review your Soul.",
   path: "/configurator/",
 });
 

@@ -1,0 +1,71 @@
+/* Footer: 48px controls + 12px top + 1px border + safe bottom; leave 16px above it. */
+.companion-flow { background: var(--paper-white); padding-bottom: calc(77px + max(12px, env(safe-area-inset-bottom))); }
+.companion-flow ~ .flow-motion-control { display: none; }
+.companion-flow :where(input, textarea, select, summary):focus-visible { outline: 2px solid var(--soul-ink); outline-offset: 4px; }
+.soul-kicker { font-size: 10px; line-height: 1.5; font-weight: 600; letter-spacing: .12em; color: var(--soul-ink); }
+.soul-caption { font-size: 11px; line-height: 1.7; color: var(--steel-text); }
+.soul-portrait { display: block; position: relative; overflow: hidden; background: var(--panel-gray); }
+.soul-portrait .soul-portrait-sheet { position: absolute; top: 0; width: 300%; height: auto; max-width: none; }
+.soul-casting { display: grid; grid-template-columns: .7fr 1.3fr; grid-template-rows: 1fr auto; column-gap: 64px; border-top: 1px solid var(--hairline); padding-top: 24px; }
+.soul-casting-portrait { grid-row: 1 / 3; position: relative; aspect-ratio: 3 / 4; align-self: start; overflow: hidden; background: var(--panel-gray); }
+.soul-casting-portrait > .soul-portrait { height: 100%; }
+.soul-casting-portrait .soul-portrait-sheet { top: 0; }
+.soul-casting-index { position: absolute; top: 20px; left: 20px; font-size: 11px; letter-spacing: .1em; }
+.soul-casting-profile { padding: 24px 0 28px; }
+.soul-casting-profile h2 { font-size: 64px; font-weight: 600; letter-spacing: -.06em; line-height: 1.1; margin: 12px 0; }
+.soul-casting-meta { font-size: 12px; color: var(--steel-text); }
+.soul-casting-story { max-width: 44ch; font-size: 14px; line-height: 1.85; margin-top: 24px; }
+.soul-roster { align-self: end; padding-bottom: 2px; min-width: 0; }
+.soul-roster-list { max-width: 420px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.soul-roster-option { position: relative; cursor: pointer; min-width: 0; }
+.soul-roster-option input, .soul-assembly-choice input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.soul-roster-tile { display: block; border: 1px solid var(--divider-line); }
+.soul-roster-tile .soul-portrait { aspect-ratio: 3 / 4; filter: saturate(.5); }
+.soul-roster-tile .soul-portrait-sheet { top: 0; }
+.soul-roster-name { display: block; text-align: center; padding: 10px 2px; font-size: 12px; font-weight: 600; }
+.soul-roster-status { position: absolute; top: 6px; left: 6px; padding: 4px 6px; font-size: 9px; background: var(--vessel-red); color: var(--paper-white); }
+.soul-roster-status:empty { display: none; }
+.soul-roster-option input:checked + span { border-color: var(--vessel-red); box-shadow: inset 0 0 0 1px var(--vessel-red); }
+.soul-roster-option input:checked + span .soul-portrait, .soul-roster-option:hover .soul-portrait { filter: none; }
+.soul-roster-option input:checked + span .soul-roster-name { color: var(--vessel-red); }
+.soul-roster-option:hover .soul-roster-tile { border-color: var(--steel-text); }
+.soul-roster-option input:focus-visible + span, .soul-assembly-choice input:focus-visible + span { outline: 2px solid var(--soul-ink); outline-offset: 4px; }
+.soul-assembly-choice input:checked + span { border-color: var(--soul-ink); background: var(--soul-tint); }
+.soul-field { display: flex; flex-direction: column; gap: 10px; font-size: 13px; font-weight: 600; min-width: 0; flex: 1; }
+.soul-field select { width: 100%; min-height: 48px; background: var(--paper-white); border: 1px solid var(--divider-line); border-radius: 4px; padding: 12px; color: var(--graphite-ink); font: inherit; font-weight: 400; }
+.soul-personality-row { display: grid; grid-template-columns: 260px 1fr; gap: 36px; border-top: 1px solid var(--hairline); padding: 30px 0; }
+.soul-relation-title { display: flex; gap: 18px; align-items: flex-start; }
+.soul-line-icon { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 50%; background: var(--soul-tint); color: var(--soul-ink); flex-shrink: 0; }
+.soul-relation-title h2 { font-size: 18px; font-weight: 600; letter-spacing: -.04em; margin: 4px 0 8px; }
+.soul-personality-row legend { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.soul-personality-row label span { font-size: 12px; }
+.soul-sample { margin-top: 18px; font-size: 12px; line-height: 1.8; color: var(--steel-text); max-width: 70ch; }
+@media (max-width: 900px) {
+  .soul-casting { column-gap: 32px; }
+  .soul-casting-profile h2 { font-size: 48px; }
+  .soul-roster-list { gap: 8px; }
+  .soul-personality-row { grid-template-columns: 220px 1fr; gap: 20px; }
+  .soul-personality-row fieldset > div { display: grid; grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 640px) {
+  .soul-casting { grid-template-columns: 1fr; gap: 20px; padding-top: 0; border: 0; }
+  .soul-casting-portrait { grid-row: auto; width: 100%; }
+  .soul-casting-profile { padding: 0; }
+  .soul-casting-profile h2 { font-size: 44px; margin-block: 8px; }
+  .soul-casting-story { font-size: 13px; margin-top: 16px; }
+  .soul-roster { grid-row: 2; }
+  .soul-personality-row { grid-template-columns: 1fr; gap: 20px; padding: 24px 0; }
+  .soul-relation-title { gap: 14px; }
+  .soul-relation-title h2 { margin-top: 0; }
+  .soul-relation-title .soul-kicker { display: none; }
+}
+
+
+.soul-flow-steps { position: sticky; top: 72px; z-index: 40; background: var(--paper-white); padding-block: 16px 10px; box-shadow: 0 1px 0 var(--hairline); }
+.companion-flow :where(button, input, select, summary, textarea, [tabindex], .soul-roster-option) { scroll-margin-block: 170px 100px; }
+@media (max-width: 640px) {
+  .soul-start-conversation { font-size: 11px; padding-inline: 12px; gap: 6px; }
+}
+@media (max-width: 359px) {
+  .soul-start-conversation { max-width: 226px; font-size: 10px; }
+}

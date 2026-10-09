@@ -1,0 +1,31 @@
+/* Keep the arrow gutter intact when component styles set background or padding. */
+select:not([multiple]):not([size]),
+select:not([multiple])[size="1"] {
+  appearance: none;
+  padding-inline-end: 44px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Cpath d='m3 6 5 5 5-5' fill='none' stroke='%23555e69' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 16px 16px;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+select:not([multiple]):is(:not([size]), [size="1"]):dir(rtl) {
+  background-position: left 14px center;
+}
+
+select:focus-visible {
+  outline: 2px solid var(--soul-ink);
+  outline-offset: 3px;
+}
+
+select:disabled { cursor: not-allowed; }
+
+@media (forced-colors: active) {
+  select:not([multiple]):is(:not([size]), [size="1"]) {
+    appearance: auto;
+    background-image: none;
+    padding-inline-end: 12px;
+  }
+}

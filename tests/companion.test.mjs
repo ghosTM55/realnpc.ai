@@ -1,36 +1,22 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { VESSEL_OPTIONS } from "../src/domain/companion/copy.ts";
 import {
   DEFAULT_DRAFT,
   normalizeDemoDraft,
   parseDemoDraft,
   serializeDemoDraft,
 } from "../src/domain/companion/draft.ts";
-import { DEFAULT_CONFIG, DEFAULT_REVIEW, VESSEL_FORMS } from "../src/domain/companion/model.ts";
-import { createProfileText, getCompanionProfile, getScenePreview } from "../src/domain/companion/profile.ts";
-import { createReviewCase } from "../src/domain/companion/review.ts";
+import { DEFAULT_CONFIG, SOUL_IDENTITIES, VESSEL_FORMS } from "../src/domain/companion/model.ts";
 import { NPC_FORMS } from "../src/domain/npc.ts";
 
-test("turning off both memory permissions removes remembered preferences and moments from the profile", () => {
-  const profile = getCompanionProfile({
-    ...DEFAULT_CONFIG,
-    rememberPreferences: false,
-    rememberMoments: false,
-  });
-  assert.equal(profile.memory.mode, "session-only");
-  assert.deepEqual(profile.memory.items, []);
-  assert.equal(profile.powers.includes("Memory thread"), false);
-  assert.match(profile.memory.description, /no lasting memory/i);
-});
-
-test("a chosen companion survives all six steps without storing dialogue", () => {
+test("a chosen companion survives all five steps without storing dialogue", () => {
   const draft = {
     ...DEFAULT_DRAFT,
-    step: 5,
-    unlockedStep: 5,
+    step: 4,
+    unlockedStep: 4,
     config: {
       ...DEFAULT_CONFIG,
+      ...SOUL_IDENTITIES.scout,
       soulId: "scout",
       form: "robot",
       rememberPreferences: false,
@@ -40,7 +26,7 @@ test("a chosen companion survives all six steps without storing dialogue", () =>
   const serialized = serializeDemoDraft(draft);
   const restored = parseDemoDraft(serialized);
   assert.deepEqual(restored, draft);
-  assert.equal(serialized.includes("reply"), false);
+  assert.equal(serialized.includes('"reply"'), false);
   assert.equal(serialized.includes("prompt"), false);
 });
 
@@ -67,154 +53,19 @@ test("untrusted or obsolete browser drafts fall back safely, without merging unk
   assert.equal("secret" in restored.config, false);
 });
 
-test("the same scenario produces three distinct personalities across intimacy, everyday life and a change of mind", () => {
-  for (const scene of ["chemistry", "everyday", "boundary"]) {
-    const previews = ["anchor", "instigator", "scout"].map((soulId) =>
-      getScenePreview({ ...DEFAULT_CONFIG, soulId }, scene),
-    );
-    assert.equal(new Set(previews.map((preview) => preview.prompt)).size, 1);
-    assert.equal(new Set(previews.map((preview) => preview.reply)).size, 3);
-    assert.ok(
-      previews.every(
-        (preview) => preview.mode === "scripted" && preview.reply.length > 60,
-      ),
-    );
-  }
-});
-
-test("the resulting next encounter reflects rhythm, initiative and allowed memory", () => {
-  const quiet = getCompanionProfile({
-    ...DEFAULT_CONFIG,
-    rhythm: "unhurried",
-    takesInitiative: false,
-    rememberPreferences: false,
-  });
-  const playful = getCompanionProfile({
-    ...DEFAULT_CONFIG,
-    rhythm: "playful",
-    takesInitiative: true,
-  });
-  assert.notEqual(quiet.nextEncounter.reply, playful.nextEncounter.reply);
-  assert.match(quiet.nextEncounter.reply, /you.*ready/i);
-  assert.match(playful.nextEncounter.reply, /remember/i);
-  assert.equal(quiet.relationship, "Room to breathe");
-  assert.equal(playful.relationship, "A shared spark");
-  assert.equal(quiet.powers.includes("First move"), false);
-  assert.ok(playful.powers.includes("First move"));
-});
-
-test("a build preview carries the chosen Soul and effective privacy, never an order or a submission", () => {
-  const review = createReviewCase(
-    {
-      ...DEFAULT_CONFIG,
-      soulId: "instigator",
-      form: "robot",
-      rememberPreferences: false,
-      rememberMoments: false,
-    },
-    DEFAULT_REVIEW,
-  );
-  assert.equal(review.status, "local-draft");
-  assert.equal(review.companion.name, "Vex");
-  assert.equal(review.companion.memory.mode, "session-only");
-  assert.match(review.path.title, /physical/i);
-  assert.ok(
-    review.reviewNotes.some((note) => /hardware.*feasibility/i.test(note)),
-  );
-  assert.equal(review.submitted, false);
-  assert.equal("price" in review, false);
-});
-
-test("optional review selections survive a reload and license / budget constraints appear in the preview", () => {
+test("obsolete review fields are discarded without losing current configuration or progress", () => {
   const review = {
-    ...DEFAULT_REVIEW,
     characterSource: "licensed",
     budget: "under-10k",
     priority: "presence",
+    service: "software",
   };
   const restored = parseDemoDraft(
-    serializeDemoDraft({ ...DEFAULT_DRAFT, review, step: 5, unlockedStep: 5 }),
+    serializeDemoDraft({ ...DEFAULT_DRAFT, review, step: 3, unlockedStep: 3 }),
   );
-  assert.deepEqual(restored.review, review);
-  assert.equal(restored.step, 5);
-  const result = createReviewCase(
-    { ...DEFAULT_CONFIG, form: "robot" },
-    restored.review,
-  );
-  assert.ok(result.reviewNotes.some((note) => /rights.*verified/i.test(note)));
-  assert.ok(result.reviewNotes.some((note) => /budget.*scope/i.test(note)));
-  assert.match(result.path.why, /presence/i);
-});
-
-test("a permitted shared moment changes the next encounter without claiming remembered preferences", () => {
-  const fresh = getCompanionProfile({
-    ...DEFAULT_CONFIG,
-    rememberPreferences: false,
-    rememberMoments: false,
-  });
-  const remembered = getCompanionProfile({
-    ...DEFAULT_CONFIG,
-    rememberPreferences: false,
-    rememberMoments: true,
-  });
-  assert.notEqual(fresh.nextEncounter.reply, remembered.nextEncounter.reply);
-  assert.match(remembered.nextEncounter.reply, /changed your mind/i);
-  assert.doesNotMatch(
-    remembered.nextEncounter.reply,
-    /remember the pace|start fresh/i,
-  );
-});
-
-test("each Soul keeps a distinct voice throughout the resulting encounter, not only its opening", () => {
-  for (const rhythm of ["unhurried", "playful", "direct"]) {
-    const replies = ["anchor", "instigator", "scout"].map(
-      (soulId) =>
-        getCompanionProfile({ ...DEFAULT_CONFIG, soulId, rhythm }).nextEncounter
-          .reply,
-    );
-    const endings = replies.map((reply) =>
-      reply.slice(reply.indexOf(".") + 1).trim(),
-    );
-    assert.equal(new Set(endings).size, 3);
-  }
-});
-
-test("the plan preview keeps Soul-specific responses and effective memory", () => {
-  const plans = ["anchor", "instigator", "scout"].map((soulId) => {
-    const profile = getCompanionProfile({
-      ...DEFAULT_CONFIG,
-      soulId,
-      rememberPreferences: false,
-      rememberMoments: false,
-    });
-    assert.equal(profile.planEncounter.title, "A plan for tonight");
-    assert.notEqual(profile.planEncounter.prompt, profile.nextEncounter.prompt);
-    assert.notEqual(profile.planEncounter.reply, profile.nextEncounter.reply);
-    assert.doesNotMatch(profile.planEncounter.reply, /remember|last time/i);
-    return profile.planEncounter.reply;
-  });
-  assert.equal(new Set(plans).size, 3);
-  const withMoment = getCompanionProfile({
-    ...DEFAULT_CONFIG,
-    rememberMoments: true,
-  });
-  assert.match(withMoment.planEncounter.reply, /changed your mind/i);
-});
-
-test("the readable keepsake contains the effective profile, not dialogue or forbidden memory", () => {
-  const text = createProfileText({
-    ...DEFAULT_CONFIG,
-    soulId: "scout",
-    rememberPreferences: false,
-    rememberMoments: false,
-    takesInitiative: false,
-  });
-  assert.match(text, /Kite/);
-  assert.match(text, /Playfully unpredictable/);
-  assert.match(text, /No lasting memory/);
-  assert.match(text, /Waits for your invitation/);
-  assert.match(text, /Scripted demo/);
-  assert.doesNotMatch(text, /Memory thread|First move|I'm back|Suppose we had/);
+  assert.equal("review" in restored, false);
+  assert.equal(restored.step, 3);
+  assert.deepEqual(restored.config, DEFAULT_CONFIG);
 });
 
 test("existing two-flow drafts migrate without losing the chosen companion or permissions", () => {
@@ -227,14 +78,16 @@ test("existing two-flow drafts migrate without losing the chosen companion or pe
       soulId: "instigator",
       rememberPreferences: false,
     },
-    review: { ...DEFAULT_REVIEW, characterSource: "licensed" },
+    review: { priority: "privacy", characterSource: "licensed", budget: "discuss", service: "discuss" },
   };
   const migrated = parseDemoDraft(JSON.stringify(legacy));
-  assert.equal(migrated.version, 3);
+  assert.equal(migrated.version, 5);
   assert.equal(migrated.step, 0);
   assert.equal(migrated.unlockedStep, 0);
-  assert.deepEqual(migrated.config, legacy.config);
-  assert.deepEqual(migrated.review, legacy.review);
+  assert.equal(migrated.config.soulId, legacy.config.soulId);
+  assert.equal(migrated.config.rememberPreferences, false);
+  assert.equal(migrated.config.age, 34);
+  assert.equal("review" in migrated, false);
   assert.equal("labStep" in migrated, false);
   assert.equal("reviewStep" in migrated, false);
   assert.equal(
@@ -253,13 +106,15 @@ test("older unrestricted drafts retain choices but do not count skipped steps as
   const old = {
     ...DEFAULT_DRAFT,
     version: 2,
-    step: 5,
+    step: 3,
     config: { ...DEFAULT_CONFIG, soulId: "scout", form: "robot" },
   };
   const restored = parseDemoDraft(JSON.stringify(old));
   assert.equal(restored.step, 0);
   assert.equal(restored.unlockedStep, 0);
-  assert.deepEqual(restored.config, old.config);
+  assert.equal(restored.config.soulId, old.config.soulId);
+  assert.equal(restored.config.form, old.config.form);
+  assert.equal(restored.config.assembly, "preset");
 });
 
 test("saved navigation preserves unlocked progress when revisiting an earlier step", () => {
@@ -269,26 +124,25 @@ test("saved navigation preserves unlocked progress when revisiting an earlier st
 
 test("restored navigation cannot exceed completed progress or trust invalid progress", () => {
   const clamped = parseDemoDraft(
-    JSON.stringify({ ...DEFAULT_DRAFT, step: 5, unlockedStep: 2 }),
+    JSON.stringify({ ...DEFAULT_DRAFT, step: 3, unlockedStep: 2 }),
   );
   assert.equal(clamped.step, 2);
   assert.equal(clamped.unlockedStep, 2);
   for (const unlockedStep of [-1, 6, 1.5, "5", null]) {
     const restored = parseDemoDraft(
-      JSON.stringify({ ...DEFAULT_DRAFT, step: 5, unlockedStep }),
+      JSON.stringify({ ...DEFAULT_DRAFT, step: 3, unlockedStep }),
     );
     assert.equal(restored.step, 0);
     assert.equal(restored.unlockedStep, 0);
   }
 });
 
-test("the Vessel choice is every NPC form plus undecided, each with option copy", () => {
+test("the Vessel choice is every NPC form plus undecided", () => {
   assert.deepEqual([...VESSEL_FORMS].sort(), [...NPC_FORMS, "undecided"].sort());
-  assert.deepEqual(Object.keys(VESSEL_OPTIONS).sort(), [...VESSEL_FORMS].sort());
 });
 
 test("normalizing a draft clamps progress exactly as reloading it from storage would", () => {
-  const draft = { ...DEFAULT_DRAFT, step: 5, unlockedStep: 2 };
+  const draft = { ...DEFAULT_DRAFT, step: 3, unlockedStep: 2 };
   assert.deepEqual(normalizeDemoDraft(draft), parseDemoDraft(serializeDemoDraft(draft)));
   assert.equal(normalizeDemoDraft(draft).step, 2);
   assert.equal(serializeDemoDraft(draft), JSON.stringify(normalizeDemoDraft(draft)));

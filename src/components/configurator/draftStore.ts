@@ -45,17 +45,6 @@ export function updateDemoDraft(update: (draft: DemoDraft) => DemoDraft) {
   listeners.forEach((listener) => listener());
 }
 
-export function clearDemoDraft() {
-  let storageAvailable = true;
-  try {
-    window.sessionStorage.removeItem(STORAGE_KEY);
-  } catch {
-    storageAvailable = false;
-  }
-  snapshot = { draft: DEFAULT_DRAFT, storageAvailable };
-  listeners.forEach((listener) => listener());
-}
-
 export function useDemoDraft() {
   return useSyncExternalStore(subscribe, getSnapshot, () => serverSnapshot);
 }

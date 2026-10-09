@@ -1,42 +1,35 @@
+import { parseCapabilities } from "./capabilities.ts";
 import { LAST_STEP } from "../../data/configuratorSteps.ts";
 import {
-  BUDGETS,
-  CHARACTER_SOURCES,
+  ASSEMBLIES, GENDERS, PERSONALITY_STYLES, RELATIONSHIPS, SOUL_IDENTITIES,
   DEFAULT_CONFIG,
-  DEFAULT_REVIEW,
-  PRIORITIES,
   RHYTHMS,
-  SERVICES,
   SOULS,
   VESSEL_FORMS,
   isOneOf,
   type CompanionConfig,
-  type ReviewOptions,
 } from "./model.ts";
 
 // Stored drafts outlive deploys: parsing and the v1/v2 migrations change rarely and carefully.
 export type DemoDraft = {
-  version: 3;
+  version: 5;
   step: number;
   unlockedStep: number;
-  review: ReviewOptions;
   config: CompanionConfig;
 };
 
 export const DEFAULT_DRAFT: DemoDraft = {
-  version: 3,
+  version: 5,
   step: 0,
   unlockedStep: 0,
-  review: DEFAULT_REVIEW,
   config: DEFAULT_CONFIG,
 };
 
 export function parseDemoDraft(serialized: string | null): DemoDraft {
   try {
-    if (serialized && serialized.length > 4096) return DEFAULT_DRAFT;
+    if (serialized && serialized.length > 16384) return DEFAULT_DRAFT;
     const value = JSON.parse(serialized ?? "null");
     const config = value?.config;
-    const review = value?.review;
     // Older drafts allowed arbitrary jumps, so their step is not completion evidence.
     // The 3 and 2 below are v1's own two-flow bounds (lab 0-3, review 0-2), not current step ids.
     const legacyStepsValid =
@@ -51,18 +44,13 @@ export function parseDemoDraft(serialized: string | null): DemoDraft {
       ? value.labStep < 3
         ? value.labStep
         : 3 + value.reviewStep
-      : value?.version === 2 || value?.version === 3
+      : value?.version === 2 || value?.version === 3 || value?.version === 5
         ? value.step
         : undefined;
     if (
       !Number.isInteger(step) ||
       step < 0 ||
-      step > LAST_STEP ||
-      !review ||
-      !isOneOf(PRIORITIES, review.priority) ||
-      !isOneOf(CHARACTER_SOURCES, review.characterSource) ||
-      !isOneOf(BUDGETS, review.budget) ||
-      !isOneOf(SERVICES, review.service) ||
+      step > (value.version === 5 ? LAST_STEP : 5) ||
       !config ||
       !SOULS.some((soul) => soul.id === config.soulId) ||
       !isOneOf(RHYTHMS, config.rhythm) ||
@@ -76,24 +64,37 @@ export function parseDemoDraft(serialized: string | null): DemoDraft {
     )
       return DEFAULT_DRAFT;
     const unlockedStep =
-      value.version === 3 &&
+      value.version === 5 &&
       Number.isInteger(value.unlockedStep) &&
       value.unlockedStep >= 0 &&
       value.unlockedStep <= LAST_STEP
         ? value.unlockedStep
         : 0;
+    const identity = SOUL_IDENTITIES[config.soulId as keyof typeof SOUL_IDENTITIES];
+    const modern = value.version === 5;
+    if (modern && (
+      typeof config.name !== "string" || config.name.length > 40 ||
+      !isOneOf(GENDERS, config.gender) || !Number.isInteger(config.age) || config.age < 18 || config.age > 100 ||
+      typeof config.background !== "string" || config.background.length > 1200 ||
+      !isOneOf(ASSEMBLIES, config.assembly) || !config.personality ||
+      !RELATIONSHIPS.every(key => isOneOf(PERSONALITY_STYLES, config.personality[key]))
+    )) return DEFAULT_DRAFT;
+    const capabilities = parseCapabilities(config.capabilities);
+    if (!capabilities) return DEFAULT_DRAFT;
     return {
-      version: 3,
+      version: 5,
       step: Math.min(step, unlockedStep),
       unlockedStep,
-      review: {
-        priority: review.priority,
-        characterSource: review.characterSource,
-        budget: review.budget,
-        service: review.service,
-      },
       config: {
         soulId: config.soulId,
+        capabilities,
+        // Character selection replaces previously editable identity.
+        name: "",
+        gender: identity.gender,
+        age: identity.age,
+        background: identity.background,
+        personality: Object.fromEntries(RELATIONSHIPS.map(key => [key, modern ? config.personality[key] : identity.personality[key]])) as CompanionConfig["personality"],
+        assembly: modern ? config.assembly : config.form === "robot" ? "preset" : "software",
         rhythm: config.rhythm,
         form: config.form,
         takesInitiative: config.takesInitiative,
