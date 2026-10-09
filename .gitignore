@@ -44,6 +44,10 @@ next-env.d.ts
 
 # internal planning docs (not for repo)
 /docs/
+/PRODUCT.md
+/assets/media/soul/README.md
+/services/soul-api/README.md
+/services/soul-api/verify-vercel.mjs
 
 # local agent config
 /AGENTS.md
