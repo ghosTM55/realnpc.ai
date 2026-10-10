@@ -16,6 +16,15 @@ test('legacy replies and untrusted moods keep the message without inventing an e
   assert.deepEqual(parseSoulReply({ reply: 'Happy to talk.', relationship: 'partner', mood: 'happy' }, 'strangers'), { reply: 'Happy to talk.', relationship: 'strangers', mood: 'happy' });
 });
 
+test('missing or untrusted model progress cannot discard a valid reply or change earned progress', () => {
+  for (const relationship of [undefined, null, 'unknown', 'partner', 5, {}]) {
+    assert.deepEqual(parseSoulReply({ reply: ' Hello. ', relationship }, 'friends'), { reply: 'Hello.', relationship: 'friends' });
+  }
+  for (const reply of [undefined, null, '', '   ', {}, 5, 'x'.repeat(8001)]) {
+    assert.equal(parseSoulReply({ reply, relationship: 'friends', mood: 'happy' }, 'friends'), null);
+  }
+});
+
 test('current draft uses fixed character identity while retaining personality and assembly choices', () => {
   const draft = { ...DEFAULT_DRAFT, step: 3, unlockedStep: 3, config: { ...DEFAULT_DRAFT.config,
     name: 'Nova', gender: 'nonbinary', age: 32, background: 'A night-shift astronomer.',

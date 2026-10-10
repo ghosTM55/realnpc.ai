@@ -64,13 +64,18 @@ export function createSoulServer(env: Environment, dependencies: { fetch?: typeo
       if (!apiKey) { reply(503, { error: "This character is not connected yet. Please try again later." }); return; }
       const model = isDeepSeek ? env.DEEPSEEK_MODEL || "deepseek-flash" : env.OPENROUTER_MODEL || "x-ai/grok-4.7";
       if (!isDeepSeek && !model.startsWith("x-ai/grok-")) { reply(503, { error: "Grok is not configured correctly." }); return; }
+      // DeepSeek JSON mode can return empty content when earlier replies are plain text.
+      // Only the dialogue is retained; do not invent historical mood or relationship data.
+      const messages = input.messages.map(message => isDeepSeek && message.role === "assistant"
+        ? { role: message.role, content: JSON.stringify({ reply: message.content }) }
+        : message);
       // Body reads yield: another request may have spent the remaining allowance.
       if (daily >= dailyLimit) { res.setHeader("Retry-After", "3600"); reply(429, { error: "The conversation limit has been reached. Please try again later." }); return; }
       daily++;
       const upstream = await providerFetch(isDeepSeek ? "https://api.deepseek.com/chat/completions" : "https://openrouter.ai/api/v1/chat/completions", {
         method: "POST", signal: controller.signal,
         headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ model, messages: [{ role: "system", content: createSoulPrompt(input.config, nextRelationship) }, ...input.messages], max_tokens: 800, stream: false, response_format: { type: "json_object" }, ...(isDeepSeek ? { thinking: { type: "disabled" } } : { reasoning: { effort: "low" }, provider: { require_parameters: true } }) }),
+        body: JSON.stringify({ model, messages: [{ role: "system", content: createSoulPrompt(input.config, nextRelationship) }, ...messages], max_tokens: 800, stream: false, response_format: { type: "json_object" }, ...(isDeepSeek ? { thinking: { type: "disabled" } } : { reasoning: { effort: "low" }, provider: { require_parameters: true } }) }),
       });
       if (!upstream.ok) { await upstream.body?.cancel(); reply(upstream.status === 429 ? 429 : 502, { error: upstream.status === 429 ? "This provider is busy. Please try again shortly." : "The AI provider could not reply. Please try again later." }); return; }
       const result = await upstream.json();

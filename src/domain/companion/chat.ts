@@ -18,7 +18,7 @@ export function relationshipAfterTurns(completedTurns: number): Relationship {
 export function parseSoulReply(value: unknown, relationship: Relationship): SoulChatReply | null {
   if (!value || typeof value !== "object") return null;
   const result = value as Record<string, unknown>;
-  if (typeof result.reply !== "string" || !result.reply.trim() || result.reply.length > 8000 || !isOneOf(RELATIONSHIPS, result.relationship)) return null;
+  if (typeof result.reply !== "string" || !result.reply.trim() || result.reply.length > 8000) return null;
   return { reply: result.reply.trim(), relationship, ...(isOneOf(MOODS, result.mood) ? { mood: result.mood } : {}) };
 }
 
