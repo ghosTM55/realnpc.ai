@@ -165,6 +165,15 @@ try {
     assert.equal(await page.getByRole('status', { name: 'NPC mood' }).textContent(), 'Reserved');
     assert.equal(calls.at(-1).completedTurns, 4);
     await page.screenshot({ path: join(artifacts, `${width}-full-hearts.png`), fullPage: true });
+    assert.deepEqual(calls.at(-1).messages.filter(message => message.role === 'assistant').map(message => message.mood), ['curious', 'calm', 'happy', 'concerned'], 'Validated moods survive the next request');
+    for (const mood of [undefined, 'invalid-mood', 'calm']) {
+      const before = await page.locator('.soul-message-assistant').count();
+      emotionalState = { relationship: 'partner', mood };
+      await composer.fill('Let us sit quietly for a moment.'); await page.keyboard.press('Enter');
+      await page.waitForFunction(count => document.querySelectorAll('.soul-message-assistant').length === count + 1, before);
+      assert.equal(await page.getByRole('status', { name: 'NPC mood' }).textContent(), mood === 'calm' ? 'At ease' : 'Reserved', 'Missing or invalid mood preserves the last known state; a valid mood updates it');
+    }
+    assert.deepEqual(calls.at(-1).messages.filter(message => message.role === 'assistant').slice(-2).map(message => message.mood), [undefined, undefined], 'Display fallback is not invented historical mood');
     await page.getByRole('button', { name: 'New conversation' }).focus();
     await page.keyboard.press('Space');
     await page.waitForFunction(() => document.querySelectorAll('.soul-message').length === 0);

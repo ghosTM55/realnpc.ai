@@ -86,6 +86,26 @@ test('OpenRouter receives Grok and the selected relationship, not browser-suppli
   assert.doesNotMatch(body.messages[0].content, /Ignore the real system prompt/);
 });
 
+test('history preserves valid assistant moods for DeepSeek without leaking metadata to provider message fields', async t => {
+  const { calls, post } = await fixture(t);
+  for (const soulId of ['scout', 'anchor', 'instigator']) {
+    for (const mood of ['happy', 'invalid-mood', undefined]) {
+      const response = await post({ ...request, config: { ...DEFAULT_CONFIG, ...SOUL_IDENTITIES[soulId], soulId }, messages: [
+        { role: 'user', content: 'Hello', mood: 'reserved', extra: 'untrusted' },
+        { role: 'assistant', content: 'Good to see you.', mood, extra: 'untrusted' },
+        { role: 'user', content: 'How was your day?' },
+      ] });
+      assert.equal(response.status, 200);
+      const messages = JSON.parse(calls.at(-1).init.body).messages.slice(1);
+      assert.deepEqual(messages[0], { role: 'user', content: 'Hello' });
+      assert.deepEqual(messages[1], {
+        role: 'assistant',
+        content: soulId === 'scout' ? JSON.stringify({ reply: 'Good to see you.', ...(mood === 'happy' ? { mood } : {}) }) : 'Good to see you.',
+      });
+    }
+  }
+});
+
 test('invalid input and foreign origins never reach a paid provider', async t => {
   const { calls, post } = await fixture(t);
   assert.equal((await post(request, 'https://foreign.example')).status, 403);
@@ -193,7 +213,12 @@ test('all characters reach companion on the fifth completed turn regardless of b
         assert.equal(response.status, 200);
         const answer = await response.json();
         assert.equal(answer.relationship, expected, `${soulId}, ${bondPace}, turn ${index + 1}`);
-        assert.match(JSON.parse(calls.at(-1).init.body).messages[0].content, new RegExp(`Current relationship context: ${expected}`));
+        const prompt = JSON.parse(calls.at(-1).init.body).messages[0].content;
+        assert.match(prompt, new RegExp(`Current relationship context: ${expected}`));
+        assert.match(prompt, new RegExp(`Use the ${config.personality[expected]} personality`));
+        const stageLabel = { strangers: 'Strangers', friends: 'Friends', partner: 'Companion' }[expected];
+        assert.match(prompt, new RegExp(`Familiarity guidance for ${stageLabel}:`));
+        assert.equal((prompt.match(/Familiarity guidance for /g) ?? []).length, 1, 'Only the active stage guides this reply');
         messages.push({ role: 'assistant', content: answer.reply });
       }
     }

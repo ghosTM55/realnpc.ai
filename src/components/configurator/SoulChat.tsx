@@ -70,8 +70,9 @@ export function SoulChat({ config, storageAvailable = true }: { config: Companio
       if (!answer) throw new Error("The reply didn't arrive correctly. Please try again.");
       if (controller.signal.aborted) return;
       setRelationship(answer.relationship);
-      setMood(answer.mood ?? null);
-      setMessages([...history, { role: "assistant", content: answer.reply }]); setStatus(`${name} replied.`);
+      // Missing metadata should not erase the last known state or block a valid reply.
+      setMood(previous => answer.mood ?? previous);
+      setMessages([...history, { role: "assistant", content: answer.reply, ...(answer.mood ? { mood: answer.mood } : {}) }]); setStatus(`${name} replied.`);
     } catch (failure) {
       if (request.current !== controller) return;
       setFailedMessage(message);

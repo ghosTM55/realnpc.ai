@@ -65,10 +65,10 @@ export function createSoulServer(env: Environment, dependencies: { fetch?: typeo
       const model = isDeepSeek ? env.DEEPSEEK_MODEL || "deepseek-flash" : env.OPENROUTER_MODEL || "x-ai/grok-4.7";
       if (!isDeepSeek && !model.startsWith("x-ai/grok-")) { reply(503, { error: "Grok is not configured correctly." }); return; }
       // DeepSeek JSON mode can return empty content when earlier replies are plain text.
-      // Only the dialogue is retained; do not invent historical mood or relationship data.
+      // Preserve known moods so history does not teach the model to omit the field.
       const messages = input.messages.map(message => isDeepSeek && message.role === "assistant"
-        ? { role: message.role, content: JSON.stringify({ reply: message.content }) }
-        : message);
+        ? { role: message.role, content: JSON.stringify({ reply: message.content, ...(message.mood ? { mood: message.mood } : {}) }) }
+        : { role: message.role, content: message.content });
       // Body reads yield: another request may have spent the remaining allowance.
       if (daily >= dailyLimit) { res.setHeader("Retry-After", "3600"); reply(429, { error: "The conversation limit has been reached. Please try again later." }); return; }
       daily++;
